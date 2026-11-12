@@ -142,7 +142,34 @@ btnNext.addEventListener('click', () => {
     updateWizard();
   } else {
     // C'est ici qu'on enregistrera dans Supabase plus tard !
-    alert("Formulaire terminé ! (L'enregistrement Supabase viendra ensuite)");
+    // --- LOGIQUE DU BOUTON SUIVANT ---
+btnNext.addEventListener('click', () => {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateWizard();
+  } else {
+    // C'est ici qu'on enregistrera dans Supabase plus tard !
+    
+    // On affiche le popup stylé
+    const toast = document.getElementById('toast-success');
+    toast.classList.remove('hidden');
+    // Petit délai pour l'animation CSS
+    setTimeout(() => toast.classList.add('show'), 50);
+    
+    // On cache le popup après 5 secondes
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.classList.add('hidden'), 500);
+    }, 5000);
+
+    // Optionnel : Remettre le formulaire à zéro et revenir à l'étape 1
+    currentStep = 1;
+    updateWizard();
+    
+    // Et basculer sur l'onglet "Mes fiches"
+    document.querySelector('[data-sub="mine"]').click();
+  }
+});
   }
 });
 
