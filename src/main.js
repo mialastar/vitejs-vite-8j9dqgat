@@ -1,6 +1,7 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
+// ⚠️ VÉRIFIE TES CLÉS ICI
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
@@ -111,11 +112,10 @@ btnNext.addEventListener('click', async () => {
     const origines = document.querySelectorAll('#step-4 textarea')[0].value;
     const evenements = document.querySelectorAll('#step-4 textarea')[1].value;
     
-    // Récupérer les cases cochées
     const checkedBoxes = document.querySelectorAll('.comp-checkbox:checked');
     const competences_list = Array.from(checkedBoxes).map(cb => cb.value).join(', ');
-
     const competences_details = document.querySelector('#step-5 textarea').value;
+    
     const obj_court = document.querySelectorAll('#step-6 input')[0].value;
     const obj_long = document.querySelectorAll('#step-6 input')[1].value;
     const reves = document.querySelector('#step-6 textarea').value;
@@ -128,12 +128,38 @@ btnNext.addEventListener('click', async () => {
     const stats_ruse = document.getElementById('stat-ruse').value;
     const stats_charisme = document.getElementById('stat-charisme').value;
 
+    // --- UPLOAD DE L'IMAGE ---
+    let imageUrl = "";
+    const fileInput = document.getElementById('image-upload');
+    
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('fiches-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        alert("Erreur lors de l'upload de l'image : " + uploadError.message);
+        return; 
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('fiches-images')
+        .getPublicUrl(fileName);
+      
+      imageUrl = urlData.publicUrl;
+    }
+
+    // --- ENREGISTREMENT SUPABASE ---
     const { data: { user } } = await supabase.auth.getUser();
 
     const { error } = await supabase.from('fiches_oc').insert({
       user_id: user.id, nom, clan, rang, pelage, yeux, traits, qualites, defauts, origines, evenements, 
       competences_list, competences_details, 
       objectifs_court: obj_court, objectifs_long: obj_long, reves, peurs, vulnerabilites,
+      image_url: imageUrl,
       stats_force: parseInt(stats_force), stats_agilite: parseInt(stats_agilite), 
       stats_endurance: parseInt(stats_endurance), stats_ruse: parseInt(stats_ruse), stats_charisme: parseInt(stats_charisme),
       statut: 'En attente'
@@ -147,9 +173,11 @@ btnNext.addEventListener('click', async () => {
       setTimeout(() => toast.classList.add('show'), 50);
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
 
+      // Reset
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('image-preview').style.display = 'none';
       
       currentStep = 1;
       updateWizard();
@@ -183,7 +211,21 @@ sliders.forEach(s => {
 });
 updateStats();
 
-// --- AFFICHAGE (MES FICHES ET TOUTES LES FICHES) ---
+// --- APERÇU DE L'IMAGE ---
+document.getElementById('image-upload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const preview = document.getElementById('image-preview');
+      preview.src = event.target.result;
+      preview.style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+// --- AFFICHAGE (MES FICHES) ---
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
@@ -209,6 +251,7 @@ async function loadMyFiches() {
 }
 document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
 
+// --- AFFICHAGE (VOIR LES FICHES) ---
 let allValidatedFiches = [];
 async function loadAllFiches() {
   const container = document.getElementById('all-fiches-container');
@@ -247,25 +290,21 @@ document.getElementById('search-fiches').addEventListener('input', (e) => {
 });
 document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);
 
-
-// --- PAGE DE DÉTAIL (REMPLIE TOUT) ---
+// --- PAGE DE DÉTAIL ---
 function openFicheDetail(fiche) {
   document.getElementById('view-fiches').classList.remove('active');
   document.getElementById('view-fiche-detail').classList.add('active');
   window.scrollTo(0, 0);
 
-  // Infos de base
   document.getElementById('detail-nom').textContent = fiche.nom;
   document.getElementById('detail-clan').textContent = fiche.clan;
   document.getElementById('detail-rang').textContent = fiche.rang;
 
-  // Onglet Histoire
   document.getElementById('detail-pelage').textContent = fiche.pelage || 'Non renseigné';
   document.getElementById('detail-yeux').textContent = fiche.yeux || 'Non renseigné';
   document.getElementById('detail-origines').textContent = fiche.origines || 'Non renseigné.';
   document.getElementById('detail-evenements').textContent = fiche.evenements || 'Non renseigné.';
 
-  // Onglet Caractère
   document.getElementById('detail-traits').textContent = fiche.traits || 'Non renseigné';
   document.getElementById('detail-qualites').textContent = fiche.qualites || 'Non renseigné';
   document.getElementById('detail-defauts').textContent = fiche.defauts || 'Non renseigné';
@@ -275,7 +314,6 @@ function openFicheDetail(fiche) {
   document.getElementById('detail-peurs').textContent = fiche.peurs || 'Non renseigné';
   document.getElementById('detail-vulnerabilites').textContent = fiche.vulnerabilites || 'Non renseigné';
 
-  // Onglet Compétences & Stats
   const compContainer = document.getElementById('detail-competences-list');
   compContainer.innerHTML = '';
   if (fiche.competences_list) {
@@ -294,7 +332,6 @@ function openFicheDetail(fiche) {
   }
   document.getElementById('detail-competences-details').textContent = fiche.competences_details || 'Aucun détail fourni.';
 
-  // Image
   const imgContainer = document.getElementById('detail-image');
   if (fiche.image_url && fiche.image_url.trim() !== '') {
     imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
@@ -303,7 +340,6 @@ function openFicheDetail(fiche) {
     imgContainer.style.display = 'none';
   }
 
-  // Stats
   const stats = [
     { id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite },
     { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse },
@@ -315,7 +351,6 @@ function openFicheDetail(fiche) {
     document.getElementById(`bar-${stat.id}`).style.width = `${(val / 10) * 100}%`;
   });
 
-  // Réinitialiser sur l'onglet Histoire par défaut
   document.querySelectorAll('.detail-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.detail-tab-btn[data-dtab="histoire"]').classList.add('active');
   document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));

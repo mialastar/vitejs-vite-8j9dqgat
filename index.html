@@ -172,8 +172,9 @@
                   <h3>8. Image</h3>
                   <label>Image de référence (Avatar)</label>
                   <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
-                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour uploader une image</p>
-                    <input type="file" accept="image/*" style="border: none; background: transparent; margin: 0 auto;" />
+                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour choisir une image</p>
+                    <input type="file" id="image-upload" accept="image/*" style="border: none; background: transparent; margin: 0 auto; color: #fff; display: block;" />
+                    <img id="image-preview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 10px; margin: 15px auto 0; object-fit: cover;" />
                   </div>
                 </div>
 
@@ -225,7 +226,6 @@
               </div>
             </div>
 
-            <!-- Onglets internes -->
             <div class="detail-tabs">
               <button type="button" class="detail-tab-btn active" data-dtab="histoire">Histoire</button>
               <button type="button" class="detail-tab-btn" data-dtab="perso">Caractère</button>
@@ -233,8 +233,6 @@
             </div>
 
             <div class="detail-content">
-              
-              <!-- Onglet Histoire -->
               <div id="dtab-histoire" class="dtab active">
                 <h3>Apparence</h3>
                 <p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p>
@@ -245,7 +243,6 @@
                 <p id="detail-evenements">Non renseigné.</p>
               </div>
 
-              <!-- Onglet Caractère -->
               <div id="dtab-perso" class="dtab">
                 <h3>Personnalité</h3>
                 <p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p>
@@ -260,7 +257,6 @@
                 <p><strong>Vulnérabilités :</strong> <span id="detail-vulnerabilites">Non renseigné</span></p>
               </div>
 
-              <!-- Onglet Compétences & Stats -->
               <div id="dtab-stats" class="dtab">
                 <h3>Compétences</h3>
                 <div id="detail-competences-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
@@ -273,7 +269,6 @@
                 <div class="stat-bar-container"><span>Ruse</span><div class="stat-bar-bg"><div id="bar-ruse" class="stat-bar-fill"></div></div><span id="num-ruse">0</span></div>
                 <div class="stat-bar-container"><span>Charisme</span><div class="stat-bar-bg"><div id="bar-charisme" class="stat-bar-fill"></div></div><span id="num-charisme">0</span></div>
               </div>
-
             </div>
           </div>
 
@@ -288,7 +283,6 @@
         </nav>
       </div>
 
-      <!-- POPUP -->
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
         <div class="toast-text">
@@ -296,7 +290,6 @@
           <p>Le staff va l'étudier. La validation peut prendre jusqu'à 48h max.</p>
         </div>
       </div>
-
     </div>
 
     <script type="module" src="/src/main.js"></script>

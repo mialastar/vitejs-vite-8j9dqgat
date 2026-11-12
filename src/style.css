@@ -592,3 +592,12 @@ body {
   color: var(--text-dim);
   display: inline-block;
 }
+
+.tag {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: var(--text-dim);
+  display: inline-block;
+}
