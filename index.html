@@ -151,14 +151,103 @@
                   <input type="text" placeholder="Ex: Ambre" />
                 </div>
 
-                <!-- (Les étapes 3 à 9 seront ajoutées ici) -->
-                <div class="wizard-step" id="step-3"><h3>3. Caractère</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-4"><h3>4. Histoire</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-5"><h3>5. Compétences</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-6"><h3>6. Objectifs</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-7"><h3>7. Faiblesses</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-8"><h3>8. Image</h3><p>À venir...</p></div>
-                <div class="wizard-step" id="step-9"><h3>9. Stats</h3><p>À venir...</p></div>
+                                <!-- ÉTAPE 3 : CARACTÈRE -->
+                                <div class="wizard-step" id="step-3">
+                                  <h3>3. Caractère</h3>
+                                  <label>Traits principaux</label>
+                                  <input type="text" placeholder="Ex: Loyal, Impulsif, Protecteur" />
+                                  <label>Qualités (séparées par des virgules)</label>
+                                  <input type="text" placeholder="Ex: Courageux, Honnête, Rapide" />
+                                  <label>Défauts (séparés par des virgules)</label>
+                                  <input type="text" placeholder="Ex: Têtu, Impatient, Peureux" />
+                                </div>
+                
+                                <!-- ÉTAPE 4 : HISTOIRE -->
+                                <div class="wizard-step" id="step-4">
+                                  <h3>4. Histoire</h3>
+                                  <label>Origines / Naissance</label>
+                                  <textarea rows="3" placeholder="Où est-il né ? Qui sont ses parents ?"></textarea>
+                                  <label>Événements marquants</label>
+                                  <textarea rows="4" placeholder="Qu'est-ce qui a façonné sa personnalité ?"></textarea>
+                                </div>
+                
+                                <!-- ÉTAPE 5 : COMPÉTENCES -->
+                                <div class="wizard-step" id="step-5">
+                                  <h3>5. Compétences</h3>
+                                  <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
+                                  <div class="checkbox-grid">
+                                    <label><input type="checkbox" value="Chasse"> Chasse</label>
+                                    <label><input type="checkbox" value="Combat"> Combat</label>
+                                    <label><input type="checkbox" value="Pistage"> Pistage</label>
+                                    <label><input type="checkbox" value="Escalade"> Escalade</label>
+                                    <label><input type="checkbox" value="Natation"> Natation</label>
+                                    <label><input type="checkbox" value="Soin"> Soin / Herbes</label>
+                                    <label><input type="checkbox" value="Discrétion"> Discrétion</label>
+                                    <label><input type="checkbox" value="Stratégie"> Stratégie</label>
+                                  </div>
+                                  <label>Détails supplémentaires (Optionnel)</label>
+                                  <textarea rows="2" placeholder="Explique ses techniques..."></textarea>
+                                </div>
+                
+                                <!-- ÉTAPE 6 : OBJECTIFS -->
+                                <div class="wizard-step" id="step-6">
+                                  <h3>6. Objectifs & Rêves</h3>
+                                  <label>Objectifs à court terme</label>
+                                  <input type="text" placeholder="Ex: Devenir un meilleur chasseur" />
+                                  <label>Objectifs à long terme</label>
+                                  <input type="text" placeholder="Ex: Devenir Lieutenant du clan" />
+                                  <label>Rêves secrets</label>
+                                  <textarea rows="2" placeholder="Ce qu'il n'avoue à personne..."></textarea>
+                                </div>
+                
+                                <!-- ÉTAPE 7 : FAIBLESSES -->
+                                <div class="wizard-step" id="step-7">
+                                  <h3>7. Faiblesses & Peurs</h3>
+                                  <label>Peurs profondes / Phobies</label>
+                                  <input type="text" placeholder="Ex: Peur de l'eau, Peur de perdre ses proches" />
+                                  <label>Vulnérabilités</label>
+                                  <textarea rows="2" placeholder="Ex: Sa patte arrière droite est fragile..."></textarea>
+                                </div>
+                
+                                <!-- ÉTAPE 8 : IMAGE -->
+                                <div class="wizard-step" id="step-8">
+                                  <h3>8. Image</h3>
+                                  <label>Image de référence (Avatar)</label>
+                                  <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
+                                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour uploader une image</p>
+                                    <input type="file" accept="image/*" style="border: none; background: transparent; margin: 0 auto;" />
+                                  </div>
+                                </div>
+                
+                                <!-- ÉTAPE 9 : STATS -->
+                                <div class="wizard-step" id="step-9">
+                                  <h3>9. Statistiques</h3>
+                                  <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
+                                    Répartis <strong>20 points</strong> maximum (Max 10 par stat).<br>
+                                    Points restants : <span id="points-left" style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">20</span>
+                                  </p>
+                                  
+                                  <div class="stat-row">
+                                    <label>Force <span id="val-force">5</span></label>
+                                    <input type="range" class="stat-slider" id="stat-force" min="1" max="10" value="5" />
+                                  </div>
+                                  <div class="stat-row">
+                                    <label>Agilité <span id="val-agilite">5</span></label>
+                                    <input type="range" class="stat-slider" id="stat-agilite" min="1" max="10" value="5" />
+                                  </div>
+                                  <div class="stat-row">
+                                    <label>Endurance <span id="val-endurance">5</span></label>
+                                    <input type="range" class="stat-slider" id="stat-endurance" min="1" max="10" value="5" />
+                                  </div>
+                                  <div class="stat-row">
+                                    <label>Ruse <span id="val-ruse">5</span></label>
+                                    <input type="range" class="stat-slider" id="stat-ruse" min="1" max="10" value="5" />
+                                  </div>
+                                  <div class="stat-row">
+                                    <label>Charisme <span id="val-charisme">5</span></label>
+                                    <input type="range" class="stat-slider" id="stat-charisme" min="1" max="10" value="5" />
+                                  </div>
+                                </div>
 
               </div>
 

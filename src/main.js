@@ -152,3 +152,44 @@ btnPrev.addEventListener('click', () => {
     updateWizard();
   }
 });
+
+// --- LOGIQUE DES STATS (MAX 20 POINTS) ---
+const sliders = document.querySelectorAll('.stat-slider');
+const pointsLeftDisplay = document.getElementById('points-left');
+let maxPoints = 20;
+
+function updateStats() {
+  let totalUsed = 0;
+  
+  sliders.forEach(slider => {
+    totalUsed += parseInt(slider.value);
+    // Mettre à jour le chiffre à côté du nom de la stat
+    document.getElementById(`val-${slider.id.split('-')[1]}`).textContent = slider.value;
+  });
+
+  let remaining = maxPoints - totalUsed;
+  pointsLeftDisplay.textContent = remaining;
+
+  if (remaining < 0) {
+    pointsLeftDisplay.style.color = '#ef4444'; // Rouge si dépassement
+  } else {
+    pointsLeftDisplay.style.color = 'var(--accent)'; // Jaune/Or normal
+  }
+}
+
+// Écouter les changements sur chaque curseur
+sliders.forEach(slider => {
+  slider.addEventListener('input', () => {
+    let totalUsed = 0;
+    sliders.forEach(s => totalUsed += parseInt(s.value));
+    
+    // Si le joueur essaie de dépasser 20 points, on bloque le curseur
+    if (totalUsed > maxPoints) {
+      slider.value = parseInt(slider.value) - 1;
+    }
+    updateStats();
+  });
+});
+
+// Initialiser au chargement
+updateStats();
