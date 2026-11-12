@@ -2,7 +2,7 @@ import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
 // 👇 VÉRIFIE BIEN TES CLÉS ICI 👇
-const SUPABASE_URL = 'https://lrkiiyqbnkkduxfcrcbjn.supabase.co';
+const SUPABASE_URL = 'https://lrkiivqbnkkduxfcrbjn.supabase.co/rest/v1/';
 const SUPABASE_ANON_KEY = 'sb_publishable_q7sNSUeAKIGxpDUp30yeIQ_0_qV6BY0';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
