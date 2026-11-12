@@ -290,3 +290,78 @@ document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFich
 
 // Et on charge aussi les fiches juste après avoir soumis une nouvelle fiche
 // (Cherche la ligne "document.querySelector('[data-sub="mine"]').click();" à la fin de ton btnNext et ajoute "loadMyFiches();" juste après)
+
+// --- AFFICHER TOUTES LES FICHES (PUBLIC) ---
+let allValidatedFiches = []; // On stocke les fiches ici pour la recherche
+
+async function loadAllFiches() {
+  const container = document.getElementById('all-fiches-container');
+  container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
+
+  // On récupère UNIQUEMENT les fiches validées
+  const { data: fiches, error } = await supabase
+    .from('fiches_oc')
+    .select('*')
+    .eq('statut', 'Validée') // Filtre important !
+    .order('date_creation', { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+    return;
+  }
+
+  allValidatedFiches = fiches; // On sauvegarde pour la recherche
+  renderPublicFiches(fiches);
+}
+
+function renderPublicFiches(fiches) {
+  const container = document.getElementById('all-fiches-container');
+  
+  if (fiches.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche validée pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  fiches.forEach(fiche => {
+    const card = document.createElement('div');
+    card.className = 'public-fiche-card';
+    
+    // Si l'image n'est pas encore gérée, on met un fond par défaut
+    const bgImage = fiche.image_url ? fiche.image_url : 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500&auto=format&fit=crop'; 
+
+    // On prend les 100 premiers caractères de l'histoire pour le résumé
+    const bioCourte = fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire renseignée.';
+
+    card.innerHTML = `
+      <div class="card-image" style="background-image: url('${bgImage}')"></div>
+      <div class="card-content">
+        <h3>${fiche.nom}</h3>
+        <div class="card-tags">
+          <span class="tag">${fiche.clan}</span>
+          <span class="tag">${fiche.rang}</span>
+        </div>
+        <p class="card-bio">${bioCourte}</p>
+      </div>
+    `;
+    
+    // (Plus tard on fera en sorte que cliquer sur la carte ouvre la fiche complète)
+    card.addEventListener('click', () => {
+      alert(`Ouverture de la fiche de ${fiche.nom} (Bientôt disponible)`);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// --- RECHERCHE PAR NOM ---
+document.getElementById('search-fiches').addEventListener('input', (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  const filtered = allValidatedFiches.filter(f => 
+    f.nom.toLowerCase().includes(searchTerm)
+  );
+  renderPublicFiches(filtered);
+});
+
+// Quand on clique sur l'onglet "Voir les fiches", on charge les données
+document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);

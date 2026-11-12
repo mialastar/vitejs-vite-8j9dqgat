@@ -266,10 +266,21 @@
                           </div>
                         </div>
 
-            <!-- SOUS-VUE : VOIR LES FICHES -->
-            <div id="subview-all" class="subview">
-              <p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche validée pour le moment.</p>
-            </div>
+                        <!-- SOUS-VUE : VOIR LES FICHES -->
+                        <div id="subview-all" class="subview">
+              
+                          <!-- Barre de recherche -->
+                          <div class="search-container">
+                            <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
+                            <button type="button" class="btn-filter" onclick="alert('Les filtres arrivent bientôt !')">⚙️</button>
+                          </div>
+            
+                          <!-- Conteneur des cartes -->
+                          <div id="all-fiches-container">
+                            <p style="text-align: center; color: gray; margin-top: 20px;">Chargement des fiches...</p>
+                          </div>
+            
+                        </div>
 
           </div>
 
