@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 // ⚠️ TES CLÉS SUPABASE
 const SUPABASE_URL = "https://lrkiiyqbnkkduxfcrcbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- GESTION DES ÉCRANS ---
@@ -17,67 +18,47 @@ const btnContinueCredits = document.getElementById('btn-continue-credits');
 const btnDiscordLogin = document.getElementById('btn-discord-login');
 
 function switchScreen(current, next) {
+  if(!current || !next) return;
   current.classList.remove('active');
   setTimeout(() => {
     next.classList.add('active');
   }, 800); 
 }
 
-btnStart.addEventListener('click', () => {
-  switchScreen(screenIntro, screenCredits);
-});
-
-btnContinueCredits.addEventListener('click', () => {
-  switchScreen(screenCredits, screenAuth);
-});
+btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
+btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
 
 // --- CONNEXION DISCORD ---
 btnDiscordLogin.addEventListener('click', async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: 'https://lgdc-rp.vercel.app'
+      redirectTo: 'https://lgdc-rp.vercel.app' // Ton lien Vercel
     }
   });
-  if (error) alert("Erreur de connexion.");
+  if (error) alert("Erreur de connexion : " + error.message);
 });
 
-// --- VÉRIFICATION UTILISATEUR ---
+// --- VÉRIFICATION UTILISATEUR AU CHARGEMENT ---
 async function checkUser() {
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    
-    if (data && data.session) {
-      // L'utilisateur est connecté, on cache les autres écrans et on affiche l'app !
-      screenIntro.classList.remove('active');
-      screenCredits.classList.remove('active');
-      screenAuth.classList.remove('active');
-      
-      // On force l'affichage de l'app
-      screenApp.classList.add('active');
-      console.log("Connexion réussie, bienvenue !");
-    } else {
-      console.log("Pas de session active.");
-    }
-  } catch (err) {
-    console.error("Erreur lors de la vérification :", err);
+  const { data } = await supabase.auth.getSession();
+  
+  if (data && data.session) {
+    // Si connecté, on affiche DIRECTEMENT l'application
+    screenIntro.classList.remove('active');
+    screenCredits.classList.remove('active');
+    screenAuth.classList.remove('active');
+    screenApp.classList.add('active');
+    console.log("Connecté en tant que :", data.session.user.user_metadata.full_name);
   }
 }
-
 checkUser();
 
-// --- GESTION DE LA NAVIGATION (ONGLETS DU BAS) ---
+// --- GESTION DE LA NAVIGATION ---
 const navButtons = document.querySelectorAll('.nav-btn');
 navButtons.forEach(btn => {
   btn.addEventListener('click', (e) => {
-    // 1. Enlever la classe "active" de tous les boutons
     navButtons.forEach(b => b.classList.remove('active'));
-    
-    // 2. Ajouter la classe "active" au bouton cliqué
     e.currentTarget.classList.add('active');
-    
-    // 3. (Plus tard) Afficher le bon contenu selon le data-target
-    const target = e.currentTarget.getAttribute('data-target');
-    console.log("Navigation vers :", target);
   });
 });
