@@ -259,29 +259,81 @@
 
             </div>
 
-                        <!-- SOUS-VUE : MES FICHES -->
-                        <div id="subview-mine" class="subview">
-                          <div id="my-fiches-container">
-                            <p style="text-align: center; color: gray; margin-top: 20px;">Chargement de tes fiches...</p>
-                          </div>
-                        </div>
+            <!-- SOUS-VUE : MES FICHES -->
+            <div id="subview-mine" class="subview">
+              <div id="my-fiches-container">
+                <p style="text-align: center; color: gray; margin-top: 20px;">Chargement de tes fiches...</p>
+              </div>
+            </div>
 
-                        <!-- SOUS-VUE : VOIR LES FICHES -->
-                        <div id="subview-all" class="subview">
+            <!-- SOUS-VUE : VOIR LES FICHES -->
+            <div id="subview-all" class="subview">
               
-                          <!-- Barre de recherche -->
-                          <div class="search-container">
-                            <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
-                            <button type="button" class="btn-filter" onclick="alert('Les filtres arrivent bientôt !')">⚙️</button>
-                          </div>
-            
-                          <!-- Conteneur des cartes -->
-                          <div id="all-fiches-container">
-                            <p style="text-align: center; color: gray; margin-top: 20px;">Chargement des fiches...</p>
-                          </div>
-            
-                        </div>
+              <!-- Barre de recherche -->
+              <div class="search-container">
+                <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
+                <button type="button" class="btn-filter" onclick="alert('Les filtres arrivent bientôt !')">⚙️</button>
+              </div>
 
+              <!-- Conteneur des cartes -->
+              <div id="all-fiches-container">
+                <p style="text-align: center; color: gray; margin-top: 20px;">Chargement des fiches...</p>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- VUE DÉTAIL D'UNE FICHE (AJOUTÉE ICI) -->
+          <div id="view-fiche-detail" class="view">
+            <button type="button" id="btn-back-fiches" class="btn-back">← Retour</button>
+            
+            <div class="detail-header">
+              <div id="detail-image" class="detail-image"></div>
+              <div class="detail-titles">
+                <h2 id="detail-nom">Nom</h2>
+                <p><span id="detail-clan">Clan</span> • <span id="detail-rang">Rang</span></p>
+              </div>
+            </div>
+
+            <!-- Onglets internes de la fiche -->
+            <div class="detail-tabs">
+              <button type="button" class="detail-tab-btn active" data-dtab="infos">Infos & Histoire</button>
+              <button type="button" class="detail-tab-btn" data-dtab="physique">Physique</button>
+              <button type="button" class="detail-tab-btn" data-dtab="stats">Statistiques</button>
+            </div>
+
+            <!-- Contenu des onglets -->
+            <div class="detail-content">
+              
+              <!-- Onglet 1 : Infos & Histoire -->
+              <div id="dtab-infos" class="dtab active">
+                <h3>Histoire</h3>
+                <p id="detail-origines">Non renseigné.</p>
+                <h3>Caractère</h3>
+                <p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p>
+                <p><strong>Qualités :</strong> <span id="detail-qualites">Non renseigné</span></p>
+                <p><strong>Défauts :</strong> <span id="detail-defauts">Non renseigné</span></p>
+              </div>
+
+              <!-- Onglet 2 : Physique -->
+              <div id="dtab-physique" class="dtab">
+                <h3>Apparence</h3>
+                <p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p>
+                <p><strong>Yeux :</strong> <span id="detail-yeux">Non renseigné</span></p>
+              </div>
+
+              <!-- Onglet 3 : Stats -->
+              <div id="dtab-stats" class="dtab">
+                <h3>Statistiques</h3>
+                <div class="stat-bar-container"><span>Force</span><div class="stat-bar-bg"><div id="bar-force" class="stat-bar-fill"></div></div><span id="num-force">0</span></div>
+                <div class="stat-bar-container"><span>Agilité</span><div class="stat-bar-bg"><div id="bar-agilite" class="stat-bar-fill"></div></div><span id="num-agilite">0</span></div>
+                <div class="stat-bar-container"><span>Endurance</span><div class="stat-bar-bg"><div id="bar-endurance" class="stat-bar-fill"></div></div><span id="num-endurance">0</span></div>
+                <div class="stat-bar-container"><span>Ruse</span><div class="stat-bar-bg"><div id="bar-ruse" class="stat-bar-fill"></div></div><span id="num-ruse">0</span></div>
+                <div class="stat-bar-container"><span>Charisme</span><div class="stat-bar-bg"><div id="bar-charisme" class="stat-bar-fill"></div></div><span id="num-charisme">0</span></div>
+              </div>
+
+            </div>
           </div>
 
         </div>
@@ -305,7 +357,7 @@
         </nav>
       </div>
 
-      <!-- POPUP DE SUCCÈS (TOAST) - AJOUTÉ ICI -->
+      <!-- POPUP DE SUCCÈS (TOAST) -->
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
         <div class="toast-text">

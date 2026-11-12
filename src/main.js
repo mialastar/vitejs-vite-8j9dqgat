@@ -349,7 +349,7 @@ function renderPublicFiches(fiches) {
     `;
     
     card.addEventListener('click', () => {
-      alert(`Ouverture de la fiche de ${fiche.nom} (Bientôt disponible)`);
+      openFicheDetail(fiche);
     });
 
     container.appendChild(card);
@@ -367,3 +367,74 @@ document.getElementById('search-fiches').addEventListener('input', (e) => {
 
 // Quand on clique sur l'onglet "Voir les fiches", on charge les données
 document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);
+
+// --- OUVRIR LA PAGE DE DÉTAIL ---
+function openFicheDetail(fiche) {
+  // 1. Cacher la vue des fiches et afficher la page de détail
+  document.getElementById('view-fiches').classList.remove('active');
+  document.getElementById('view-fiche-detail').classList.add('active');
+  window.scrollTo(0, 0); // Remonter en haut
+
+  // 2. Remplir les textes
+  document.getElementById('detail-nom').textContent = fiche.nom;
+  document.getElementById('detail-clan').textContent = fiche.clan;
+  document.getElementById('detail-rang').textContent = fiche.rang;
+  
+  document.getElementById('detail-origines').textContent = fiche.origines || 'Non renseigné.';
+  document.getElementById('detail-traits').textContent = fiche.traits || 'Non renseigné.';
+  document.getElementById('detail-qualites').textContent = fiche.qualites || 'Non renseigné.';
+  document.getElementById('detail-defauts').textContent = fiche.defauts || 'Non renseigné.';
+  
+  document.getElementById('detail-pelage').textContent = fiche.pelage || 'Non renseigné.';
+  document.getElementById('detail-yeux').textContent = fiche.yeux || 'Non renseigné.';
+
+  // 3. Gérer l'image (affichage conditionnel)
+  const imgContainer = document.getElementById('detail-image');
+  if (fiche.image_url && fiche.image_url.trim() !== '') {
+    imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
+    imgContainer.style.display = 'block';
+  } else {
+    imgContainer.style.display = 'none';
+  }
+
+  // 4. Remplir les Stats
+  const stats = [
+    { id: 'force', val: fiche.stats_force },
+    { id: 'agilite', val: fiche.stats_agilite },
+    { id: 'endurance', val: fiche.stats_endurance },
+    { id: 'ruse', val: fiche.stats_ruse },
+    { id: 'charisme', val: fiche.stats_charisme }
+  ];
+
+  stats.forEach(stat => {
+    const val = stat.val || 0;
+    document.getElementById(`num-${stat.id}`).textContent = val;
+    // On calcule la largeur de la barre (max 10)
+    document.getElementById(`bar-${stat.id}`).style.width = `${(val / 10) * 100}%`;
+  });
+}
+
+// --- GÉRER LES ONGLETS INTERNES DE LA FICHE ---
+const detailTabBtns = document.querySelectorAll('.detail-tab-btn');
+const dtabs = document.querySelectorAll('.dtab');
+
+detailTabBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    detailTabBtns.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    
+    dtabs.forEach(t => t.classList.remove('active'));
+    const target = e.currentTarget.getAttribute('data-dtab');
+    document.getElementById(`dtab-${target}`).classList.add('active');
+  });
+});
+
+// --- BOUTON RETOUR ---
+document.getElementById('btn-back-fiches').addEventListener('click', () => {
+  document.getElementById('view-fiche-detail').classList.remove('active');
+  document.getElementById('view-fiches').classList.add('active');
+  
+  // Remettre l'onglet "Voir les fiches" actif quand on revient
+  document.querySelector('[data-sub="all"]').classList.add('active');
+  document.getElementById('subview-all').classList.add('active');
+});
