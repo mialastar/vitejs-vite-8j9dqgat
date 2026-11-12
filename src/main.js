@@ -1,11 +1,14 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ VÉRIFIE TES CLÉS ICI
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Variables globales
+let editingFicheId = null; // Sert à savoir si on modifie une fiche
+let currentEditingImage = ""; // Garde l'image actuelle si on ne la change pas
 
 // --- GESTION DES ÉCRANS ---
 const screenIntro = document.getElementById('screen-intro');
@@ -84,8 +87,9 @@ function updateWizard() {
   stepNumText.textContent = currentStep;
   progressFill.style.width = `${(currentStep / totalSteps) * 100}%`;
   btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  
   if (currentStep === totalSteps) {
-    btnNext.textContent = 'Soumettre la fiche';
+    btnNext.textContent = editingFicheId ? 'Mettre à jour la fiche' : 'Soumettre la fiche';
     btnNext.style.background = '#10b981';
   } else {
     btnNext.textContent = 'Suivant';
@@ -100,7 +104,6 @@ btnNext.addEventListener('click', async () => {
     currentStep++;
     updateWizard();
   } else {
-    // RÉCUPÉRATION DES DONNÉES
     const nom = document.querySelector('#step-1 input').value;
     const clan = document.querySelector('#step-1 select').value; 
     const rang = document.querySelectorAll('#step-1 select')[1].value; 
@@ -129,41 +132,43 @@ btnNext.addEventListener('click', async () => {
     const stats_charisme = document.getElementById('stat-charisme').value;
 
     // --- UPLOAD DE L'IMAGE ---
-    let imageUrl = "";
+    let imageUrl = currentEditingImage; // On garde l'ancienne par défaut
     const fileInput = document.getElementById('image-upload');
     
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
       const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('fiches-images')
-        .upload(fileName, file);
+      const { error: uploadError } = await supabase.storage.from('fiches-images').upload(fileName, file);
+      if (uploadError) { alert("Erreur upload : " + uploadError.message); return; }
 
-      if (uploadError) {
-        alert("Erreur lors de l'upload de l'image : " + uploadError.message);
-        return; 
-      }
-
-      const { data: urlData } = supabase.storage
-        .from('fiches-images')
-        .getPublicUrl(fileName);
-      
+      const { data: urlData } = supabase.storage.from('fiches-images').getPublicUrl(fileName);
       imageUrl = urlData.publicUrl;
     }
 
-    // --- ENREGISTREMENT SUPABASE ---
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error } = await supabase.from('fiches_oc').insert({
-      user_id: user.id, nom, clan, rang, pelage, yeux, traits, qualites, defauts, origines, evenements, 
+    // Préparation des données
+    const ficheData = {
+      nom, clan, rang, pelage, yeux, traits, qualites, defauts, origines, evenements, 
       competences_list, competences_details, 
       objectifs_court: obj_court, objectifs_long: obj_long, reves, peurs, vulnerabilites,
       image_url: imageUrl,
       stats_force: parseInt(stats_force), stats_agilite: parseInt(stats_agilite), 
       stats_endurance: parseInt(stats_endurance), stats_ruse: parseInt(stats_ruse), stats_charisme: parseInt(stats_charisme),
-      statut: 'En attente'
-    });
+      statut: 'En attente' // Repasse en attente si c'est une modif
+    };
+
+    let error;
+    if (editingFicheId) {
+      // MODE MODIFICATION
+      const { error: updateError } = await supabase.from('fiches_oc').update(ficheData).eq('id', editingFicheId);
+      error = updateError;
+    } else {
+      // MODE CRÉATION
+      const { error: insertError } = await supabase.from('fiches_oc').insert({ ...ficheData, user_id: user.id });
+      error = insertError;
+    }
 
     if (error) {
       alert("Erreur : " + error.message);
@@ -173,21 +178,24 @@ btnNext.addEventListener('click', async () => {
       setTimeout(() => toast.classList.add('show'), 50);
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
 
-      // Reset
+      // Reset du formulaire
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
       document.getElementById('image-preview').style.display = 'none';
       
+      editingFicheId = null; // On réinitialise
+      currentEditingImage = "";
       currentStep = 1;
       updateWizard();
+      
       document.querySelector('[data-sub="mine"]').click();
       loadMyFiches();
     }
   }
 });
 
-// --- STATS LOGIC ---
+// --- LOGIQUE DES STATS ---
 const sliders = document.querySelectorAll('.stat-slider');
 const pointsLeftDisplay = document.getElementById('points-left');
 const maxPoints = 20;
@@ -244,12 +252,88 @@ async function loadMyFiches() {
     card.innerHTML = `
       <div class="fiche-card-header"><h4>${fiche.nom}</h4><span class="status-badge ${statusClass}">${fiche.statut}</span></div>
       <div class="fiche-card-info"><p><strong>Clan :</strong> ${fiche.clan}</p><p><strong>Rang :</strong> ${fiche.rang}</p></div>
-      <div class="fiche-card-actions"><button class="btn-action btn-modifier" onclick="alert('Bientôt disponible !')">Modifier</button><button class="btn-action btn-supprimer" onclick="alert('Bientôt disponible !')">Supprimer</button></div>
+      <div class="fiche-card-actions">
+        <button class="btn-action btn-modifier" onclick="editFiche(${fiche.id})">Modifier</button>
+        <button class="btn-action btn-supprimer" onclick="deleteFiche(${fiche.id})">Supprimer</button>
+      </div>
     `;
     container.appendChild(card);
   });
 }
 document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
+
+// --- FONCTIONS GLOBALES MODIFIER ET SUPPRIMER ---
+window.editFiche = async function(id) {
+  // Aller chercher les données de la fiche
+  const { data: fiche, error } = await supabase.from('fiches_oc').select('*').eq('id', id).single();
+  if (error || !fiche) return alert("Erreur lors du chargement de la fiche.");
+
+  editingFicheId = id;
+  currentEditingImage = fiche.image_url || "";
+
+  // Remplir l'étape 1
+  document.querySelector('#step-1 input').value = fiche.nom || '';
+  document.querySelectorAll('#step-1 select')[0].value = fiche.clan || 'Clan de la Forêt';
+  document.querySelectorAll('#step-1 select')[1].value = fiche.rang || 'Guerrier';
+  
+  // Étape 2
+  document.querySelectorAll('#step-2 input')[0].value = fiche.pelage || '';
+  document.querySelectorAll('#step-2 input')[1].value = fiche.yeux || '';
+  
+  // Étape 3
+  document.querySelectorAll('#step-3 input')[0].value = fiche.traits || '';
+  document.querySelectorAll('#step-3 input')[1].value = fiche.qualites || '';
+  document.querySelectorAll('#step-3 input')[2].value = fiche.defauts || '';
+  
+  // Étape 4
+  document.querySelectorAll('#step-4 textarea')[0].value = fiche.origines || '';
+  document.querySelectorAll('#step-4 textarea')[1].value = fiche.evenements || '';
+  
+  // Étape 5
+  document.querySelectorAll('.comp-checkbox').forEach(cb => {
+    cb.checked = fiche.competences_list ? fiche.competences_list.includes(cb.value) : false;
+  });
+  document.querySelector('#step-5 textarea').value = fiche.competences_details || '';
+  
+  // Étape 6
+  document.querySelectorAll('#step-6 input')[0].value = fiche.objectifs_court || '';
+  document.querySelectorAll('#step-6 input')[1].value = fiche.objectifs_long || '';
+  document.querySelector('#step-6 textarea').value = fiche.reves || '';
+  
+  // Étape 7
+  document.querySelector('#step-7 input').value = fiche.peurs || '';
+  document.querySelector('#step-7 textarea').value = fiche.vulnerabilites || '';
+  
+  // Étape 8 (Image)
+  const preview = document.getElementById('image-preview');
+  if (fiche.image_url) {
+    preview.src = fiche.image_url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+
+  // Étape 9 (Stats)
+  document.getElementById('stat-force').value = fiche.stats_force || 1;
+  document.getElementById('stat-agilite').value = fiche.stats_agilite || 1;
+  document.getElementById('stat-endurance').value = fiche.stats_endurance || 1;
+  document.getElementById('stat-ruse').value = fiche.stats_ruse || 1;
+  document.getElementById('stat-charisme').value = fiche.stats_charisme || 1;
+  updateStats(); // Recalculer les points restants
+
+  // Aller sur l'onglet Créer
+  document.querySelector('[data-sub="create"]').click();
+  currentStep = 1;
+  updateWizard();
+};
+
+window.deleteFiche = async function(id) {
+  if(confirm("Es-tu sûr de vouloir supprimer cette fiche ? Cette action est irréversible.")) {
+    const { error } = await supabase.from('fiches_oc').delete().eq('id', id);
+    if (error) alert("Erreur lors de la suppression.");
+    else loadMyFiches();
+  }
+};
 
 // --- AFFICHAGE (VOIR LES FICHES) ---
 let allValidatedFiches = [];
