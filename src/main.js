@@ -36,7 +36,7 @@ btnDiscordLogin.addEventListener('click', async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: window.location.origin // Utilise l'URL Vercel que tu as configurée
+      redirectTo: 'https://lgdc-rp.vercel.app'
     }
   });
   if (error) alert("Erreur de connexion.");
