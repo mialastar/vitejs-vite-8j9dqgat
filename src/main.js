@@ -30,38 +30,26 @@ btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, s
 
 // --- CONNEXION DISCORD ---
 btnDiscordLogin.addEventListener('click', async () => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: 'https://lgdc-rp.vercel.app' // Ton lien Vercel
+      redirectTo: 'https://lgdc-rp.vercel.app' 
     }
   });
-  if (error) alert("Erreur de connexion : " + error.message);
+  if (error) alert("Erreur de connexion.");
 });
 
 // --- VÉRIFICATION UTILISATEUR AU CHARGEMENT ---
 async function checkUser() {
   const { data } = await supabase.auth.getSession();
-  
   if (data && data.session) {
-    // Si connecté, on affiche DIRECTEMENT l'application
     screenIntro.classList.remove('active');
     screenCredits.classList.remove('active');
     screenAuth.classList.remove('active');
     screenApp.classList.add('active');
-    console.log("Connecté en tant que :", data.session.user.user_metadata.full_name);
   }
 }
 checkUser();
-
-// --- GESTION DE LA NAVIGATION ---
-const navButtons = document.querySelectorAll('.nav-btn');
-navButtons.forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    navButtons.forEach(b => b.classList.remove('active'));
-    e.currentTarget.classList.add('active');
-  });
-});
 
 // --- LOGIQUE DE NAVIGATION DES ONGLETS ---
 const navBtns = document.querySelectorAll('.nav-btn');
@@ -69,26 +57,16 @@ const views = document.querySelectorAll('.view');
 
 navBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
-    // Gérer la classe active du menu bas
     navBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    
-    // Cacher toutes les vues
     views.forEach(v => v.classList.remove('active'));
-
-    // Afficher la bonne vue selon le data-target
     const target = e.currentTarget.getAttribute('data-target');
-    
-    if(target === 'accueil') {
-      document.getElementById('view-accueil').classList.add('active');
-    } else if (target === 'fiches') {
-      document.getElementById('view-fiches').classList.add('active');
-    }
-    // Les autres onglets seront ajoutés plus tard
+    if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
+    if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
   });
 });
 
-// --- LOGIQUE DES 3 SOUS-ONGLETS FICHES ---
+// --- LOGIQUE DES SOUS-ONGLETS FICHES ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
 
@@ -96,14 +74,13 @@ subTabBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     subTabBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    
     subviews.forEach(v => v.classList.remove('active'));
     const subTarget = e.currentTarget.getAttribute('data-sub');
     document.getElementById(`subview-${subTarget}`).classList.add('active');
   });
 });
 
-// --- LOGIQUE DU WIZARD (FORMULAIRE) ---
+// --- LOGIQUE DU WIZARD ---
 let currentStep = 1;
 const totalSteps = 9;
 const btnPrev = document.getElementById('btn-prev');
@@ -112,66 +89,23 @@ const progressFill = document.getElementById('progress-bar-fill');
 const stepNumText = document.getElementById('current-step-num');
 
 function updateWizard() {
-  // Cacher toutes les étapes
   document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
-  // Afficher l'étape actuelle
   document.getElementById(`step-${currentStep}`).classList.add('active');
   
-  // Mettre à jour la barre
   stepNumText.textContent = currentStep;
-  const percent = (currentStep / totalSteps) * 100;
-  progressFill.style.width = `${percent}%`;
+  progressFill.style.width = `${(currentStep / totalSteps) * 100}%`;
 
-  // Gérer l'affichage des boutons
   btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
-  
   if (currentStep === totalSteps) {
     btnNext.textContent = 'Soumettre la fiche';
-    btnNext.style.background = '#10b981'; // Vert pour la fin
+    btnNext.style.background = '#10b981';
     btnNext.style.color = '#fff';
   } else {
     btnNext.textContent = 'Suivant';
-    btnNext.style.background = ''; // Remet la couleur par défaut
+    btnNext.style.background = '';
     btnNext.style.color = '';
   }
 }
-
-btnNext.addEventListener('click', () => {
-  if (currentStep < totalSteps) {
-    currentStep++;
-    updateWizard();
-  } else {
-    // C'est ici qu'on enregistrera dans Supabase plus tard !
-    // --- LOGIQUE DU BOUTON SUIVANT ---
-btnNext.addEventListener('click', () => {
-  if (currentStep < totalSteps) {
-    currentStep++;
-    updateWizard();
-  } else {
-    // C'est ici qu'on enregistrera dans Supabase plus tard !
-    
-    // On affiche le popup stylé
-    const toast = document.getElementById('toast-success');
-    toast.classList.remove('hidden');
-    // Petit délai pour l'animation CSS
-    setTimeout(() => toast.classList.add('show'), 50);
-    
-    // On cache le popup après 5 secondes
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.classList.add('hidden'), 500);
-    }, 5000);
-
-    // Optionnel : Remettre le formulaire à zéro et revenir à l'étape 1
-    currentStep = 1;
-    updateWizard();
-    
-    // Et basculer sur l'onglet "Mes fiches"
-    document.querySelector('[data-sub="mine"]').click();
-  }
-});
-  }
-});
 
 btnPrev.addEventListener('click', () => {
   if (currentStep > 1) {
@@ -180,43 +114,117 @@ btnPrev.addEventListener('click', () => {
   }
 });
 
-// --- LOGIQUE DES STATS (MAX 20 POINTS) ---
+// --- SOUMISSION DU FORMULAIRE ---
+btnNext.addEventListener('click', async () => {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateWizard();
+  } else {
+    // Récupération des données
+    const nom = document.querySelector('#step-1 input').value;
+    const clan = document.querySelector('#step-1 select').value; 
+    const rang = document.querySelectorAll('#step-1 select')[1].value; 
+    const pelage = document.querySelectorAll('#step-2 input')[0].value;
+    const yeux = document.querySelectorAll('#step-2 input')[1].value;
+    const traits = document.querySelectorAll('#step-3 input')[0].value;
+    const qualites = document.querySelectorAll('#step-3 input')[1].value;
+    const defauts = document.querySelectorAll('#step-3 input')[2].value;
+    const origines = document.querySelectorAll('#step-4 textarea')[0].value;
+    const evenements = document.querySelectorAll('#step-4 textarea')[1].value;
+    const competences_details = document.querySelector('#step-5 textarea').value;
+    const objectifs_court = document.querySelectorAll('#step-6 input')[0].value;
+    const objectifs_long = document.querySelectorAll('#step-6 input')[1].value;
+    const reves = document.querySelector('#step-6 textarea').value;
+    const peurs = document.querySelector('#step-7 input').value;
+    const vulnerabilites = document.querySelector('#step-7 textarea').value;
+
+    const stats_force = document.getElementById('stat-force').value;
+    const stats_agilite = document.getElementById('stat-agilite').value;
+    const stats_endurance = document.getElementById('stat-endurance').value;
+    const stats_ruse = document.getElementById('stat-ruse').value;
+    const stats_charisme = document.getElementById('stat-charisme').value;
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("Erreur : Tu dois être connecté pour créer une fiche.");
+      return;
+    }
+
+    // Envoi à Supabase
+    const { error } = await supabase.from('fiches_oc').insert({
+      user_id: user.id,
+      nom: nom,
+      clan: clan,
+      rang: rang,
+      pelage: pelage,
+      yeux: yeux,
+      traits: traits,
+      qualites: qualites,
+      defauts: defauts,
+      origines: origines,
+      evenements: evenements,
+      competences_details: competences_details,
+      objectifs_court: objectifs_court,
+      objectifs_long: objectifs_long,
+      reves: reves,
+      peurs: peurs,
+      vulnerabilites: vulnerabilites,
+      stats_force: parseInt(stats_force),
+      stats_agilite: parseInt(stats_agilite),
+      stats_endurance: parseInt(stats_endurance),
+      stats_ruse: parseInt(stats_ruse),
+      stats_charisme: parseInt(stats_charisme),
+      statut: 'En attente'
+    });
+
+    if (error) {
+      console.error(error);
+      alert("Erreur : " + error.message);
+    } else {
+      // Affichage du popup
+      const toast = document.getElementById('toast-success');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('show'), 50);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.classList.add('hidden'), 500);
+      }, 5000);
+
+      // Reset du formulaire
+      document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
+      document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
+      
+      currentStep = 1;
+      updateWizard();
+      document.querySelector('[data-sub="mine"]').click();
+    }
+  }
+});
+
+// --- LOGIQUE DES STATS ---
 const sliders = document.querySelectorAll('.stat-slider');
 const pointsLeftDisplay = document.getElementById('points-left');
-let maxPoints = 20;
+const maxPoints = 20;
 
 function updateStats() {
   let totalUsed = 0;
-  
   sliders.forEach(slider => {
     totalUsed += parseInt(slider.value);
-    // Mettre à jour le chiffre à côté du nom de la stat
     document.getElementById(`val-${slider.id.split('-')[1]}`).textContent = slider.value;
   });
 
   let remaining = maxPoints - totalUsed;
   pointsLeftDisplay.textContent = remaining;
-
-  if (remaining < 0) {
-    pointsLeftDisplay.style.color = '#ef4444'; // Rouge si dépassement
-  } else {
-    pointsLeftDisplay.style.color = 'var(--accent)'; // Jaune/Or normal
-  }
+  pointsLeftDisplay.style.color = remaining < 0 ? '#ef4444' : 'var(--accent)';
 }
 
-// Écouter les changements sur chaque curseur
 sliders.forEach(slider => {
   slider.addEventListener('input', () => {
     let totalUsed = 0;
     sliders.forEach(s => totalUsed += parseInt(s.value));
-    
-    // Si le joueur essaie de dépasser 20 points, on bloque le curseur
-    if (totalUsed > maxPoints) {
-      slider.value = parseInt(slider.value) - 1;
-    }
+    if (totalUsed > maxPoints) slider.value = parseInt(slider.value) - 1;
     updateStats();
   });
 });
-
-// Initialiser au chargement
 updateStats();
