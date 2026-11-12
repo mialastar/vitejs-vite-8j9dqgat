@@ -120,14 +120,13 @@ body {
   text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
-/* --- NOUVELLE BANNIÈRE AVEC IMAGE --- */
+/* --- BANNIÈRE AUTOMNE (Vraie image de forêt) --- */
 .season-banner {
-  /* Image de forêt d'automne très fiable + filtre sombre léger */
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8)), url('https://images.pexels.com/photos/1470171/pexels-photo-1470171.jpeg?auto=compress&cs=tinysrgb&w=1000');
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)), url('https://images.pexels.com/photos/1659782/pexels-photo-1659782.jpeg?auto=compress&cs=tinysrgb&w=1000');
   background-size: cover;
   background-position: center;
   border-radius: 15px;
-  padding: 50px 20px; /* J'ai augmenté un peu la taille pour bien voir l'image */
+  padding: 60px 20px;
   text-align: center;
   margin-bottom: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
@@ -138,7 +137,7 @@ body {
   font-family: var(--font-title); 
   font-size: 2.5rem; 
   color: #fff; 
-  text-shadow: 0 2px 10px rgba(0,0,0,0.9); /* Ombre plus forte pour lire sur la photo */
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5);
 }
 
 .season-banner p { 
