@@ -191,6 +191,7 @@ btnNext.addEventListener('click', async () => {
       
       document.querySelector('[data-sub="mine"]').click();
       loadMyFiches();
+      loadAllFiches();
     }
   }
 });
@@ -264,7 +265,12 @@ document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFich
 
 // --- FONCTIONS GLOBALES MODIFIER ET SUPPRIMER ---
 window.editFiche = async function(id) {
-  // Aller chercher les données de la fiche
+  // 1. On demande confirmation au joueur (pour éviter les modifications par impatience)
+  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente' et ne sera plus visible sur le site jusqu'à ce qu'un Admin la revalide. Es-tu sûr de vouloir continuer ?");
+  
+  if (!confirmModif) return; // Si le joueur annule, on arrête là
+
+  // 2. On va chercher les données de la fiche
   const { data: fiche, error } = await supabase.from('fiches_oc').select('*').eq('id', id).single();
   if (error || !fiche) return alert("Erreur lors du chargement de la fiche.");
 
@@ -319,9 +325,9 @@ window.editFiche = async function(id) {
   document.getElementById('stat-endurance').value = fiche.stats_endurance || 1;
   document.getElementById('stat-ruse').value = fiche.stats_ruse || 1;
   document.getElementById('stat-charisme').value = fiche.stats_charisme || 1;
-  updateStats(); // Recalculer les points restants
+  updateStats();
 
-  // Aller sur l'onglet Créer
+  // Aller sur l'onglet Créer et remettre à l'étape 1
   document.querySelector('[data-sub="create"]').click();
   currentStep = 1;
   updateWizard();
