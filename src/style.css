@@ -1,0 +1,319 @@
+:root {
+  --bg-color: #05050a;
+  --text-main: #f8fafc;
+  --text-dim: #cbd5e1;
+  --accent: #fbbf24; /* Un jaune/orange doré */
+  --font-title: 'Cinzel', serif;
+  --font-body: 'Montserrat', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* L'IMAGE DE FOND : Forêt et ciel de crépuscule */
+#shader-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  /* Lien vers l'image de la forêt au crépuscule */
+  background-image: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  /* Léger zoom qui donne l'impression que la forêt respire */
+  animation: forestBreath 25s ease-in-out infinite alternate;
+}
+
+/* Un voile sombre très léger pour que le texte reste lisible */
+#shader-canvas::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 10, 0.4) 0%,
+    rgba(5, 5, 10, 0.1) 50%,
+    rgba(5, 5, 10, 0.8) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes forestBreath {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* --- GESTION DES ÉCRANS --- */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.5s ease, transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: scale(0.95);
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+/* --- ÉCRAN INTRO --- */
+.intro-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.main-title {
+  font-family: var(--font-title);
+  font-size: 4.5rem;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #fff;
+  animation: riseUp 2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.main-title .highlight {
+  color: var(--accent);
+  font-style: italic;
+  font-size: 3.8rem;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 4px 15px rgba(0, 0, 0, 0.9);
+}
+
+.intro-line {
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: 25px auto;
+  animation: expandLine 1.5s ease forwards;
+  animation-delay: 0.8s;
+  box-shadow: 0 0 15px var(--accent);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 50px;
+  animation: fadeIn 1.5s ease forwards;
+  animation-delay: 1.2s;
+  opacity: 0;
+}
+
+/* Bouton */
+.btn-primary {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 15px 45px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  animation: fadeIn 1.5s ease forwards;
+  animation-delay: 1.5s;
+  opacity: 0;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.8);
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* --- ÉCRAN CRÉDITS --- */
+.credits-container {
+  width: 90%;
+  max-width: 650px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.credits-title {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+}
+
+.credits-scroll {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  padding: 30px;
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  margin-bottom: 20px;
+}
+
+.credits-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.credits-scroll::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+.credit-section {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.credit-section h3 {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  color: var(--accent);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.credit-section p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+.credit-section.legal {
+  margin-top: 60px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+}
+
+@keyframes riseUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes expandLine {
+  to {
+    width: 80%;
+  }
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-title {
+    font-size: 3rem;
+  }
+  .main-title .highlight {
+    font-size: 2.5rem;
+  }
+  .credits-container {
+    height: 85vh;
+  }
+}
+
+/* --- ÉCRAN AUTH DISCORD --- */
+.auth-container {
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.auth-title {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 15px;
+  text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+.auth-text {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.btn-discord {
+  background: #5865f2;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+}
+
+.btn-discord:hover {
+  background: #4752c4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.6);
+}
