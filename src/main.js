@@ -318,7 +318,7 @@ function renderPublicFiches(fiches) {
   const container = document.getElementById('all-fiches-container');
   
   if (fiches.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche validée pour le moment.</p>';
+    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche trouvée.</p>';
     return;
   }
 
@@ -327,14 +327,17 @@ function renderPublicFiches(fiches) {
     const card = document.createElement('div');
     card.className = 'public-fiche-card';
     
-    // Si l'image n'est pas encore gérée, on met un fond par défaut
-    const bgImage = fiche.image_url ? fiche.image_url : 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500&auto=format&fit=crop'; 
+    // On vérifie si une image existe. Si oui, on crée la div, sinon on ne met rien.
+    let imageHtml = '';
+    if (fiche.image_url && fiche.image_url.trim() !== '') {
+      imageHtml = `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>`;
+    }
 
     // On prend les 100 premiers caractères de l'histoire pour le résumé
     const bioCourte = fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire renseignée.';
 
     card.innerHTML = `
-      <div class="card-image" style="background-image: url('${bgImage}')"></div>
+      ${imageHtml}
       <div class="card-content">
         <h3>${fiche.nom}</h3>
         <div class="card-tags">
@@ -345,7 +348,6 @@ function renderPublicFiches(fiches) {
       </div>
     `;
     
-    // (Plus tard on fera en sorte que cliquer sur la carte ouvre la fiche complète)
     card.addEventListener('click', () => {
       alert(`Ouverture de la fiche de ${fiche.nom} (Bientôt disponible)`);
     });
