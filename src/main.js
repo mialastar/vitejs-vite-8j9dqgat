@@ -235,6 +235,7 @@ document.getElementById('image-upload').addEventListener('change', function(e) {
 });
 
 // --- AFFICHAGE (MES FICHES) ---
+// --- AFFICHAGE (MES FICHES) ---
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
@@ -250,12 +251,13 @@ async function loadMyFiches() {
     let statusClass = fiche.statut === 'Validée' ? 'status-valide' : (fiche.statut === 'Refusée' ? 'status-refuse' : 'status-attente');
     const card = document.createElement('div');
     card.className = 'fiche-card';
+    // ⚠️ AJOUT DES GUILLEMETS AUTOUR DE ${fiche.id} ICI 👇
     card.innerHTML = `
       <div class="fiche-card-header"><h4>${fiche.nom}</h4><span class="status-badge ${statusClass}">${fiche.statut}</span></div>
       <div class="fiche-card-info"><p><strong>Clan :</strong> ${fiche.clan}</p><p><strong>Rang :</strong> ${fiche.rang}</p></div>
       <div class="fiche-card-actions">
-        <button class="btn-action btn-modifier" onclick="editFiche(${fiche.id})">Modifier</button>
-        <button class="btn-action btn-supprimer" onclick="deleteFiche(${fiche.id})">Supprimer</button>
+        <button class="btn-action btn-modifier" onclick="editFiche('${fiche.id}')">Modifier</button>
+        <button class="btn-action btn-supprimer" onclick="deleteFiche('${fiche.id}')">Supprimer</button>
       </div>
     `;
     container.appendChild(card);
@@ -464,4 +466,19 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('view-fiches').classList.add('active');
   document.querySelector('[data-sub="all"]').classList.add('active');
   document.getElementById('subview-all').classList.add('active');
+});
+
+// Sécurité : Si on clique sur l'onglet "Créer", on annule le mode modification
+document.querySelector('[data-sub="create"]').addEventListener('click', () => {
+  // Si on était en train de modifier, on réinitialise tout
+  if (editingFicheId) {
+    editingFicheId = null;
+    currentEditingImage = "";
+    document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
+    document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
+    document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('image-preview').style.display = 'none';
+    currentStep = 1;
+    updateWizard();
+  }
 });
