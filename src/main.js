@@ -7,8 +7,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Variables globales
-let editingFicheId = null; // Sert à savoir si on modifie une fiche
-let currentEditingImage = ""; // Garde l'image actuelle si on ne la change pas
+let editingFicheId = null; 
+let currentEditingImage = ""; 
 
 // --- GESTION DES ÉCRANS ---
 const screenIntro = document.getElementById('screen-intro');
@@ -132,7 +132,7 @@ btnNext.addEventListener('click', async () => {
     const stats_charisme = document.getElementById('stat-charisme').value;
 
     // --- UPLOAD DE L'IMAGE ---
-    let imageUrl = currentEditingImage; // On garde l'ancienne par défaut
+    let imageUrl = currentEditingImage; 
     const fileInput = document.getElementById('image-upload');
     
     if (fileInput.files.length > 0) {
@@ -148,7 +148,6 @@ btnNext.addEventListener('click', async () => {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Préparation des données
     const ficheData = {
       nom, clan, rang, pelage, yeux, traits, qualites, defauts, origines, evenements, 
       competences_list, competences_details, 
@@ -156,16 +155,16 @@ btnNext.addEventListener('click', async () => {
       image_url: imageUrl,
       stats_force: parseInt(stats_force), stats_agilite: parseInt(stats_agilite), 
       stats_endurance: parseInt(stats_endurance), stats_ruse: parseInt(stats_ruse), stats_charisme: parseInt(stats_charisme),
-      statut: 'En attente' // Repasse en attente si c'est une modif
+      statut: 'En attente' 
     };
 
     let error;
     if (editingFicheId) {
-      // MODE MODIFICATION
+      // MODE MODIFICATION (écrase l'ancienne)
       const { error: updateError } = await supabase.from('fiches_oc').update(ficheData).eq('id', editingFicheId);
       error = updateError;
     } else {
-      // MODE CRÉATION
+      // MODE CRÉATION (nouvelle ligne)
       const { error: insertError } = await supabase.from('fiches_oc').insert({ ...ficheData, user_id: user.id });
       error = insertError;
     }
@@ -178,20 +177,20 @@ btnNext.addEventListener('click', async () => {
       setTimeout(() => toast.classList.add('show'), 50);
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
 
-      // Reset du formulaire
+      // Reset complet du formulaire
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
       document.getElementById('image-preview').style.display = 'none';
       
-      editingFicheId = null; // On réinitialise
+      editingFicheId = null; 
       currentEditingImage = "";
       currentStep = 1;
       updateWizard();
       
       document.querySelector('[data-sub="mine"]').click();
       loadMyFiches();
-      loadAllFiches();
+      loadAllFiches(); // Met à jour le catalogue public
     }
   }
 });
@@ -235,7 +234,6 @@ document.getElementById('image-upload').addEventListener('change', function(e) {
 });
 
 // --- AFFICHAGE (MES FICHES) ---
-// --- AFFICHAGE (MES FICHES) ---
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
@@ -251,7 +249,6 @@ async function loadMyFiches() {
     let statusClass = fiche.statut === 'Validée' ? 'status-valide' : (fiche.statut === 'Refusée' ? 'status-refuse' : 'status-attente');
     const card = document.createElement('div');
     card.className = 'fiche-card';
-    // ⚠️ AJOUT DES GUILLEMETS AUTOUR DE ${fiche.id} ICI 👇
     card.innerHTML = `
       <div class="fiche-card-header"><h4>${fiche.nom}</h4><span class="status-badge ${statusClass}">${fiche.statut}</span></div>
       <div class="fiche-card-info"><p><strong>Clan :</strong> ${fiche.clan}</p><p><strong>Rang :</strong> ${fiche.rang}</p></div>
@@ -267,61 +264,40 @@ document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFich
 
 // --- FONCTIONS GLOBALES MODIFIER ET SUPPRIMER ---
 window.editFiche = async function(id) {
-  // 1. On demande confirmation au joueur (pour éviter les modifications par impatience)
-  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente' et ne sera plus visible sur le site jusqu'à ce qu'un Admin la revalide. Es-tu sûr de vouloir continuer ?");
-  
-  if (!confirmModif) return; // Si le joueur annule, on arrête là
+  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente' et ne sera plus visible sur le site jusqu'à ce qu'un Admin la revalide. Continuer ?");
+  if (!confirmModif) return;
 
-  // 2. On va chercher les données de la fiche
   const { data: fiche, error } = await supabase.from('fiches_oc').select('*').eq('id', id).single();
-  if (error || !fiche) return alert("Erreur lors du chargement de la fiche.");
+  if (error || !fiche) return alert("Erreur lors du chargement.");
 
   editingFicheId = id;
   currentEditingImage = fiche.image_url || "";
 
-  // Remplir l'étape 1
   document.querySelector('#step-1 input').value = fiche.nom || '';
   document.querySelectorAll('#step-1 select')[0].value = fiche.clan || 'Clan de la Forêt';
   document.querySelectorAll('#step-1 select')[1].value = fiche.rang || 'Guerrier';
-  
-  // Étape 2
   document.querySelectorAll('#step-2 input')[0].value = fiche.pelage || '';
   document.querySelectorAll('#step-2 input')[1].value = fiche.yeux || '';
-  
-  // Étape 3
   document.querySelectorAll('#step-3 input')[0].value = fiche.traits || '';
   document.querySelectorAll('#step-3 input')[1].value = fiche.qualites || '';
   document.querySelectorAll('#step-3 input')[2].value = fiche.defauts || '';
-  
-  // Étape 4
   document.querySelectorAll('#step-4 textarea')[0].value = fiche.origines || '';
   document.querySelectorAll('#step-4 textarea')[1].value = fiche.evenements || '';
   
-  // Étape 5
   document.querySelectorAll('.comp-checkbox').forEach(cb => {
     cb.checked = fiche.competences_list ? fiche.competences_list.includes(cb.value) : false;
   });
   document.querySelector('#step-5 textarea').value = fiche.competences_details || '';
-  
-  // Étape 6
   document.querySelectorAll('#step-6 input')[0].value = fiche.objectifs_court || '';
   document.querySelectorAll('#step-6 input')[1].value = fiche.objectifs_long || '';
   document.querySelector('#step-6 textarea').value = fiche.reves || '';
-  
-  // Étape 7
   document.querySelector('#step-7 input').value = fiche.peurs || '';
   document.querySelector('#step-7 textarea').value = fiche.vulnerabilites || '';
   
-  // Étape 8 (Image)
   const preview = document.getElementById('image-preview');
-  if (fiche.image_url) {
-    preview.src = fiche.image_url;
-    preview.style.display = 'block';
-  } else {
-    preview.style.display = 'none';
-  }
+  if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } 
+  else { preview.style.display = 'none'; }
 
-  // Étape 9 (Stats)
   document.getElementById('stat-force').value = fiche.stats_force || 1;
   document.getElementById('stat-agilite').value = fiche.stats_agilite || 1;
   document.getElementById('stat-endurance').value = fiche.stats_endurance || 1;
@@ -329,8 +305,12 @@ window.editFiche = async function(id) {
   document.getElementById('stat-charisme').value = fiche.stats_charisme || 1;
   updateStats();
 
-  // Aller sur l'onglet Créer et remettre à l'étape 1
-  document.querySelector('[data-sub="create"]').click();
+  // On change d'onglet SANS utiliser le .click() pour ne pas effacer l'ID de modification
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
+  document.querySelector('.sub-tab-btn[data-sub="create"]').classList.add('active');
+  document.getElementById('subview-create').classList.add('active');
+
   currentStep = 1;
   updateWizard();
 };
@@ -350,7 +330,7 @@ async function loadAllFiches() {
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('statut', 'Validée').order('date_creation', { ascending: false });
   if (error || fiches.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: gray;">Aucune fiche validée pour le moment.</p>';
+    container.innerHTML = '<p style="text-align: center; color: gray;">Aucune fiche validée.</p>';
     return;
   }
   allValidatedFiches = fiches;
@@ -466,19 +446,4 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('view-fiches').classList.add('active');
   document.querySelector('[data-sub="all"]').classList.add('active');
   document.getElementById('subview-all').classList.add('active');
-});
-
-// Sécurité : Si on clique sur l'onglet "Créer", on annule le mode modification
-document.querySelector('[data-sub="create"]').addEventListener('click', () => {
-  // Si on était en train de modifier, on réinitialise tout
-  if (editingFicheId) {
-    editingFicheId = null;
-    currentEditingImage = "";
-    document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
-    document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
-    document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('image-preview').style.display = 'none';
-    currentStep = 1;
-    updateWizard();
-  }
 });
