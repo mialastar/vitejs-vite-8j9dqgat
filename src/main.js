@@ -1,9 +1,9 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
-// 👇 VÉRIFIE BIEN TES CLÉS ICI 👇
-const SUPABASE_URL = 'https://lrkiivqbnkkduxfcrbjn.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y';
+// ⚠️ TES CLÉS SUPABASE
+const SUPABASE_URL = "https://lrkiiyqbnkkduxfcrcbjn.supabase.co"; 
+const SUPABASE_ANON_KEY = "TA_CLE_ANON"; // Garde ta clé ici
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -11,6 +11,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const screenIntro = document.getElementById('screen-intro');
 const screenCredits = document.getElementById('screen-credits');
 const screenAuth = document.getElementById('screen-auth');
+const screenApp = document.getElementById('screen-app');
 
 const btnStart = document.getElementById('btn-start');
 const btnContinueCredits = document.getElementById('btn-continue-credits');
@@ -20,46 +21,56 @@ function switchScreen(current, next) {
   current.classList.remove('active');
   setTimeout(() => {
     next.classList.add('active');
-  }, 800);
+  }, 800); 
 }
 
-// Intro -> Crédits
 btnStart.addEventListener('click', () => {
   switchScreen(screenIntro, screenCredits);
 });
 
-// Crédits -> Auth
 btnContinueCredits.addEventListener('click', () => {
   switchScreen(screenCredits, screenAuth);
 });
 
-// --- LOGIQUE DE CONNEXION DISCORD ---
+// --- CONNEXION DISCORD ---
 btnDiscordLogin.addEventListener('click', async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: window.location.origin,
-    },
+      redirectTo: window.location.origin // Utilise l'URL Vercel que tu as configurée
+    }
   });
-
-  if (error) {
-    console.error('Erreur de connexion :', error.message);
-    alert('Erreur lors de la connexion à Discord.');
-  }
+  if (error) alert("Erreur de connexion.");
 });
 
-// --- VÉRIFICATION DE L'UTILISATEUR AU CHARGEMENT ---
+// --- VÉRIFICATION UTILISATEUR ---
 async function checkUser() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
+  const { data: { session } } = await supabase.auth.getSession();
+  
   if (session) {
-    console.log('Connecté en tant que :', session.user.user_metadata.full_name);
-    alert(
-      `Bienvenue sur les Terres du Crépuscule, ${session.user.user_metadata.full_name} !`
-    );
+    // Si connecté, on saute l'intro et l'auth, on va direct à l'app !
+    screenIntro.classList.remove('active');
+    screenCredits.classList.remove('active');
+    screenAuth.classList.remove('active');
+    screenApp.classList.add('active');
+    
+    console.log("Connecté en tant que :", session.user.user_metadata.full_name);
   }
 }
-
 checkUser();
+
+// --- GESTION DE LA NAVIGATION (ONGLETS DU BAS) ---
+const navButtons = document.querySelectorAll('.nav-btn');
+navButtons.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // 1. Enlever la classe "active" de tous les boutons
+    navButtons.forEach(b => b.classList.remove('active'));
+    
+    // 2. Ajouter la classe "active" au bouton cliqué
+    e.currentTarget.classList.add('active');
+    
+    // 3. (Plus tard) Afficher le bon contenu selon le data-target
+    const target = e.currentTarget.getAttribute('data-target');
+    console.log("Navigation vers :", target);
+  });
+});
