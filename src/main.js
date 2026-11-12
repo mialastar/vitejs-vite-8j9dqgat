@@ -76,11 +76,15 @@ navBtns.forEach(btn => {
     // Cacher toutes les vues
     views.forEach(v => v.classList.remove('active'));
 
-    // Afficher la bonne vue
+    // Afficher la bonne vue selon le data-target
     const target = e.currentTarget.getAttribute('data-target');
-    if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
-    if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
-    // (Les autres vues s'ajouteront plus tard)
+    
+    if(target === 'accueil') {
+      document.getElementById('view-accueil').classList.add('active');
+    } else if (target === 'fiches') {
+      document.getElementById('view-fiches').classList.add('active');
+    }
+    // Les autres onglets seront ajoutés plus tard
   });
 });
 
