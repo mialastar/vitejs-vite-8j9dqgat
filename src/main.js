@@ -198,6 +198,8 @@ btnNext.addEventListener('click', async () => {
       currentStep = 1;
       updateWizard();
       document.querySelector('[data-sub="mine"]').click();
+      document.querySelector('[data-sub="mine"]').click();
+      loadMyFiches(); // <--- AJOUTE CETTE LIGNE ICI
     }
   }
 });
@@ -228,3 +230,63 @@ sliders.forEach(slider => {
   });
 });
 updateStats();
+
+// --- AFFICHER LES FICHES DU JOUEUR ---
+async function loadMyFiches() {
+  const container = document.getElementById('my-fiches-container');
+  container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
+
+  // On récupère l'utilisateur connecté
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // On demande à Supabase toutes les fiches de cet utilisateur
+  const { data: fiches, error } = await supabase
+    .from('fiches_oc')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('date_creation', { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+    return;
+  }
+
+  // Si le joueur n'a pas de fiche
+  if (fiches.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Tu n\'as pas encore de fiche.</p>';
+    return;
+  }
+
+  // Sinon, on génère les cartes HTML
+  container.innerHTML = ''; // On vide le conteneur
+  fiches.forEach(fiche => {
+    let statusClass = 'status-attente';
+    if (fiche.statut === 'Validée') statusClass = 'status-valide';
+    if (fiche.statut === 'Refusée') statusClass = 'status-refuse';
+
+    const card = document.createElement('div');
+    card.className = 'fiche-card';
+    card.innerHTML = `
+      <div class="fiche-card-header">
+        <h4>${fiche.nom || 'Sans nom'}</h4>
+        <span class="status-badge ${statusClass}">${fiche.statut}</span>
+      </div>
+      <div class="fiche-card-info">
+        <p><strong>Clan :</strong> ${fiche.clan}</p>
+        <p><strong>Rang :</strong> ${fiche.rang}</p>
+      </div>
+      <div class="fiche-card-actions">
+        <button class="btn-action btn-modifier" onclick="alert('Bientôt disponible !')">Modifier</button>
+        <button class="btn-action btn-supprimer" onclick="alert('Bientôt disponible !')">Supprimer</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Quand on clique sur l'onglet "Mes fiches", on charge les données
+document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
+
+// Et on charge aussi les fiches juste après avoir soumis une nouvelle fiche
+// (Cherche la ligne "document.querySelector('[data-sub="mine"]').click();" à la fin de ton btnNext et ajoute "loadMyFiches();" juste après)

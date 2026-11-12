@@ -343,3 +343,65 @@ body {
   font-size: 0.85rem;
   line-height: 1.3;
 }
+
+/* --- CARTES MES FICHES --- */
+.fiche-card {
+  background: rgba(30, 30, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fiche-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fiche-card-header h4 {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-attente { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
+.status-valide { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+.status-refuse { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+.fiche-card-info {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.fiche-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-modifier { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.btn-modifier:hover { background: rgba(255, 255, 255, 0.2); }
+.btn-supprimer { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.btn-supprimer:hover { background: rgba(239, 68, 68, 0.4); }
