@@ -44,18 +44,26 @@ btnDiscordLogin.addEventListener('click', async () => {
 
 // --- VÉRIFICATION UTILISATEUR ---
 async function checkUser() {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (session) {
-    // Si connecté, on saute l'intro et l'auth, on va direct à l'app !
-    screenIntro.classList.remove('active');
-    screenCredits.classList.remove('active');
-    screenAuth.classList.remove('active');
-    screenApp.classList.add('active');
+  try {
+    const { data, error } = await supabase.auth.getSession();
     
-    console.log("Connecté en tant que :", session.user.user_metadata.full_name);
+    if (data && data.session) {
+      // L'utilisateur est connecté, on cache les autres écrans et on affiche l'app !
+      screenIntro.classList.remove('active');
+      screenCredits.classList.remove('active');
+      screenAuth.classList.remove('active');
+      
+      // On force l'affichage de l'app
+      screenApp.classList.add('active');
+      console.log("Connexion réussie, bienvenue !");
+    } else {
+      console.log("Pas de session active.");
+    }
+  } catch (err) {
+    console.error("Erreur lors de la vérification :", err);
   }
 }
+
 checkUser();
 
 // --- GESTION DE LA NAVIGATION (ONGLETS DU BAS) ---
