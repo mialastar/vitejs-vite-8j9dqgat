@@ -583,3 +583,12 @@ body {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 }
+
+.tag {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: var(--text-dim);
+  display: inline-block;
+}

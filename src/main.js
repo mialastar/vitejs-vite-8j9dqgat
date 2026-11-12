@@ -1,7 +1,6 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ TES CLÉS SUPABASE
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
@@ -12,7 +11,6 @@ const screenIntro = document.getElementById('screen-intro');
 const screenCredits = document.getElementById('screen-credits');
 const screenAuth = document.getElementById('screen-auth');
 const screenApp = document.getElementById('screen-app');
-
 const btnStart = document.getElementById('btn-start');
 const btnContinueCredits = document.getElementById('btn-continue-credits');
 const btnDiscordLogin = document.getElementById('btn-discord-login');
@@ -20,26 +18,21 @@ const btnDiscordLogin = document.getElementById('btn-discord-login');
 function switchScreen(current, next) {
   if(!current || !next) return;
   current.classList.remove('active');
-  setTimeout(() => {
-    next.classList.add('active');
-  }, 800); 
+  setTimeout(() => next.classList.add('active'), 800); 
 }
 
 btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
 btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
 
-// --- CONNEXION DISCORD ---
+// --- CONNEXION ---
 btnDiscordLogin.addEventListener('click', async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
-    options: {
-      redirectTo: 'https://lgdc-rp.vercel.app' 
-    }
+    options: { redirectTo: 'https://lgdc-rp.vercel.app' }
   });
   if (error) alert("Erreur de connexion.");
 });
 
-// --- VÉRIFICATION UTILISATEUR AU CHARGEMENT ---
 async function checkUser() {
   const { data } = await supabase.auth.getSession();
   if (data && data.session) {
@@ -51,10 +44,9 @@ async function checkUser() {
 }
 checkUser();
 
-// --- LOGIQUE DE NAVIGATION DES ONGLETS ---
+// --- NAVIGATION ---
 const navBtns = document.querySelectorAll('.nav-btn');
 const views = document.querySelectorAll('.view');
-
 navBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     navBtns.forEach(b => b.classList.remove('active'));
@@ -66,21 +58,18 @@ navBtns.forEach(btn => {
   });
 });
 
-// --- LOGIQUE DES SOUS-ONGLETS FICHES ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
-
 subTabBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     subTabBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     subviews.forEach(v => v.classList.remove('active'));
-    const subTarget = e.currentTarget.getAttribute('data-sub');
-    document.getElementById(`subview-${subTarget}`).classList.add('active');
+    document.getElementById(`subview-${e.currentTarget.getAttribute('data-sub')}`).classList.add('active');
   });
 });
 
-// --- LOGIQUE DU WIZARD ---
+// --- WIZARD ---
 let currentStep = 1;
 const totalSteps = 9;
 const btnPrev = document.getElementById('btn-prev');
@@ -89,38 +78,28 @@ const progressFill = document.getElementById('progress-bar-fill');
 const stepNumText = document.getElementById('current-step-num');
 
 function updateWizard() {
-  document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
   document.getElementById(`step-${currentStep}`).classList.add('active');
-  
   stepNumText.textContent = currentStep;
   progressFill.style.width = `${(currentStep / totalSteps) * 100}%`;
-
   btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
   if (currentStep === totalSteps) {
     btnNext.textContent = 'Soumettre la fiche';
     btnNext.style.background = '#10b981';
-    btnNext.style.color = '#fff';
   } else {
     btnNext.textContent = 'Suivant';
     btnNext.style.background = '';
-    btnNext.style.color = '';
   }
 }
 
-btnPrev.addEventListener('click', () => {
-  if (currentStep > 1) {
-    currentStep--;
-    updateWizard();
-  }
-});
+btnPrev.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
 
-// --- SOUMISSION DU FORMULAIRE ---
 btnNext.addEventListener('click', async () => {
   if (currentStep < totalSteps) {
     currentStep++;
     updateWizard();
   } else {
-    // Récupération des données
+    // RÉCUPÉRATION DES DONNÉES
     const nom = document.querySelector('#step-1 input').value;
     const clan = document.querySelector('#step-1 select').value; 
     const rang = document.querySelectorAll('#step-1 select')[1].value; 
@@ -131,9 +110,14 @@ btnNext.addEventListener('click', async () => {
     const defauts = document.querySelectorAll('#step-3 input')[2].value;
     const origines = document.querySelectorAll('#step-4 textarea')[0].value;
     const evenements = document.querySelectorAll('#step-4 textarea')[1].value;
+    
+    // Récupérer les cases cochées
+    const checkedBoxes = document.querySelectorAll('.comp-checkbox:checked');
+    const competences_list = Array.from(checkedBoxes).map(cb => cb.value).join(', ');
+
     const competences_details = document.querySelector('#step-5 textarea').value;
-    const objectifs_court = document.querySelectorAll('#step-6 input')[0].value;
-    const objectifs_long = document.querySelectorAll('#step-6 input')[1].value;
+    const obj_court = document.querySelectorAll('#step-6 input')[0].value;
+    const obj_long = document.querySelectorAll('#step-6 input')[1].value;
     const reves = document.querySelector('#step-6 textarea').value;
     const peurs = document.querySelector('#step-7 input').value;
     const vulnerabilites = document.querySelector('#step-7 textarea').value;
@@ -146,249 +130,171 @@ btnNext.addEventListener('click', async () => {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      alert("Erreur : Tu dois être connecté pour créer une fiche.");
-      return;
-    }
-
-    // Envoi à Supabase
     const { error } = await supabase.from('fiches_oc').insert({
-      user_id: user.id,
-      nom: nom,
-      clan: clan,
-      rang: rang,
-      pelage: pelage,
-      yeux: yeux,
-      traits: traits,
-      qualites: qualites,
-      defauts: defauts,
-      origines: origines,
-      evenements: evenements,
-      competences_details: competences_details,
-      objectifs_court: objectifs_court,
-      objectifs_long: objectifs_long,
-      reves: reves,
-      peurs: peurs,
-      vulnerabilites: vulnerabilites,
-      stats_force: parseInt(stats_force),
-      stats_agilite: parseInt(stats_agilite),
-      stats_endurance: parseInt(stats_endurance),
-      stats_ruse: parseInt(stats_ruse),
-      stats_charisme: parseInt(stats_charisme),
+      user_id: user.id, nom, clan, rang, pelage, yeux, traits, qualites, defauts, origines, evenements, 
+      competences_list, competences_details, 
+      objectifs_court: obj_court, objectifs_long: obj_long, reves, peurs, vulnerabilites,
+      stats_force: parseInt(stats_force), stats_agilite: parseInt(stats_agilite), 
+      stats_endurance: parseInt(stats_endurance), stats_ruse: parseInt(stats_ruse), stats_charisme: parseInt(stats_charisme),
       statut: 'En attente'
     });
 
     if (error) {
-      console.error(error);
       alert("Erreur : " + error.message);
     } else {
-      // Affichage du popup
       const toast = document.getElementById('toast-success');
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('show'), 50);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.classList.add('hidden'), 500);
-      }, 5000);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
 
-      // Reset du formulaire
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
+      document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
       
       currentStep = 1;
       updateWizard();
       document.querySelector('[data-sub="mine"]').click();
-      document.querySelector('[data-sub="mine"]').click();
-      loadMyFiches(); // <--- AJOUTE CETTE LIGNE ICI
+      loadMyFiches();
     }
   }
 });
 
-// --- LOGIQUE DES STATS ---
+// --- STATS LOGIC ---
 const sliders = document.querySelectorAll('.stat-slider');
 const pointsLeftDisplay = document.getElementById('points-left');
 const maxPoints = 20;
 
 function updateStats() {
   let totalUsed = 0;
-  sliders.forEach(slider => {
-    totalUsed += parseInt(slider.value);
-    document.getElementById(`val-${slider.id.split('-')[1]}`).textContent = slider.value;
+  sliders.forEach(s => {
+    totalUsed += parseInt(s.value);
+    document.getElementById(`val-${s.id.split('-')[1]}`).textContent = s.value;
   });
-
-  let remaining = maxPoints - totalUsed;
-  pointsLeftDisplay.textContent = remaining;
-  pointsLeftDisplay.style.color = remaining < 0 ? '#ef4444' : 'var(--accent)';
+  pointsLeftDisplay.textContent = maxPoints - totalUsed;
+  pointsLeftDisplay.style.color = (maxPoints - totalUsed) < 0 ? '#ef4444' : 'var(--accent)';
 }
 
-sliders.forEach(slider => {
-  slider.addEventListener('input', () => {
-    let totalUsed = 0;
-    sliders.forEach(s => totalUsed += parseInt(s.value));
-    if (totalUsed > maxPoints) slider.value = parseInt(slider.value) - 1;
+sliders.forEach(s => {
+  s.addEventListener('input', () => {
+    let total = 0; sliders.forEach(sl => total += parseInt(sl.value));
+    if (total > maxPoints) s.value = parseInt(s.value) - 1;
     updateStats();
   });
 });
 updateStats();
 
-// --- AFFICHER LES FICHES DU JOUEUR ---
+// --- AFFICHAGE (MES FICHES ET TOUTES LES FICHES) ---
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
-
-  // On récupère l'utilisateur connecté
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
 
-  // On demande à Supabase toutes les fiches de cet utilisateur
-  const { data: fiches, error } = await supabase
-    .from('fiches_oc')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('date_creation', { ascending: false });
-
-  if (error) {
-    container.innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+  if (error || fiches.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: gray;">Tu n\'as pas encore de fiche.</p>';
     return;
   }
-
-  // Si le joueur n'a pas de fiche
-  if (fiches.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Tu n\'as pas encore de fiche.</p>';
-    return;
-  }
-
-  // Sinon, on génère les cartes HTML
-  container.innerHTML = ''; // On vide le conteneur
+  container.innerHTML = '';
   fiches.forEach(fiche => {
-    let statusClass = 'status-attente';
-    if (fiche.statut === 'Validée') statusClass = 'status-valide';
-    if (fiche.statut === 'Refusée') statusClass = 'status-refuse';
-
+    let statusClass = fiche.statut === 'Validée' ? 'status-valide' : (fiche.statut === 'Refusée' ? 'status-refuse' : 'status-attente');
     const card = document.createElement('div');
     card.className = 'fiche-card';
     card.innerHTML = `
-      <div class="fiche-card-header">
-        <h4>${fiche.nom || 'Sans nom'}</h4>
-        <span class="status-badge ${statusClass}">${fiche.statut}</span>
-      </div>
-      <div class="fiche-card-info">
-        <p><strong>Clan :</strong> ${fiche.clan}</p>
-        <p><strong>Rang :</strong> ${fiche.rang}</p>
-      </div>
-      <div class="fiche-card-actions">
-        <button class="btn-action btn-modifier" onclick="alert('Bientôt disponible !')">Modifier</button>
-        <button class="btn-action btn-supprimer" onclick="alert('Bientôt disponible !')">Supprimer</button>
-      </div>
+      <div class="fiche-card-header"><h4>${fiche.nom}</h4><span class="status-badge ${statusClass}">${fiche.statut}</span></div>
+      <div class="fiche-card-info"><p><strong>Clan :</strong> ${fiche.clan}</p><p><strong>Rang :</strong> ${fiche.rang}</p></div>
+      <div class="fiche-card-actions"><button class="btn-action btn-modifier" onclick="alert('Bientôt disponible !')">Modifier</button><button class="btn-action btn-supprimer" onclick="alert('Bientôt disponible !')">Supprimer</button></div>
     `;
     container.appendChild(card);
   });
 }
-
-// Quand on clique sur l'onglet "Mes fiches", on charge les données
 document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
 
-// Et on charge aussi les fiches juste après avoir soumis une nouvelle fiche
-// (Cherche la ligne "document.querySelector('[data-sub="mine"]').click();" à la fin de ton btnNext et ajoute "loadMyFiches();" juste après)
-
-// --- AFFICHER TOUTES LES FICHES (PUBLIC) ---
-let allValidatedFiches = []; // On stocke les fiches ici pour la recherche
-
+let allValidatedFiches = [];
 async function loadAllFiches() {
   const container = document.getElementById('all-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
-
-  // On récupère UNIQUEMENT les fiches validées
-  const { data: fiches, error } = await supabase
-    .from('fiches_oc')
-    .select('*')
-    .eq('statut', 'Validée') // Filtre important !
-    .order('date_creation', { ascending: false });
-
-  if (error) {
-    container.innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+  const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('statut', 'Validée').order('date_creation', { ascending: false });
+  if (error || fiches.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: gray;">Aucune fiche validée pour le moment.</p>';
     return;
   }
-
-  allValidatedFiches = fiches; // On sauvegarde pour la recherche
+  allValidatedFiches = fiches;
   renderPublicFiches(fiches);
 }
 
 function renderPublicFiches(fiches) {
   const container = document.getElementById('all-fiches-container');
-  
-  if (fiches.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche trouvée.</p>';
-    return;
-  }
-
   container.innerHTML = '';
   fiches.forEach(fiche => {
+    let imageHtml = (fiche.image_url && fiche.image_url.trim() !== '') ? `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>` : '';
     const card = document.createElement('div');
     card.className = 'public-fiche-card';
-    
-    // On vérifie si une image existe. Si oui, on crée la div, sinon on ne met rien.
-    let imageHtml = '';
-    if (fiche.image_url && fiche.image_url.trim() !== '') {
-      imageHtml = `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>`;
-    }
-
-    // On prend les 100 premiers caractères de l'histoire pour le résumé
-    const bioCourte = fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire renseignée.';
-
     card.innerHTML = `
       ${imageHtml}
       <div class="card-content">
         <h3>${fiche.nom}</h3>
-        <div class="card-tags">
-          <span class="tag">${fiche.clan}</span>
-          <span class="tag">${fiche.rang}</span>
-        </div>
-        <p class="card-bio">${bioCourte}</p>
+        <div class="card-tags"><span class="tag">${fiche.clan}</span><span class="tag">${fiche.rang}</span></div>
+        <p class="card-bio">${fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire.'}</p>
       </div>
     `;
-    
-    card.addEventListener('click', () => {
-      openFicheDetail(fiche);
-    });
-
+    card.addEventListener('click', () => openFicheDetail(fiche));
     container.appendChild(card);
   });
 }
-
-// --- RECHERCHE PAR NOM ---
 document.getElementById('search-fiches').addEventListener('input', (e) => {
-  const searchTerm = e.target.value.toLowerCase();
-  const filtered = allValidatedFiches.filter(f => 
-    f.nom.toLowerCase().includes(searchTerm)
-  );
-  renderPublicFiches(filtered);
+  const term = e.target.value.toLowerCase();
+  renderPublicFiches(allValidatedFiches.filter(f => f.nom.toLowerCase().includes(term)));
 });
-
-// Quand on clique sur l'onglet "Voir les fiches", on charge les données
 document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);
 
-// --- OUVRIR LA PAGE DE DÉTAIL ---
+
+// --- PAGE DE DÉTAIL (REMPLIE TOUT) ---
 function openFicheDetail(fiche) {
-  // 1. Cacher la vue des fiches et afficher la page de détail
   document.getElementById('view-fiches').classList.remove('active');
   document.getElementById('view-fiche-detail').classList.add('active');
-  window.scrollTo(0, 0); // Remonter en haut
+  window.scrollTo(0, 0);
 
-  // 2. Remplir les textes
+  // Infos de base
   document.getElementById('detail-nom').textContent = fiche.nom;
   document.getElementById('detail-clan').textContent = fiche.clan;
   document.getElementById('detail-rang').textContent = fiche.rang;
-  
-  document.getElementById('detail-origines').textContent = fiche.origines || 'Non renseigné.';
-  document.getElementById('detail-traits').textContent = fiche.traits || 'Non renseigné.';
-  document.getElementById('detail-qualites').textContent = fiche.qualites || 'Non renseigné.';
-  document.getElementById('detail-defauts').textContent = fiche.defauts || 'Non renseigné.';
-  
-  document.getElementById('detail-pelage').textContent = fiche.pelage || 'Non renseigné.';
-  document.getElementById('detail-yeux').textContent = fiche.yeux || 'Non renseigné.';
 
-  // 3. Gérer l'image (affichage conditionnel)
+  // Onglet Histoire
+  document.getElementById('detail-pelage').textContent = fiche.pelage || 'Non renseigné';
+  document.getElementById('detail-yeux').textContent = fiche.yeux || 'Non renseigné';
+  document.getElementById('detail-origines').textContent = fiche.origines || 'Non renseigné.';
+  document.getElementById('detail-evenements').textContent = fiche.evenements || 'Non renseigné.';
+
+  // Onglet Caractère
+  document.getElementById('detail-traits').textContent = fiche.traits || 'Non renseigné';
+  document.getElementById('detail-qualites').textContent = fiche.qualites || 'Non renseigné';
+  document.getElementById('detail-defauts').textContent = fiche.defauts || 'Non renseigné';
+  document.getElementById('detail-obj-court').textContent = fiche.objectifs_court || 'Non renseigné';
+  document.getElementById('detail-obj-long').textContent = fiche.objectifs_long || 'Non renseigné';
+  document.getElementById('detail-reves').textContent = fiche.reves || 'Non renseigné';
+  document.getElementById('detail-peurs').textContent = fiche.peurs || 'Non renseigné';
+  document.getElementById('detail-vulnerabilites').textContent = fiche.vulnerabilites || 'Non renseigné';
+
+  // Onglet Compétences & Stats
+  const compContainer = document.getElementById('detail-competences-list');
+  compContainer.innerHTML = '';
+  if (fiche.competences_list) {
+    fiche.competences_list.split(',').forEach(comp => {
+      if(comp.trim()) {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.style.background = 'rgba(251, 191, 36, 0.2)';
+        tag.style.color = 'var(--accent)';
+        tag.textContent = comp.trim();
+        compContainer.appendChild(tag);
+      }
+    });
+  } else {
+    compContainer.innerHTML = '<span style="color: gray;">Aucune spécialité cochée.</span>';
+  }
+  document.getElementById('detail-competences-details').textContent = fiche.competences_details || 'Aucun détail fourni.';
+
+  // Image
   const imgContainer = document.getElementById('detail-image');
   if (fiche.image_url && fiche.image_url.trim() !== '') {
     imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
@@ -397,44 +303,40 @@ function openFicheDetail(fiche) {
     imgContainer.style.display = 'none';
   }
 
-  // 4. Remplir les Stats
+  // Stats
   const stats = [
-    { id: 'force', val: fiche.stats_force },
-    { id: 'agilite', val: fiche.stats_agilite },
-    { id: 'endurance', val: fiche.stats_endurance },
-    { id: 'ruse', val: fiche.stats_ruse },
+    { id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite },
+    { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse },
     { id: 'charisme', val: fiche.stats_charisme }
   ];
-
   stats.forEach(stat => {
     const val = stat.val || 0;
     document.getElementById(`num-${stat.id}`).textContent = val;
-    // On calcule la largeur de la barre (max 10)
     document.getElementById(`bar-${stat.id}`).style.width = `${(val / 10) * 100}%`;
   });
+
+  // Réinitialiser sur l'onglet Histoire par défaut
+  document.querySelectorAll('.detail-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.detail-tab-btn[data-dtab="histoire"]').classList.add('active');
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('dtab-histoire').classList.add('active');
 }
 
-// --- GÉRER LES ONGLETS INTERNES DE LA FICHE ---
+// --- ONGLETS INTERNES DETAIL ---
 const detailTabBtns = document.querySelectorAll('.detail-tab-btn');
 const dtabs = document.querySelectorAll('.dtab');
-
 detailTabBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     detailTabBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    
     dtabs.forEach(t => t.classList.remove('active'));
-    const target = e.currentTarget.getAttribute('data-dtab');
-    document.getElementById(`dtab-${target}`).classList.add('active');
+    document.getElementById(`dtab-${e.currentTarget.getAttribute('data-dtab')}`).classList.add('active');
   });
 });
 
-// --- BOUTON RETOUR ---
 document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('view-fiche-detail').classList.remove('active');
   document.getElementById('view-fiches').classList.add('active');
-  
-  // Remettre l'onglet "Voir les fiches" actif quand on revient
   document.querySelector('[data-sub="all"]').classList.add('active');
   document.getElementById('subview-all').classList.add('active');
 });
