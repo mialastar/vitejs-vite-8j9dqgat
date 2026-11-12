@@ -62,3 +62,89 @@ navButtons.forEach(btn => {
     e.currentTarget.classList.add('active');
   });
 });
+
+// --- LOGIQUE DE NAVIGATION DES ONGLETS ---
+const navBtns = document.querySelectorAll('.nav-btn');
+const views = document.querySelectorAll('.view');
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // Gérer la classe active du menu bas
+    navBtns.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    
+    // Cacher toutes les vues
+    views.forEach(v => v.classList.remove('active'));
+
+    // Afficher la bonne vue
+    const target = e.currentTarget.getAttribute('data-target');
+    if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
+    if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
+    // (Les autres vues s'ajouteront plus tard)
+  });
+});
+
+// --- LOGIQUE DES 3 SOUS-ONGLETS FICHES ---
+const subTabBtns = document.querySelectorAll('.sub-tab-btn');
+const subviews = document.querySelectorAll('.subview');
+
+subTabBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    subTabBtns.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    
+    subviews.forEach(v => v.classList.remove('active'));
+    const subTarget = e.currentTarget.getAttribute('data-sub');
+    document.getElementById(`subview-${subTarget}`).classList.add('active');
+  });
+});
+
+// --- LOGIQUE DU WIZARD (FORMULAIRE) ---
+let currentStep = 1;
+const totalSteps = 9;
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const progressFill = document.getElementById('progress-bar-fill');
+const stepNumText = document.getElementById('current-step-num');
+
+function updateWizard() {
+  // Cacher toutes les étapes
+  document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+  // Afficher l'étape actuelle
+  document.getElementById(`step-${currentStep}`).classList.add('active');
+  
+  // Mettre à jour la barre
+  stepNumText.textContent = currentStep;
+  const percent = (currentStep / totalSteps) * 100;
+  progressFill.style.width = `${percent}%`;
+
+  // Gérer l'affichage des boutons
+  btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  
+  if (currentStep === totalSteps) {
+    btnNext.textContent = 'Soumettre la fiche';
+    btnNext.style.background = '#10b981'; // Vert pour la fin
+    btnNext.style.color = '#fff';
+  } else {
+    btnNext.textContent = 'Suivant';
+    btnNext.style.background = ''; // Remet la couleur par défaut
+    btnNext.style.color = '';
+  }
+}
+
+btnNext.addEventListener('click', () => {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateWizard();
+  } else {
+    // C'est ici qu'on enregistrera dans Supabase plus tard !
+    alert("Formulaire terminé ! (L'enregistrement Supabase viendra ensuite)");
+  }
+});
+
+btnPrev.addEventListener('click', () => {
+  if (currentStep > 1) {
+    currentStep--;
+    updateWizard();
+  }
+});

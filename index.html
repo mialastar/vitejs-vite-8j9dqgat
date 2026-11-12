@@ -70,20 +70,118 @@
       <!-- ÉCRAN 3 : APPLICATION -->
       <div id="screen-app" class="screen app-layout">
         <div class="app-content">
-          <div class="season-banner">
-            <h2>Automne</h2>
-            <p>Lune des Feuilles Mortes</p>
-          </div>
-          <div class="feed-container">
-            <div class="feed-card">
-              <div class="feed-header">
-                <span class="author">Moonlight Studio</span>
-                <span class="date">Aujourd'hui</span>
+          
+          <!-- VUE ACCUEIL -->
+          <div id="view-accueil" class="view active">
+            <div class="season-banner">
+              <h2>Automne</h2>
+              <p>Lune des Feuilles Mortes</p>
+            </div>
+            <div class="feed-container">
+              <div class="feed-card">
+                <div class="feed-header">
+                  <span class="author">Moonlight Studio</span>
+                  <span class="date">Aujourd'hui</span>
+                </div>
+                <h3>Bienvenue sur les Terres du Crépuscule !</h3>
+                <p>Le site officiel du RP est enfin ouvert. Créez vos fiches OC et rejoignez l'aventure.</p>
               </div>
-              <h3>Bienvenue sur les Terres du Crépuscule !</h3>
-              <p>Le site officiel du RP est enfin ouvert. Créez vos fiches OC et rejoignez l'aventure.</p>
             </div>
           </div>
+
+          <!-- VUE FICHES OC -->
+          <div id="view-fiches" class="view">
+            
+            <!-- Menu des 3 sous-onglets -->
+            <div class="sub-tabs">
+              <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
+              <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
+              <button type="button" class="sub-tab-btn" data-sub="all">Voir les fiches</button>
+            </div>
+
+            <!-- SOUS-VUE : CRÉER UNE FICHE (Wizard) -->
+            <div id="subview-create" class="subview active">
+              
+              <!-- Barre de progression -->
+              <div class="progress-container">
+                <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
+                <div class="progress-bar-bg">
+                  <div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div>
+                </div>
+              </div>
+
+              <!-- Formulaire -->
+              <div class="wizard-form">
+                
+                <!-- ÉTAPE 1 : IDENTITÉ -->
+                <div class="wizard-step active" id="step-1">
+                  <h3>1. Identité</h3>
+                  <label>Nom du personnage</label>
+                  <input type="text" placeholder="Ex: Étoile de Feu" />
+                  
+                  <label>Clan / Tribu</label>
+                  <select>
+                    <option>Clan de la Forêt</option>
+                    <option>Clan de la Pluie</option>
+                    <option>Clan du Zénith</option>
+                    <option>Clan de la Brume</option>
+                    <option disabled>Clan de la Lune (Coming Soon)</option>
+                    <option disabled>Forêt des Ronces (Coming Soon)</option>
+                    <option>Solitaire / Chat de l'Extérieur</option>
+                    <option>Domestique</option>
+                  </select>
+
+                  <label>Rang</label>
+                  <select>
+                    <option>Guerrier</option>
+                    <option>Apprenti</option>
+                    <option>Chef</option>
+                    <option>Lieutenant</option>
+                    <option>Guérisseur</option>
+                    <option>Ancien</option>
+                  </select>
+                </div>
+
+                <!-- ÉTAPE 2 : APPARENCE (Exemple de structure) -->
+                <div class="wizard-step" id="step-2">
+                  <h3>2. Apparence</h3>
+                  <label>Couleur du pelage</label>
+                  <input type="text" placeholder="Ex: Roux et blanc" />
+                  <label>Couleur des yeux</label>
+                  <input type="text" placeholder="Ex: Ambre" />
+                </div>
+
+                <!-- (Les étapes 3 à 9 seront ajoutées ici) -->
+                <div class="wizard-step" id="step-3"><h3>3. Caractère</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-4"><h3>4. Histoire</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-5"><h3>5. Compétences</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-6"><h3>6. Objectifs</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-7"><h3>7. Faiblesses</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-8"><h3>8. Image</h3><p>À venir...</p></div>
+                <div class="wizard-step" id="step-9"><h3>9. Stats</h3><p>À venir...</p></div>
+
+              </div>
+
+              <!-- Boutons Précédent / Suivant -->
+              <div class="wizard-buttons">
+                <button type="button" id="btn-prev" class="btn-secondary" style="visibility: hidden;">Précédent</button>
+                <button type="button" id="btn-next" class="btn-primary">Suivant</button>
+              </div>
+
+            </div>
+
+            <!-- SOUS-VUE : MES FICHES -->
+            <div id="subview-mine" class="subview">
+              <p style="text-align: center; color: gray; margin-top: 20px;">Tu n'as pas encore de fiche.</p>
+            </div>
+
+            <!-- SOUS-VUE : VOIR LES FICHES -->
+            <div id="subview-all" class="subview">
+              <p style="text-align: center; color: gray; margin-top: 20px;">Aucune fiche validée pour le moment.</p>
+            </div>
+
+          </div>
+
         </div>
 
         <nav class="bottom-nav">
