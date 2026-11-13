@@ -10,9 +10,15 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* Le fond dégradé qui charge INSTANTANÉMENT (plus de latence) */
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  /* Couleur de secours sombre (comme la forêt) pendant le chargement */
+  background-color: #0a0a0a; 
+  
+  /* L'image de la forêt, optimisée pour charger rapidement (w=800) */
+  background-image: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
   background-attachment: fixed;
+  
   color: var(--text-main);
   font-family: var(--font-body);
   overflow: hidden;
@@ -20,9 +26,8 @@ body {
   width: 100vw;
 }
 
-#shader-canvas {
-  display: none;
-}
+#shader-canvas { display: none; }
+.screen, .app-layout, #screen-app.active, .app-content { background: transparent !important; }
 
 #app { 
   position: relative; 
