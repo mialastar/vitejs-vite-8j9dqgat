@@ -10,8 +10,10 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* Le fameux dégradé Crépuscule qui ne bug jamais */
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  /* L'image de forêt avec un voile sombre pour que le texte soit lisible */
+  background-image: linear-gradient(rgba(5, 5, 10, 0.7), rgba(5, 5, 10, 0.9)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
   background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-body);
