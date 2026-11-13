@@ -1,6 +1,7 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
+// ⚠️ TES CLÉS SUPABASE
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
@@ -8,6 +9,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let editingFicheId = null; 
 let currentEditingImage = ""; 
+let currentRelationFicheId = null;
 
 // --- GESTION DES ÉCRANS ---
 const screenIntro = document.getElementById('screen-intro');
@@ -103,7 +105,7 @@ subTabBtns.forEach(btn => {
   });
 });
 
-// --- WIZARD ---
+// --- WIZARD (CRÉATION/MODIFICATION FICHE) ---
 let currentStep = 1;
 const totalSteps = 9;
 const btnPrev = document.getElementById('btn-prev');
@@ -221,7 +223,7 @@ btnNext.addEventListener('click', async () => {
   }
 });
 
-// --- LOGIQUE DES STATS ---
+// --- STATS LOGIC ---
 const sliders = document.querySelectorAll('.stat-slider');
 const pointsLeftDisplay = document.getElementById('points-left');
 const maxPoints = 20;
@@ -245,7 +247,7 @@ sliders.forEach(s => {
 });
 updateStats();
 
-// --- APERÇU DE L'IMAGE ---
+// --- PREVIEW IMAGE ---
 document.getElementById('image-upload').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -288,9 +290,9 @@ async function loadMyFiches() {
 }
 document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
 
-// --- FONCTIONS GLOBALES MODIFIER ET SUPPRIMER ---
+// --- EDIT & DELETE FICHE ---
 window.editFiche = async function(id) {
-  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente' et ne sera plus visible sur le site jusqu'à ce qu'un Admin la revalide. Continuer ?");
+  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente'. Continuer ?");
   if (!confirmModif) return;
 
   const { data: fiche, error } = await supabase.from('fiches_oc').select('*').eq('id', id).single();
@@ -387,9 +389,10 @@ document.getElementById('search-fiches').addEventListener('input', (e) => {
 });
 document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);
 
-// --- PAGE DE DÉTAIL ---
+// --- PAGE DÉTAIL FICHE ---
 function openFicheDetail(fiche) {
-  currentRelationFicheId = fiche.id; 
+  currentRelationFicheId = fiche.id; // Pour le bouton "Demander relation"
+  
   document.getElementById('view-fiches').classList.remove('active');
   document.getElementById('view-fiche-detail').classList.add('active');
   window.scrollTo(0, 0);
@@ -474,7 +477,7 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('subview-all').classList.add('active');
 });
 
-// --- LOGIQUE DU PROFIL ---
+// --- LOGIQUE PROFIL ---
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -546,7 +549,7 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 });
 document.getElementById('btn-admin-panel').style.display = 'block';
 
-// --- INITIALISATION DU ZOOM (PANZOOM) ---
+// --- PANZOOM CARTE ---
 setTimeout(() => {
   const mapContent = document.getElementById('map-content');
   if (mapContent && typeof Panzoom !== 'undefined') {
@@ -557,9 +560,8 @@ setTimeout(() => {
   }
 }, 500);
 
-// --- LOGIQUE DU SUPPORT (TICKETS DYNAMIQUES) ---
+// --- SUPPORT (TICKETS) ---
 let currentTicketType = "";
-
 document.getElementById('btn-floating-support').addEventListener('click', () => {
   document.getElementById('support-modal').classList.add('active');
   document.getElementById('support-menu-view').style.display = 'block';
@@ -575,7 +577,6 @@ document.getElementById('btn-back-support').addEventListener('click', () => {
   document.getElementById('support-form-view').style.display = 'none';
 });
 
-// Injecter le bon formulaire selon le bouton cliqué
 window.openSupportForm = function(type) {
   currentTicketType = type;
   document.getElementById('support-menu-view').style.display = 'none';
@@ -583,158 +584,104 @@ window.openSupportForm = function(type) {
   
   const formFields = document.getElementById('dynamic-form-fields');
   const formTitle = document.getElementById('support-form-title');
-  
   let html = "";
 
   if (type === 'faction') {
-    formTitle.textContent = "Créer une Faction (Clan / Tribu / Groupe)";
-    html = `
-      <div class="form-group"><label>Nom de la Faction</label><input type="text" id="t-faction-nom" required /></div>
-      <div class="form-group">
-        <label>Type de Faction</label>
-        <select id="t-faction-type">
-          <option>Clan</option><option>Tribu</option><option>Groupe de solitaires</option><option>Domestiques</option><option>Autre</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Territoire souhaité</label><input type="text" id="t-faction-territoire" placeholder="Ex: Près de la rivière au sud..." /></div>
-      <div class="form-group"><label>Membres fondateurs (pseudos Discord)</label><input type="text" id="t-faction-membres" /></div>
-      <div class="form-group"><label>Description / Lore</label><textarea id="t-faction-lore" placeholder="But, règles, histoire du groupe..."></textarea></div>
-    `;
+    formTitle.textContent = "Créer une Faction";
+    html = `<div class="form-group"><label>Nom de la Faction</label><input type="text" id="t-faction-nom" required /></div>
+            <div class="form-group"><label>Type</label><select id="t-faction-type"><option>Clan</option><option>Tribu</option><option>Groupe</option><option>Autre</option></select></div>
+            <div class="form-group"><label>Territoire souhaité</label><input type="text" id="t-faction-territoire" /></div>
+            <div class="form-group"><label>Membres</label><input type="text" id="t-faction-membres" /></div>
+            <div class="form-group"><label>Description / Lore</label><textarea id="t-faction-lore"></textarea></div>`;
   } 
   else if (type === 'famille') {
     formTitle.textContent = "Créer une Famille";
-    html = `
-      <div class="form-group"><label>Nom de la famille</label><input type="text" id="t-famille-nom" required /></div>
-      <div class="form-group"><label>Membres actuels (pseudos)</label><input type="text" id="t-famille-membres" /></div>
-      <div class="form-group"><label>Lien avec un clan</label><input type="text" id="t-famille-clan" placeholder="Ex: Clan de la Forêt, ou Neutre..." /></div>
-      <div class="form-group"><label>Origines / Histoire</label><textarea id="t-famille-histoire"></textarea></div>
-    `;
+    html = `<div class="form-group"><label>Nom</label><input type="text" id="t-famille-nom" required /></div>
+            <div class="form-group"><label>Membres</label><input type="text" id="t-famille-membres" /></div>
+            <div class="form-group"><label>Lien Clan</label><input type="text" id="t-famille-clan" /></div>
+            <div class="form-group"><label>Histoire</label><textarea id="t-famille-histoire"></textarea></div>`;
   }
   else if (type === 'bug') {
     formTitle.textContent = "Signaler un Bug";
-    html = `
-      <div class="form-group"><label>Titre du problème</label><input type="text" id="t-bug-titre" required /></div>
-      <div class="form-group">
-        <label>Sur quel appareil ?</label>
-        <select id="t-bug-appareil"><option>Mobile</option><option>PC</option><option>Tablette</option></select>
-      </div>
-      <div class="form-group"><label>Description détaillée</label><textarea id="t-bug-desc" placeholder="Que faisais-tu quand c'est arrivé ?"></textarea></div>
-    `;
+    html = `<div class="form-group"><label>Titre</label><input type="text" id="t-bug-titre" required /></div>
+            <div class="form-group"><label>Appareil</label><select id="t-bug-appareil"><option>Mobile</option><option>PC</option></select></div>
+            <div class="form-group"><label>Description</label><textarea id="t-bug-desc"></textarea></div>`;
   }
   else if (type === 'suggestion') {
     formTitle.textContent = "Faire une Suggestion";
-    html = `
-      <div class="form-group"><label>Titre de la suggestion</label><input type="text" id="t-sugg-titre" required /></div>
-      <div class="form-group">
-        <label>Catégorie</label>
-        <select id="t-sugg-cat"><option>Site Web</option><option>Règles du RP</option><option>Événement</option><option>Autre</option></select>
-      </div>
-      <div class="form-group"><label>Description de l'idée</label><textarea id="t-sugg-desc"></textarea></div>
-    `;
+    html = `<div class="form-group"><label>Titre</label><input type="text" id="t-sugg-titre" required /></div>
+            <div class="form-group"><label>Catégorie</label><select id="t-sugg-cat"><option>Site</option><option>RP</option><option>Autre</option></select></div>
+            <div class="form-group"><label>Idée</label><textarea id="t-sugg-desc"></textarea></div>`;
   }
   else if (type === 'joueur') {
     formTitle.textContent = "Signaler un Joueur";
-    html = `
-      <div class="form-group"><label>Pseudo Discord du joueur signalé</label><input type="text" id="t-joueur-pseudo" required /></div>
-      <div class="form-group">
-        <label>Motif du signalement</label>
-        <select id="t-joueur-motif"><option>Non-respect du Code</option><option>Harcèlement</option><option>Triche</option><option>HRP (Hors-RP)</option><option>Autre</option></select>
-      </div>
-      <div class="form-group"><label>Description (Que s'est-il passé ?)</label><textarea id="t-joueur-desc"></textarea></div>
-    `;
+    html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-joueur-pseudo" required /></div>
+            <div class="form-group"><label>Motif</label><select id="t-joueur-motif"><option>HRP</option><option>Harcèlement</option><option>Autre</option></select></div>
+            <div class="form-group"><label>Description</label><textarea id="t-joueur-desc"></textarea></div>`;
   }
   else if (type === 'staff') {
     formTitle.textContent = "Rejoindre le Staff";
-    html = `
-      <div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-staff-pseudo" required /></div>
-      <div class="form-group"><label>Prénom / Âge</label><input type="text" id="t-staff-age" required /></div>
-      <div class="form-group">
-        <label>Poste souhaité</label>
-        <select id="t-staff-poste"><option>Modérateur</option><option>Maître du Jeu (MJ)</option><option>Graphiste</option><option>Développeur</option><option>Autre</option></select>
-      </div>
-      <div class="form-group"><label>Motivations & Expériences</label><textarea id="t-staff-motiv"></textarea></div>
-      <div class="form-group"><label>Disponibilités</label><input type="text" id="t-staff-dispo" placeholder="Ex: 2h par jour le soir" /></div>
-    `;
+    html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-staff-pseudo" required /></div>
+            <div class="form-group"><label>Prénom / Âge</label><input type="text" id="t-staff-age" required /></div>
+            <div class="form-group"><label>Poste</label><select id="t-staff-poste"><option>Modérateur</option><option>MJ</option><option>Graphiste</option></select></div>
+            <div class="form-group"><label>Motivations</label><textarea id="t-staff-motiv"></textarea></div>
+            <div class="form-group"><label>Disponibilités</label><input type="text" id="t-staff-dispo" /></div>`;
   }
-
   formFields.innerHTML = html;
 };
 
-// Envoyer le ticket à Supabase (en fusionnant tous les champs)
 document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
-  let sujet = "";
-  let description = "";
+  let sujet = "", description = "";
+  try {
+    if (currentTicketType === 'faction') {
+      sujet = "Faction: " + document.getElementById('t-faction-nom').value;
+      description = `Type: ${document.getElementById('t-faction-type').value}\nTerritoire: ${document.getElementById('t-faction-territoire').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\nLore:\n${document.getElementById('t-faction-lore').value}`;
+    } else if (currentTicketType === 'famille') {
+      sujet = "Famille: " + document.getElementById('t-famille-nom').value;
+      description = `Membres: ${document.getElementById('t-famille-membres').value}\nLien: ${document.getElementById('t-famille-clan').value}\n\nHistoire:\n${document.getElementById('t-famille-histoire').value}`;
+    } else if (currentTicketType === 'bug') {
+      sujet = "Bug: " + document.getElementById('t-bug-titre').value;
+      description = `Appareil: ${document.getElementById('t-bug-appareil').value}\n\n${document.getElementById('t-bug-desc').value}`;
+    } else if (currentTicketType === 'suggestion') {
+      sujet = "Suggestion: " + document.getElementById('t-sugg-titre').value;
+      description = `Catégorie: ${document.getElementById('t-sugg-cat').value}\n\n${document.getElementById('t-sugg-desc').value}`;
+    } else if (currentTicketType === 'joueur') {
+      sujet = "Signalement: " + document.getElementById('t-joueur-pseudo').value;
+      description = `Motif: ${document.getElementById('t-joueur-motif').value}\n\n${document.getElementById('t-joueur-desc').value}`;
+    } else if (currentTicketType === 'staff') {
+      sujet = "Candidature: " + document.getElementById('t-staff-pseudo').value;
+      description = `Age: ${document.getElementById('t-staff-age').value}\nPoste: ${document.getElementById('t-staff-poste').value}\nDispo: ${document.getElementById('t-staff-dispo').value}\n\n${document.getElementById('t-staff-motiv').value}`;
+    }
+  } catch(e) { alert("Merci de remplir les champs."); return; }
 
-  // On récupère les données selon le type de ticket
-  if (currentTicketType === 'faction') {
-    sujet = "Création de Faction: " + document.getElementById('t-faction-nom').value;
-    description = `Type: ${document.getElementById('t-faction-type').value}\nTerritoire: ${document.getElementById('t-faction-territoire').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\nLore:\n${document.getElementById('t-faction-lore').value}`;
-  } 
-  else if (currentTicketType === 'famille') {
-    sujet = "Création de Famille: " + document.getElementById('t-famille-nom').value;
-    description = `Membres: ${document.getElementById('t-famille-membres').value}\nLien Clan: ${document.getElementById('t-famille-clan').value}\n\nOrigines:\n${document.getElementById('t-famille-histoire').value}`;
-  }
-  else if (currentTicketType === 'bug') {
-    sujet = "Bug: " + document.getElementById('t-bug-titre').value;
-    description = `Appareil: ${document.getElementById('t-bug-appareil').value}\n\nDescription:\n${document.getElementById('t-bug-desc').value}`;
-  }
-  else if (currentTicketType === 'suggestion') {
-    sujet = "Suggestion: " + document.getElementById('t-sugg-titre').value;
-    description = `Catégorie: ${document.getElementById('t-sugg-cat').value}\n\nIdée:\n${document.getElementById('t-sugg-desc').value}`;
-  }
-  else if (currentTicketType === 'joueur') {
-    sujet = "Signalement Joueur: " + document.getElementById('t-joueur-pseudo').value;
-    description = `Motif: ${document.getElementById('t-joueur-motif').value}\n\nDescription:\n${document.getElementById('t-joueur-desc').value}`;
-  }
-  else if (currentTicketType === 'staff') {
-    sujet = "Candidature Staff: " + document.getElementById('t-staff-pseudo').value;
-    description = `Prénom/Age: ${document.getElementById('t-staff-age').value}\nPoste: ${document.getElementById('t-staff-poste').value}\nDispo: ${document.getElementById('t-staff-dispo').value}\n\nMotivations:\n${document.getElementById('t-staff-motiv').value}`;
-  }
-
-  // Vérification basique
-  if (!sujet || sujet.includes('undefined') || sujet.trim() === "" || sujet.endsWith(':')) {
-    alert("Merci de remplir les champs obligatoires (notamment le nom/titre)."); return;
-  }
+  if (!sujet || sujet.endsWith(':')) { alert("Merci de remplir le titre/nom."); return; }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return alert("Tu dois être connecté.");
 
-  // Envoi à la base de données
   const { error } = await supabase.from('tickets').insert({
     user_id: user.id, type_ticket: currentTicketType, sujet: sujet, description: description
   });
 
   if (error) {
-    alert("Erreur lors de l'envoi : " + error.message);
+    alert("Erreur : " + error.message);
   } else {
     document.getElementById('support-modal').classList.remove('active');
-    
-    // Popup de succès
     const toast = document.getElementById('toast-success');
     toast.querySelector('h4').textContent = "Ticket envoyé !";
-    toast.querySelector('p').textContent = "Le staff va traiter ta demande dès que possible.";
+    toast.querySelector('p').textContent = "Le staff va traiter ta demande.";
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('show'), 50);
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
   }
 });
 
-// --- LOGIQUE DES PARAMÈTRES ---
+// --- PARAMÈTRES ---
 const settingsModal = document.getElementById('settings-modal');
+document.getElementById('btn-open-settings').addEventListener('click', () => settingsModal.classList.add('active'));
+document.getElementById('btn-close-settings').addEventListener('click', () => settingsModal.classList.remove('active'));
+settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('active'); });
 
-document.getElementById('btn-open-settings').addEventListener('click', () => {
-  settingsModal.classList.add('active');
-});
-
-document.getElementById('btn-close-settings').addEventListener('click', () => {
-  settingsModal.classList.remove('active');
-});
-
-settingsModal.addEventListener('click', (e) => {
-  if (e.target === settingsModal) settingsModal.classList.remove('active');
-});
-
-// --- LOGIQUE POUR RELIRE LES CRÉDITS DEPUIS LES PARAMÈTRES ---
 document.getElementById('btn-open-credits').addEventListener('click', () => {
   settingsModal.classList.remove('active');
   screenApp.classList.remove('active');
@@ -742,84 +689,63 @@ document.getElementById('btn-open-credits').addEventListener('click', () => {
   
   const btnContinue = document.getElementById('btn-continue-credits');
   btnContinue.textContent = "Retour à l'application";
-  
   btnContinue.onclick = () => {
     screenCredits.classList.remove('active');
     screenApp.classList.add('active');
     btnContinue.textContent = "Entrer dans les Terres du Crépuscule";
     btnContinue.onclick = null; 
-    window.location.reload(); // Recharge pour réinitialiser le bouton
+    window.location.reload(); 
   };
 });
 
-// --- LOGIQUE DES RELATIONS ---
-let currentRelationFicheId = null; // Sert à savoir de quelle fiche on part
-
-// Quand on clique sur le bouton "Demander" dans l'onglet Relations
+// --- RELATIONS ---
 document.getElementById('btn-request-relation').addEventListener('click', async () => {
-  // currentRelationFicheId est récupéré dans la fonction openFicheDetail
   if(!currentRelationFicheId) return;
-
   document.getElementById('relation-modal').classList.add('active');
   document.getElementById('rel-message').value = '';
-
+  
   const selectCible = document.getElementById('rel-cible');
   selectCible.innerHTML = '<option value="">Chargement...</option>';
-
-  // On va chercher toutes les fiches validées SAUF la fiche actuelle
+  
   const { data: fiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée').neq('id', currentRelationFicheId);
   
   selectCible.innerHTML = '<option value="">Choisir un personnage...</option>';
   if (fiches && fiches.length > 0) {
-    fiches.forEach(f => {
-      selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`;
-    });
+    fiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
   } else {
-    selectCible.innerHTML = '<option value="">Aucun autre personnage disponible</option>';
+    selectCible.innerHTML = '<option value="">Aucun autre personnage dispo</option>';
   }
 });
 
-// Fermer la modale
 document.getElementById('btn-close-relation').addEventListener('click', () => {
   document.getElementById('relation-modal').classList.remove('active');
 });
 
-// Envoyer la demande (crée un ticket)
 document.getElementById('btn-submit-relation').addEventListener('click', async () => {
   const type = document.getElementById('rel-type').value;
   const cibleId = document.getElementById('rel-cible').value;
   const message = document.getElementById('rel-message').value;
 
-  if (!cibleId || !message) {
-    alert("Merci de choisir un personnage et d'écrire un petit message.");
-    return;
-  }
+  if (!cibleId || !message) { alert("Merci de choisir un personnage et d'écrire un message."); return; }
 
   const { data: { user } } = await supabase.auth.getUser();
-
-  // On récupère les noms pour faire un joli ticket
   const { data: ficheSource } = await supabase.from('fiches_oc').select('nom').eq('id', currentRelationFicheId).single();
   const { data: ficheCible } = await supabase.from('fiches_oc').select('nom').eq('id', cibleId).single();
 
   const sujet = `Relation: ${ficheSource.nom} & ${ficheCible.nom}`;
   const description = `Type de lien : ${type}\n\nMessage : ${message}`;
 
-  // On crée le ticket pour le staff
   const { error } = await supabase.from('tickets').insert({
-    user_id: user.id, 
-    type_ticket: 'relation', 
-    sujet: sujet, 
-    description: description
+    user_id: user.id, type_ticket: 'relation', sujet: sujet, description: description
   });
 
   if (error) {
-    alert("Erreur lors de l'envoi : " + error.message);
+    alert("Erreur : " + error.message);
   } else {
     document.getElementById('relation-modal').classList.remove('active');
-    
     const toast = document.getElementById('toast-success');
     toast.querySelector('h4').textContent = "Demande envoyée !";
-    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur pour valider cette relation.";
+    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur.";
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('show'), 50);
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
