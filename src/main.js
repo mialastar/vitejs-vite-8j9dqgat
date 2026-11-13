@@ -658,11 +658,11 @@ async function openRpPanel() {
 
   const { data: { user } } = await supabase.auth.getUser();
   
-  // 1. On trouve le clan du Chef (grâce à sa fiche OC validée)
+  // 1. On trouve le clan du Chef
   const { data: myFiche } = await supabase.from('fiches_oc').select('clan').eq('user_id', user.id).eq('statut', 'Validée').single();
   
   if (!myFiche) {
-    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Impossible de trouver ton clan.</p>';
+    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Impossible de trouver ton clan (as-tu une fiche validée ?).</p>';
     return;
   }
 
@@ -674,17 +674,20 @@ async function openRpPanel() {
     .eq('statut', 'Validée');
 
   if (error || membres.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun membre trouvé.</p>';
+    container.innerHTML = `<p style="color: gray; text-align: center;">Aucun membre validé dans le ${myFiche.clan} pour le moment.</p>`;
     return;
   }
 
   container.innerHTML = '';
   membres.forEach(membre => {
+    // On ne met pas les boutons d'action sur le Chef lui-même
+    const isSelf = membre.user_id === user.id;
+    
     const card = document.createElement('div');
     card.className = 'fiche-card';
     card.style.padding = '15px';
     card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 10px; align-items: center;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('${membre.image_url || 'https://cdn.discordapp.com/embed/avatars/0.png'}'); background-size: cover; background-position: center; border: 1px solid var(--accent);"></div>
           <div>
@@ -692,12 +695,38 @@ async function openRpPanel() {
             <span style="font-size: 0.8rem; color: gray;">Rang : ${membre.rang}</span>
           </div>
         </div>
+        ${!isSelf ? `
         <div style="display: flex; gap: 5px;">
-          <button class="btn-action btn-modifier" style="font-size: 0.7rem; padding: 5px 10px;" onclick="alert('Promotion à venir')">Promouvoir</button>
-          <button class="btn-action btn-supprimer" style="font-size: 0.7rem; padding: 5px 10px;" onclick="alert('Exil à venir')">Exiler</button>
-        </div>
+          <button class="btn-action btn-modifier" style="font-size: 0.7rem; padding: 5px 10px;" onclick="promoteMember('${membre.id}', '${membre.rang}')">Promouvoir</button>
+          <button class="btn-action btn-supprimer" style="font-size: 0.7rem; padding: 5px 10px;" onclick="exileMember('${membre.id}')">Exiler</button>
+        </div>` : '<span style="font-size: 0.8rem; color: var(--accent); font-weight: bold;">(Vous)</span>'}
       </div>
     `;
     container.appendChild(card);
   });
 }
+
+// --- FONCTIONS DES BOUTONS DU PANEL ---
+window.promoteMember = async function(ficheId, currentRang) {
+  const newRang = prompt(`Rang actuel : ${currentRang}\n\nQuel est le nouveau rang de ce membre ? (ex: Guerrier, Lieutenant, Guérisseur...)`, currentRang);
+  
+  if (newRang && newRang !== currentRang) {
+    const { error } = await supabase.from('fiches_oc').update({ rang: newRang }).eq('id', ficheId);
+    if (error) alert("Erreur : " + error.message);
+    else {
+      alert("Rang mis à jour !");
+      openRpPanel(); // On rafraîchit la liste
+    }
+  }
+};
+
+window.exileMember = async function(ficheId) {
+  if (confirm("⚠️ Es-tu sûr de vouloir exiler ce membre ? Il perdra son appartenance au clan.")) {
+    const { error } = await supabase.from('fiches_oc').update({ clan: 'Solitaire', rang: 'Solitaire' }).eq('id', ficheId);
+    if (error) alert("Erreur : " + error.message);
+    else {
+      alert("Membre exilé !");
+      openRpPanel(); // On rafraîchit la liste
+    }
+  }
+};
