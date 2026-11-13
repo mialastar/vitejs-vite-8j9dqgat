@@ -741,22 +741,69 @@ document.getElementById('btn-open-credits').addEventListener('click', () => {
   };
 });
 
-// --- RELATIONS ---
-document.getElementById('btn-request-relation').addEventListener('click', async () => {
-  if(!currentRelationFicheId) return;
+// --- LOGIQUE DES RELATIONS (NOUVEL ONGLET) ---
+
+// On charge les relations du joueur quand il clique sur l'onglet
+document.querySelector('[data-sub="relations"]').addEventListener('click', loadMyRelations);
+
+async function loadMyRelations() {
+  const container = document.getElementById('my-relations-container');
+  container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // On va chercher les tickets de type "relation" envoyés par ce joueur
+  const { data: tickets, error } = await supabase
+    .from('tickets')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('type_ticket', 'relation')
+    .order('date_creation', { ascending: false });
+
+  if (error || tickets.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune demande de relation pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  tickets.forEach(ticket => {
+    // On vérifie si c'est validé ou en attente dans le texte ou via une logique future
+    const card = document.createElement('div');
+    card.className = 'fiche-card'; // On réutilise le style des cartes
+    card.innerHTML = `
+      <div class="fiche-card-header">
+        <h4>${ticket.sujet}</h4>
+        <span class="status-badge status-attente">En attente</span>
+      </div>
+      <p style="font-size: 0.9rem; color: #cbd5e1;">${ticket.description.split('\n')[0]}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Ouvrir la modale de demande
+document.getElementById('btn-new-relation').addEventListener('click', async () => {
   document.getElementById('relation-modal').classList.add('active');
   document.getElementById('rel-message').value = '';
   
-  const selectCible = document.getElementById('rel-cible');
-  selectCible.innerHTML = '<option value="">Chargement...</option>';
+  const { data: { user } } = await supabase.auth.getUser();
   
-  const { data: fiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée').neq('id', currentRelationFicheId);
-  
-  selectCible.innerHTML = '<option value="">Choisir un personnage...</option>';
-  if (fiches && fiches.length > 0) {
-    fiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
+  // 1. Charger MES fiches validées (Source)
+  const { data: mesFiches } = await supabase.from('fiches_oc').select('id, nom').eq('user_id', user.id).eq('statut', 'Validée');
+  const selectSource = document.getElementById('rel-source');
+  selectSource.innerHTML = '<option value="">Choisir ton personnage...</option>';
+  if (mesFiches && mesFiches.length > 0) {
+    mesFiches.forEach(f => selectSource.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
   } else {
-    selectCible.innerHTML = '<option value="">Aucun autre personnage dispo</option>';
+    selectSource.innerHTML = '<option value="">Aucune de tes fiches n\'est validée</option>';
+  }
+
+  // 2. Charger TOUTES les autres fiches validées (Cible)
+  const { data: autresFiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée');
+  const selectCible = document.getElementById('rel-cible');
+  selectCible.innerHTML = '<option value="">Choisir un personnage...</option>';
+  if (autresFiches && autresFiches.length > 0) {
+    autresFiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
   }
 });
 
@@ -764,33 +811,53 @@ document.getElementById('btn-close-relation').addEventListener('click', () => {
   document.getElementById('relation-modal').classList.remove('active');
 });
 
+// Envoyer la demande
 document.getElementById('btn-submit-relation').addEventListener('click', async () => {
-  const type = document.getElementById('rel-type').value;
+  const sourceId = document.getElementById('rel-source').value;
   const cibleId = document.getElementById('rel-cible').value;
+  const type = document.getElementById('rel-type').value;
   const message = document.getElementById('rel-message').value;
 
-  if (!cibleId || !message) { alert("Merci de choisir un personnage et d'écrire un message."); return; }
+  if (!sourceId || !cibleId || !message) { 
+    alert("Merci de choisir tes personnages et d'écrire un message."); 
+    return; 
+  }
+  if (sourceId === cibleId) {
+    alert("Tu ne peux pas créer une relation entre un personnage et lui-même !");
+    return;
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: ficheSource } = await supabase.from('fiches_oc').select('nom').eq('id', currentRelationFicheId).single();
+  
+  // Récupérer les noms pour le ticket
+  const { data: ficheSource } = await supabase.from('fiches_oc').select('nom').eq('id', sourceId).single();
   const { data: ficheCible } = await supabase.from('fiches_oc').select('nom').eq('id', cibleId).single();
 
   const sujet = `Relation: ${ficheSource.nom} & ${ficheCible.nom}`;
   const description = `Type de lien : ${type}\n\nMessage : ${message}`;
 
+  // On enregistre dans les tickets
   const { error } = await supabase.from('tickets').insert({
-    user_id: user.id, type_ticket: 'relation', sujet: sujet, description: description
+    user_id: user.id, 
+    type_ticket: 'relation', 
+    sujet: sujet, 
+    description: description
   });
 
   if (error) {
     alert("Erreur : " + error.message);
   } else {
     document.getElementById('relation-modal').classList.remove('active');
+    
+    // Popup succès
     const toast = document.getElementById('toast-success');
     toast.querySelector('h4').textContent = "Demande envoyée !";
-    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur.";
+    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur pour valider.";
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('show'), 50);
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+
+    // Recharger la liste
+    loadMyRelations();
   }
 });

@@ -98,9 +98,10 @@
 
             <div id="monde-lore" class="monde-content active">
               <div class="sub-tabs">
-                <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
-                <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
-                <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
+                <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
+                <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
+                <button type="button" class="sub-tab-btn" data-sub="all">Voir</button>
+                <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
               </div>
               <div id="lore-histoire" class="lore-content active">
                 <h3>La Création des Terres</h3>
@@ -245,6 +246,15 @@
                 <button type="button" class="btn-filter" onclick="alert('Bientôt dispo !')">⚙️</button>
               </div>
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
+            </div>
+          </div>
+          <div id="subview-relations" class="subview">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
+              <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-new-relation">➕ Demander</button>
+            </div>
+            <div id="my-relations-container">
+              <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Chargement de tes relations...</p>
             </div>
           </div>
 
@@ -410,40 +420,47 @@
             </div>
           </div>
 
-          <!-- MODAL DEMANDE DE RELATION -->
-          <div id="relation-modal" class="support-modal-overlay">
-            <div class="support-modal" style="max-width: 450px;">
-              <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
-              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
-              
-              <div class="form-group">
-                <label>Type de relation</label>
-                <select id="rel-type">
-                  <option>Famille</option>
-                  <option>Compagnon</option>
-                  <option>Ami</option>
-                  <option>Rival</option>
-                  <option>Ennemi</option>
-                  <option>Mentor</option>
-                  <option>Apprenti</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Personnage ciblé</label>
-                <select id="rel-cible">
-                  <option value="">Chargement des personnages...</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Message pour le staff (et le joueur ciblé)</label>
-                <textarea id="rel-message" rows="3" placeholder="Explique brièvement l'histoire de cette relation..."></textarea>
-              </div>
-
-              <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
-            </div>
-          </div>
+                    <!-- MODAL DEMANDE DE RELATION -->
+                    <div id="relation-modal" class="support-modal-overlay">
+                      <div class="support-modal" style="max-width: 450px;">
+                        <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
+                        <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
+                        
+                        <div class="form-group">
+                          <label>Ton personnage (qui fait la demande)</label>
+                          <select id="rel-source">
+                            <option value="">Chargement de tes fiches...</option>
+                          </select>
+                        </div>
+          
+                        <div class="form-group">
+                          <label>Personnage ciblé</label>
+                          <select id="rel-cible">
+                            <option value="">Chargement des autres fiches...</option>
+                          </select>
+                        </div>
+          
+                        <div class="form-group">
+                          <label>Type de relation</label>
+                          <select id="rel-type">
+                            <option>Famille</option>
+                            <option>Compagnon</option>
+                            <option>Ami</option>
+                            <option>Rival</option>
+                            <option>Ennemi</option>
+                            <option>Mentor</option>
+                            <option>Apprenti</option>
+                          </select>
+                        </div>
+          
+                        <div class="form-group">
+                          <label>Message pour le staff (et le joueur ciblé)</label>
+                          <textarea id="rel-message" rows="3" placeholder="Explique brièvement l'histoire de cette relation..."></textarea>
+                        </div>
+          
+                        <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
+                      </div>
+                    </div>
 
         </div> <!-- FIN APP-CONTENT -->
 
