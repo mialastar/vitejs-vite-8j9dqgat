@@ -98,10 +98,9 @@
 
             <div id="monde-lore" class="monde-content active">
               <div class="sub-tabs">
-                <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
-                <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
-                <button type="button" class="sub-tab-btn" data-sub="all">Voir</button>
-                <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
+                <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
+                <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
+                <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
               </div>
               <div id="lore-histoire" class="lore-content active">
                 <h3>La Création des Terres</h3>
@@ -119,15 +118,11 @@
               </div>
             </div>
 
-            <!-- CONTENU : CARTE -->
             <div id="monde-carte" class="monde-content">
-              <div class="map-hint" id="map-hint">
-                👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.
-              </div>
+              <div class="map-hint" id="map-hint">👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.</div>
               <div id="map-viewport" class="map-viewport">
                 <div id="map-content" class="map-content">
-                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
-                  
+                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte" />
                   <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
@@ -143,18 +138,20 @@
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
+            <!-- LES 4 ONGLETS -->
             <div class="sub-tabs">
               <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
               <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
-              <button type="button" class="sub-tab-btn" data-sub="all">Voir les fiches</button>
+              <button type="button" class="sub-tab-btn" data-sub="all">Voir</button>
+              <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
             </div>
 
+            <!-- 1. CRÉER -->
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
                 <div class="progress-bar-bg"><div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div></div>
               </div>
-
               <div class="wizard-form">
                 <div class="wizard-step active" id="step-1">
                   <h3>1. Identité</h3>
@@ -188,14 +185,10 @@
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
                   <div class="checkbox-grid">
-                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
@@ -229,17 +222,18 @@
                   <div class="stat-row"><label>Charisme <span id="val-charisme">5</span></label><input type="range" class="stat-slider" id="stat-charisme" min="1" max="10" value="5" /></div>
                 </div>
               </div>
-
               <div class="wizard-buttons">
                 <button type="button" id="btn-prev" class="btn-secondary" style="visibility: hidden;">Précédent</button>
                 <button type="button" id="btn-next" class="btn-primary">Suivant</button>
               </div>
             </div>
 
+            <!-- 2. MES FICHES -->
             <div id="subview-mine" class="subview">
               <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
+            <!-- 3. VOIR LES FICHES -->
             <div id="subview-all" class="subview">
               <div class="search-container">
                 <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
@@ -247,14 +241,16 @@
               </div>
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
-          </div>
-          <div id="subview-relations" class="subview">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-              <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
-              <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-new-relation">➕ Demander</button>
-            </div>
-            <div id="my-relations-container">
-              <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Chargement de tes relations...</p>
+
+            <!-- 4. RELATIONS -->
+            <div id="subview-relations" class="subview">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
+                <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-new-relation">➕ Demander</button>
+              </div>
+              <div id="my-relations-container">
+                <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Chargement de tes relations...</p>
+              </div>
             </div>
           </div>
 
@@ -273,7 +269,6 @@
               <button type="button" class="detail-tab-btn active" data-dtab="histoire">Histoire</button>
               <button type="button" class="detail-tab-btn" data-dtab="perso">Caractère</button>
               <button type="button" class="detail-tab-btn" data-dtab="stats">Stats</button>
-              <button type="button" class="detail-tab-btn" data-dtab="relations">Relations</button>
             </div>
             
             <div class="detail-content">
@@ -282,13 +277,11 @@
                 <h3>Origines</h3><p id="detail-origines">Non renseigné.</p>
                 <h3>Événements marquants</h3><p id="detail-evenements">Non renseigné.</p>
               </div>
-              
               <div id="dtab-perso" class="dtab">
                 <h3>Personnalité</h3><p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p><p><strong>Qualités :</strong> <span id="detail-qualites">Non renseigné</span></p><p><strong>Défauts :</strong> <span id="detail-defauts">Non renseigné</span></p>
                 <h3>Motivations</h3><p><strong>Objectifs court terme :</strong> <span id="detail-obj-court">Non renseigné</span></p><p><strong>Objectifs long terme :</strong> <span id="detail-obj-long">Non renseigné</span></p><p><strong>Rêves :</strong> <span id="detail-reves">Non renseigné</span></p>
                 <h3>Faiblesses</h3><p><strong>Peurs :</strong> <span id="detail-peurs">Non renseigné</span></p><p><strong>Vulnérabilités :</strong> <span id="detail-vulnerabilites">Non renseigné</span></p>
               </div>
-              
               <div id="dtab-stats" class="dtab">
                 <h3>Compétences</h3><div id="detail-competences-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div><p><em id="detail-competences-details">Aucun détail fourni.</em></p>
                 <h3 style="margin-top: 30px;">Statistiques</h3>
@@ -297,16 +290,6 @@
                 <div class="stat-bar-container"><span>Endurance</span><div class="stat-bar-bg"><div id="bar-endurance" class="stat-bar-fill"></div></div><span id="num-endurance">0</span></div>
                 <div class="stat-bar-container"><span>Ruse</span><div class="stat-bar-bg"><div id="bar-ruse" class="stat-bar-fill"></div></div><span id="num-ruse">0</span></div>
                 <div class="stat-bar-container"><span>Charisme</span><div class="stat-bar-bg"><div id="bar-charisme" class="stat-bar-fill"></div></div><span id="num-charisme">0</span></div>
-              </div>
-
-              <div id="dtab-relations" class="dtab">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                  <h3 style="margin: 0;">Relations</h3>
-                  <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-request-relation">➕ Demander</button>
-                </div>
-                <div id="detail-relations-list">
-                  <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Aucune relation validée pour le moment.</p>
-                </div>
               </div>
             </div>
           </div>
@@ -343,11 +326,6 @@
             </div>
 
             <div class="profile-card">
-              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Relations</h3>
-              <p style="color: gray; font-size: 0.9rem;">Système de liens et de familles en cours de création...</p>
-            </div>
-
-            <div class="profile-card">
               <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">Liens utiles</h3>
               <div class="quick-links-grid">
                 <button type="button" class="btn-secondary" onclick="alert('Ouverture du Discord...')">💬 Discord</button>
@@ -372,7 +350,6 @@
           <div id="support-modal" class="support-modal-overlay">
             <div class="support-modal">
               <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
-              
               <div id="support-menu-view">
                 <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
                 <div class="support-grid">
@@ -384,7 +361,6 @@
                   <button type="button" class="support-option" onclick="openSupportForm('joueur')"><span class="icon">⚠️</span><span>Signaler un joueur</span></button>
                 </div>
               </div>
-
               <div id="support-form-view" style="display: none;">
                 <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
                 <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
@@ -399,68 +375,40 @@
             <div class="support-modal" style="max-width: 400px;">
               <button type="button" class="btn-close-support" id="btn-close-settings">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Paramètres</h2>
-              
               <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button type="button" class="btn-secondary" onclick="alert('Le changement de thème arrive bientôt !')" style="justify-content: space-between;">
-                  <span>🎨 Changer de thème</span> <span style="color: gray; font-size: 0.7rem;">(Bientôt)</span>
-                </button>
-                <button type="button" class="btn-secondary" id="btn-open-credits" style="justify-content: flex-start; gap: 10px;">
-                  ⭐ Relire les crédits
-                </button>
-                <button type="button" class="btn-secondary" onclick="window.open('https://discord.gg/TON_LIEN_DISCORD', '_blank')" style="justify-content: flex-start; gap: 10px;">
-                  💬 Rejoindre le Discord
-                </button>
-                <button type="button" class="btn-secondary" onclick="alert('Gestion des notifications bientôt disponible !')" style="justify-content: flex-start; gap: 10px;">
-                  🔔 Gérer mes notifications
-                </button>
-                <button type="button" class="btn-secondary" onclick="document.getElementById('btn-logout').click()" style="justify-content: flex-start; gap: 10px; color: #ef4444; border-color: rgba(239,68,68,0.3);">
-                  🚪 Se déconnecter
-                </button>
+                <button type="button" class="btn-secondary" onclick="alert('Le changement de thème arrive bientôt !')" style="justify-content: space-between;"><span>🎨 Changer de thème</span> <span style="color: gray; font-size: 0.7rem;">(Bientôt)</span></button>
+                <button type="button" class="btn-secondary" id="btn-open-credits" style="justify-content: flex-start; gap: 10px;">⭐ Relire les crédits</button>
+                <button type="button" class="btn-secondary" onclick="window.open('https://discord.gg/TON_LIEN_DISCORD', '_blank')" style="justify-content: flex-start; gap: 10px;">💬 Rejoindre le Discord</button>
+                <button type="button" class="btn-secondary" onclick="alert('Bientôt disponible !')" style="justify-content: flex-start; gap: 10px;">🔔 Gérer mes notifications</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('btn-logout').click()" style="justify-content: flex-start; gap: 10px; color: #ef4444; border-color: rgba(239,68,68,0.3);">🚪 Se déconnecter</button>
               </div>
             </div>
           </div>
 
-                    <!-- MODAL DEMANDE DE RELATION -->
-                    <div id="relation-modal" class="support-modal-overlay">
-                      <div class="support-modal" style="max-width: 450px;">
-                        <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
-                        <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
-                        
-                        <div class="form-group">
-                          <label>Ton personnage (qui fait la demande)</label>
-                          <select id="rel-source">
-                            <option value="">Chargement de tes fiches...</option>
-                          </select>
-                        </div>
-          
-                        <div class="form-group">
-                          <label>Personnage ciblé</label>
-                          <select id="rel-cible">
-                            <option value="">Chargement des autres fiches...</option>
-                          </select>
-                        </div>
-          
-                        <div class="form-group">
-                          <label>Type de relation</label>
-                          <select id="rel-type">
-                            <option>Famille</option>
-                            <option>Compagnon</option>
-                            <option>Ami</option>
-                            <option>Rival</option>
-                            <option>Ennemi</option>
-                            <option>Mentor</option>
-                            <option>Apprenti</option>
-                          </select>
-                        </div>
-          
-                        <div class="form-group">
-                          <label>Message pour le staff (et le joueur ciblé)</label>
-                          <textarea id="rel-message" rows="3" placeholder="Explique brièvement l'histoire de cette relation..."></textarea>
-                        </div>
-          
-                        <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
-                      </div>
-                    </div>
+          <!-- MODAL DEMANDE DE RELATION -->
+          <div id="relation-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 450px;">
+              <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
+              <div class="form-group">
+                <label>Ton personnage (qui fait la demande)</label>
+                <select id="rel-source"><option value="">Chargement...</option></select>
+              </div>
+              <div class="form-group">
+                <label>Personnage ciblé</label>
+                <select id="rel-cible"><option value="">Chargement...</option></select>
+              </div>
+              <div class="form-group">
+                <label>Type de relation</label>
+                <select id="rel-type"><option>Famille</option><option>Compagnon</option><option>Ami</option><option>Rival</option><option>Ennemi</option><option>Mentor</option><option>Apprenti</option></select>
+              </div>
+              <div class="form-group">
+                <label>Message pour le staff</label>
+                <textarea id="rel-message" rows="3" placeholder="Explique brièvement..."></textarea>
+              </div>
+              <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
+            </div>
+          </div>
 
         </div> <!-- FIN APP-CONTENT -->
 
@@ -477,8 +425,8 @@
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
         <div class="toast-text">
-          <h4>Fiche soumise avec succès !</h4>
-          <p>Le staff va l'étudier. La validation peut prendre jusqu'à 48h max.</p>
+          <h4>Succès !</h4>
+          <p>Action réalisée avec succès.</p>
         </div>
       </div>
     </div>

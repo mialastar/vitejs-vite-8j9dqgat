@@ -1,7 +1,6 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ TES CLÉS SUPABASE
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
@@ -9,7 +8,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let editingFicheId = null; 
 let currentEditingImage = ""; 
-let currentRelationFicheId = null;
 
 // --- GESTION DES ÉCRANS ---
 const screenIntro = document.getElementById('screen-intro');
@@ -29,7 +27,6 @@ function switchScreen(current, next) {
 btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
 btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
 
-// --- CONNEXION ---
 btnDiscordLogin.addEventListener('click', async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
@@ -59,7 +56,6 @@ navBtns.forEach(btn => {
     views.forEach(v => v.classList.remove('active'));
     
     const target = e.currentTarget.getAttribute('data-target');
-    
     if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
     if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
     if(target === 'monde') document.getElementById('view-monde').classList.add('active');
@@ -93,7 +89,7 @@ loreTabBtns.forEach(btn => {
   });
 });
 
-// --- ONGLETS FICHES ---
+// --- ONGLETS FICHES (4 Onglets) ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
 subTabBtns.forEach(btn => {
@@ -101,11 +97,18 @@ subTabBtns.forEach(btn => {
     subTabBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     subviews.forEach(v => v.classList.remove('active'));
-    document.getElementById(`subview-${e.currentTarget.getAttribute('data-sub')}`).classList.add('active');
+    
+    const target = e.currentTarget.getAttribute('data-sub');
+    document.getElementById(`subview-${target}`).classList.add('active');
+    
+    // Charger les données en fonction de l'onglet
+    if (target === 'mine') loadMyFiches();
+    if (target === 'all') loadAllFiches();
+    if (target === 'relations') loadMyRelations();
   });
 });
 
-// --- WIZARD (CRÉATION/MODIFICATION FICHE) ---
+// --- WIZARD ---
 let currentStep = 1;
 const totalSteps = 9;
 const btnPrev = document.getElementById('btn-prev');
@@ -121,7 +124,7 @@ function updateWizard() {
   btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
   
   if (currentStep === totalSteps) {
-    btnNext.textContent = editingFicheId ? 'Mettre à jour la fiche' : 'Soumettre la fiche';
+    btnNext.textContent = editingFicheId ? 'Mettre à jour' : 'Soumettre';
     btnNext.style.background = '#10b981';
   } else {
     btnNext.textContent = 'Suivant';
@@ -217,13 +220,11 @@ btnNext.addEventListener('click', async () => {
       updateWizard();
       
       document.querySelector('[data-sub="mine"]').click();
-      loadMyFiches();
-      loadAllFiches(); 
     }
   }
 });
 
-// --- STATS LOGIC ---
+// --- STATS ---
 const sliders = document.querySelectorAll('.stat-slider');
 const pointsLeftDisplay = document.getElementById('points-left');
 const maxPoints = 20;
@@ -247,7 +248,7 @@ sliders.forEach(s => {
 });
 updateStats();
 
-// --- PREVIEW IMAGE ---
+// --- IMAGE ---
 document.getElementById('image-upload').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -261,11 +262,14 @@ document.getElementById('image-upload').addEventListener('change', function(e) {
   }
 });
 
-// --- AFFICHAGE (MES FICHES) ---
+// --- MES FICHES ---
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return; // Sécurité
+
   const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
 
   if (error || fiches.length === 0) {
@@ -288,19 +292,15 @@ async function loadMyFiches() {
     container.appendChild(card);
   });
 }
-document.querySelector('[data-sub="mine"]').addEventListener('click', loadMyFiches);
 
-// --- EDIT & DELETE FICHE ---
 window.editFiche = async function(id) {
-  const confirmModif = confirm("⚠️ ATTENTION : Si tu modifies ta fiche, elle repassera en 'En attente'. Continuer ?");
+  const confirmModif = confirm("⚠️ Si tu modifies ta fiche, elle repassera en 'En attente'. Continuer ?");
   if (!confirmModif) return;
-
   const { data: fiche, error } = await supabase.from('fiches_oc').select('*').eq('id', id).single();
-  if (error || !fiche) return alert("Erreur lors du chargement.");
-
+  if (error || !fiche) return alert("Erreur.");
   editingFicheId = id;
   currentEditingImage = fiche.image_url || "";
-
+  
   document.querySelector('#step-1 input').value = fiche.nom || '';
   document.querySelectorAll('#step-1 select')[0].value = fiche.clan || 'Clan de la Forêt';
   document.querySelectorAll('#step-1 select')[1].value = fiche.rang || 'Guerrier';
@@ -323,9 +323,8 @@ window.editFiche = async function(id) {
   document.querySelector('#step-7 textarea').value = fiche.vulnerabilites || '';
   
   const preview = document.getElementById('image-preview');
-  if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } 
-  else { preview.style.display = 'none'; }
-
+  if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  
   document.getElementById('stat-force').value = fiche.stats_force || 1;
   document.getElementById('stat-agilite').value = fiche.stats_agilite || 1;
   document.getElementById('stat-endurance').value = fiche.stats_endurance || 1;
@@ -333,29 +332,25 @@ window.editFiche = async function(id) {
   document.getElementById('stat-charisme').value = fiche.stats_charisme || 1;
   updateStats();
 
-  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
-  document.querySelector('.sub-tab-btn[data-sub="create"]').classList.add('active');
-  document.getElementById('subview-create').classList.add('active');
-
+  document.querySelector('[data-sub="create"]').click();
   currentStep = 1;
   updateWizard();
 };
 
 window.deleteFiche = async function(id) {
-  if(confirm("Es-tu sûr de vouloir supprimer cette fiche ? Cette action est irréversible.")) {
+  if(confirm("Supprimer cette fiche ?")) {
     const { error } = await supabase.from('fiches_oc').delete().eq('id', id);
-    if (error) alert("Erreur lors de la suppression.");
-    else loadMyFiches();
+    if (error) alert("Erreur."); else loadMyFiches();
   }
 };
 
-// --- AFFICHAGE (VOIR LES FICHES) ---
+// --- VOIR FICHES ---
 let allValidatedFiches = [];
 async function loadAllFiches() {
   const container = document.getElementById('all-fiches-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('statut', 'Validée').order('date_creation', { ascending: false });
+  
   if (error || fiches.length === 0) {
     container.innerHTML = '<p style="text-align: center; color: gray;">Aucune fiche validée.</p>';
     return;
@@ -371,28 +366,19 @@ function renderPublicFiches(fiches) {
     let imageHtml = (fiche.image_url && fiche.image_url.trim() !== '') ? `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>` : '';
     const card = document.createElement('div');
     card.className = 'public-fiche-card';
-    card.innerHTML = `
-      ${imageHtml}
-      <div class="card-content">
-        <h3>${fiche.nom}</h3>
-        <div class="card-tags"><span class="tag">${fiche.clan}</span><span class="tag">${fiche.rang}</span></div>
-        <p class="card-bio">${fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire.'}</p>
-      </div>
-    `;
+    card.innerHTML = `${imageHtml}<div class="card-content"><h3>${fiche.nom}</h3><div class="card-tags"><span class="tag">${fiche.clan}</span><span class="tag">${fiche.rang}</span></div><p class="card-bio">${fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire.'}</p></div>`;
     card.addEventListener('click', () => openFicheDetail(fiche));
     container.appendChild(card);
   });
 }
+
 document.getElementById('search-fiches').addEventListener('input', (e) => {
   const term = e.target.value.toLowerCase();
   renderPublicFiches(allValidatedFiches.filter(f => f.nom.toLowerCase().includes(term)));
 });
-document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFiches);
 
-// --- PAGE DÉTAIL FICHE ---
+// --- PAGE DÉTAIL ---
 function openFicheDetail(fiche) {
-  currentRelationFicheId = fiche.id;
-  
   document.getElementById('view-fiches').classList.remove('active');
   document.getElementById('view-fiche-detail').classList.add('active');
   window.scrollTo(0, 0);
@@ -419,33 +405,18 @@ function openFicheDetail(fiche) {
   compContainer.innerHTML = '';
   if (fiche.competences_list) {
     fiche.competences_list.split(',').forEach(comp => {
-      if(comp.trim()) {
-        const tag = document.createElement('span');
-        tag.className = 'tag';
-        tag.style.background = 'rgba(251, 191, 36, 0.2)';
-        tag.style.color = 'var(--accent)';
-        tag.textContent = comp.trim();
-        compContainer.appendChild(tag);
-      }
+      if(comp.trim()) { compContainer.innerHTML += `<span class="tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent);">${comp.trim()}</span>`; }
     });
-  } else {
-    compContainer.innerHTML = '<span style="color: gray;">Aucune spécialité cochée.</span>';
   }
-  document.getElementById('detail-competences-details').textContent = fiche.competences_details || 'Aucun détail fourni.';
+  document.getElementById('detail-competences-details').textContent = fiche.competences_details || 'Aucun détail.';
 
   const imgContainer = document.getElementById('detail-image');
   if (fiche.image_url && fiche.image_url.trim() !== '') {
     imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
     imgContainer.style.display = 'block';
-  } else {
-    imgContainer.style.display = 'none';
-  }
+  } else { imgContainer.style.display = 'none'; }
 
-  const stats = [
-    { id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite },
-    { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse },
-    { id: 'charisme', val: fiche.stats_charisme }
-  ];
+  const stats = [{ id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite }, { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse }, { id: 'charisme', val: fiche.stats_charisme }];
   stats.forEach(stat => {
     const val = stat.val || 0;
     document.getElementById(`num-${stat.id}`).textContent = val;
@@ -458,7 +429,6 @@ function openFicheDetail(fiche) {
   document.getElementById('dtab-histoire').classList.add('active');
 }
 
-// --- ONGLETS INTERNES DETAIL ---
 const detailTabBtns = document.querySelectorAll('.detail-tab-btn');
 const dtabs = document.querySelectorAll('.dtab');
 detailTabBtns.forEach(btn => {
@@ -477,27 +447,19 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('subview-all').classList.add('active');
 });
 
-// --- LOGIQUE PROFIL ---
+// --- PROFIL ---
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const username = user.user_metadata.full_name || "Joueur Inconnu";
-  const avatarUrl = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-  document.getElementById('profile-username').textContent = username;
-  document.getElementById('profile-avatar').src = avatarUrl;
+  document.getElementById('profile-username').textContent = user.user_metadata.full_name || "Joueur";
+  document.getElementById('profile-avatar').src = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
 
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-  
-  if (!profile) {
-    const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single();
-    profile = newProfile;
-  }
+  if (!profile) { const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); profile = newProfile; }
 
   const pts = profile ? profile.reputation_points : 0;
-  let title = "Inconnu";
-  let nextThreshold = 25;
-
+  let title = "Inconnu", nextThreshold = 25;
   if (pts >= 25 && pts < 50) { title = "Loyal"; nextThreshold = 50; }
   else if (pts >= 50 && pts < 80) { title = "Fiable"; nextThreshold = 80; }
   else if (pts >= 80 && pts < 120) { title = "Respecté"; nextThreshold = 120; }
@@ -514,208 +476,77 @@ async function loadProfil() {
   document.getElementById('profile-rep-next').textContent = `Prochain rang : ${nextThreshold} pts`;
 
   const banner = document.getElementById('profile-banner');
-  if (profile && profile.banner_url) {
-    banner.style.backgroundImage = `url('${profile.banner_url}')`;
-  } else {
-    banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; 
-  }
+  if (profile && profile.banner_url) { banner.style.backgroundImage = `url('${profile.banner_url}')`; } 
+  else { banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; }
 
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
   const ocContainer = document.getElementById('profile-oc-preview');
-  const ocCount = document.getElementById('profile-oc-count');
   ocContainer.innerHTML = ''; 
-
-  const fichesLength = fiches ? fiches.length : 0;
-  ocCount.textContent = `${fichesLength} / 5`;
+  document.getElementById('profile-oc-count').textContent = `${fiches ? fiches.length : 0} / 5`;
 
   if (fiches && fiches.length > 0) {
     fiches.forEach(fiche => {
       const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
-      ocContainer.innerHTML += `
-        <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()">
-          <div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div>
-          <span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span>
-        </div>
-      `;
+      ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
     });
-  } else {
-    ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>';
-  }
+  } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
 }
 
-document.getElementById('btn-logout').addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  window.location.reload();
-});
+document.getElementById('btn-logout').addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
 document.getElementById('btn-admin-panel').style.display = 'block';
 
-// --- PANZOOM CARTE ---
+// --- CARTE ---
 setTimeout(() => {
   const mapContent = document.getElementById('map-content');
   if (mapContent && typeof Panzoom !== 'undefined') {
-    const panzoom = Panzoom(mapContent, {
-      maxScale: 4, minScale: 1, startScale: 1, contain: 'outside', cursor: 'grab'
-    });
+    const panzoom = Panzoom(mapContent, { maxScale: 4, minScale: 1, startScale: 1, contain: 'outside', cursor: 'grab' });
     document.getElementById('map-viewport').addEventListener('wheel', panzoom.zoomWithWheel);
   }
 }, 500);
 
-// --- CARTE : TIROIR GLISSANT (INJECTION HTML) ---
-const mapSheetHTML = `
-  <div class="map-sheet-overlay" id="map-sheet-overlay">
-    <div class="map-sheet" id="map-sheet">
-      <div class="sheet-drag-handle"></div>
-      <h3 id="sheet-title">Nom du lieu</h3>
-      <p id="sheet-desc">Description...</p>
-      <button type="button" class="btn-close-sheet" id="btn-close-sheet">Fermer</button>
-    </div>
-  </div>
-`;
-document.body.insertAdjacentHTML('beforeend', mapSheetHTML);
-
-const lieuxData = {
-  foret: { titre: "Clan de la Forêt", desc: "Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts." },
-  brume: { titre: "Clan de la Brume", desc: "Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares." },
-  zenith: { titre: "Clan du Zénith", desc: "Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre." },
-  pluie: { titre: "Clan de la Pluie", desc: "Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis." },
-  ile: { titre: "Île Lunaire", desc: "Au centre du grand lac, reliée par deux ponts dont un en ruine. C'est ici que se déroulent les grandes assemblées entre les clans." },
-  source: { titre: "Source Lunaire", desc: "Une grotte souterraine sacrée. Ses eaux cristallines brillent comme des étoiles et permettent aux guérisseurs de communiquer avec le Clan de la Lune." },
-  gare: { titre: "Gare Abandonnée", desc: "De vieux rails rouillés perdus dans la nature. Un vestige d'une époque lointaine, aujourd'hui recouvert par la végétation." },
-  ville: { titre: "La Ville", desc: "Une petite cité humaine cachée derrière les montagnes du Zénith. Les chats évitent généralement cet endroit bruyant et dangereux." }
-};
-
-document.querySelectorAll('.map-pin').forEach(pin => {
-  pin.addEventListener('click', (e) => {
-    const lieuId = e.currentTarget.getAttribute('data-lieu');
-    const data = lieuxData[lieuId];
-    if (data) {
-      document.getElementById('sheet-title').textContent = data.titre;
-      document.getElementById('sheet-desc').textContent = data.desc;
-      document.getElementById('map-sheet-overlay').classList.add('active');
-    }
-  });
-});
-
-document.getElementById('btn-close-sheet').addEventListener('click', () => {
-  document.getElementById('map-sheet-overlay').classList.remove('active');
-});
-document.getElementById('map-sheet-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'map-sheet-overlay') e.target.classList.remove('active');
-});
-
-// --- SUPPORT (TICKETS) ---
+// --- SUPPORT ---
 let currentTicketType = "";
-document.getElementById('btn-floating-support').addEventListener('click', () => {
-  document.getElementById('support-modal').classList.add('active');
-  document.getElementById('support-menu-view').style.display = 'block';
-  document.getElementById('support-form-view').style.display = 'none';
-});
-
-document.getElementById('btn-close-support').addEventListener('click', () => {
-  document.getElementById('support-modal').classList.remove('active');
-});
-
-document.getElementById('btn-back-support').addEventListener('click', () => {
-  document.getElementById('support-menu-view').style.display = 'block';
-  document.getElementById('support-form-view').style.display = 'none';
-});
+document.getElementById('btn-floating-support').addEventListener('click', () => { document.getElementById('support-modal').classList.add('active'); document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
+document.getElementById('btn-close-support').addEventListener('click', () => { document.getElementById('support-modal').classList.remove('active'); });
+document.getElementById('btn-back-support').addEventListener('click', () => { document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
 
 window.openSupportForm = function(type) {
   currentTicketType = type;
   document.getElementById('support-menu-view').style.display = 'none';
   document.getElementById('support-form-view').style.display = 'block';
-  
   const formFields = document.getElementById('dynamic-form-fields');
   const formTitle = document.getElementById('support-form-title');
   let html = "";
-
-  if (type === 'faction') {
-    formTitle.textContent = "Créer une Faction";
-    html = `<div class="form-group"><label>Nom de la Faction</label><input type="text" id="t-faction-nom" required /></div>
-            <div class="form-group"><label>Type</label><select id="t-faction-type"><option>Clan</option><option>Tribu</option><option>Groupe</option><option>Autre</option></select></div>
-            <div class="form-group"><label>Territoire souhaité</label><input type="text" id="t-faction-territoire" /></div>
-            <div class="form-group"><label>Membres</label><input type="text" id="t-faction-membres" /></div>
-            <div class="form-group"><label>Description / Lore</label><textarea id="t-faction-lore"></textarea></div>`;
-  } 
-  else if (type === 'famille') {
-    formTitle.textContent = "Créer une Famille";
-    html = `<div class="form-group"><label>Nom</label><input type="text" id="t-famille-nom" required /></div>
-            <div class="form-group"><label>Membres</label><input type="text" id="t-famille-membres" /></div>
-            <div class="form-group"><label>Lien Clan</label><input type="text" id="t-famille-clan" /></div>
-            <div class="form-group"><label>Histoire</label><textarea id="t-famille-histoire"></textarea></div>`;
-  }
-  else if (type === 'bug') {
-    formTitle.textContent = "Signaler un Bug";
-    html = `<div class="form-group"><label>Titre</label><input type="text" id="t-bug-titre" required /></div>
-            <div class="form-group"><label>Appareil</label><select id="t-bug-appareil"><option>Mobile</option><option>PC</option></select></div>
-            <div class="form-group"><label>Description</label><textarea id="t-bug-desc"></textarea></div>`;
-  }
-  else if (type === 'suggestion') {
-    formTitle.textContent = "Faire une Suggestion";
-    html = `<div class="form-group"><label>Titre</label><input type="text" id="t-sugg-titre" required /></div>
-            <div class="form-group"><label>Catégorie</label><select id="t-sugg-cat"><option>Site</option><option>RP</option><option>Autre</option></select></div>
-            <div class="form-group"><label>Idée</label><textarea id="t-sugg-desc"></textarea></div>`;
-  }
-  else if (type === 'joueur') {
-    formTitle.textContent = "Signaler un Joueur";
-    html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-joueur-pseudo" required /></div>
-            <div class="form-group"><label>Motif</label><select id="t-joueur-motif"><option>HRP</option><option>Harcèlement</option><option>Autre</option></select></div>
-            <div class="form-group"><label>Description</label><textarea id="t-joueur-desc"></textarea></div>`;
-  }
-  else if (type === 'staff') {
-    formTitle.textContent = "Rejoindre le Staff";
-    html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-staff-pseudo" required /></div>
-            <div class="form-group"><label>Prénom / Âge</label><input type="text" id="t-staff-age" required /></div>
-            <div class="form-group"><label>Poste</label><select id="t-staff-poste"><option>Modérateur</option><option>MJ</option><option>Graphiste</option></select></div>
-            <div class="form-group"><label>Motivations</label><textarea id="t-staff-motiv"></textarea></div>
-            <div class="form-group"><label>Disponibilités</label><input type="text" id="t-staff-dispo" /></div>`;
-  }
+  if (type === 'faction') { formTitle.textContent = "Créer une Faction"; html = `<div class="form-group"><label>Nom</label><input type="text" id="t-faction-nom" required /></div><div class="form-group"><label>Type</label><select id="t-faction-type"><option>Clan</option><option>Tribu</option><option>Groupe</option></select></div><div class="form-group"><label>Territoire</label><input type="text" id="t-faction-territoire" /></div><div class="form-group"><label>Membres</label><input type="text" id="t-faction-membres" /></div><div class="form-group"><label>Description</label><textarea id="t-faction-lore"></textarea></div>`; } 
+  else if (type === 'famille') { formTitle.textContent = "Créer une Famille"; html = `<div class="form-group"><label>Nom</label><input type="text" id="t-famille-nom" required /></div><div class="form-group"><label>Membres</label><input type="text" id="t-famille-membres" /></div><div class="form-group"><label>Lien Clan</label><input type="text" id="t-famille-clan" /></div><div class="form-group"><label>Histoire</label><textarea id="t-famille-histoire"></textarea></div>`; }
+  else if (type === 'bug') { formTitle.textContent = "Signaler un Bug"; html = `<div class="form-group"><label>Titre</label><input type="text" id="t-bug-titre" required /></div><div class="form-group"><label>Appareil</label><select id="t-bug-appareil"><option>Mobile</option><option>PC</option></select></div><div class="form-group"><label>Description</label><textarea id="t-bug-desc"></textarea></div>`; }
+  else if (type === 'suggestion') { formTitle.textContent = "Faire une Suggestion"; html = `<div class="form-group"><label>Titre</label><input type="text" id="t-sugg-titre" required /></div><div class="form-group"><label>Catégorie</label><select id="t-sugg-cat"><option>Site</option><option>RP</option></select></div><div class="form-group"><label>Idée</label><textarea id="t-sugg-desc"></textarea></div>`; }
+  else if (type === 'joueur') { formTitle.textContent = "Signaler un Joueur"; html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-joueur-pseudo" required /></div><div class="form-group"><label>Motif</label><select id="t-joueur-motif"><option>HRP</option><option>Harcèlement</option></select></div><div class="form-group"><label>Description</label><textarea id="t-joueur-desc"></textarea></div>`; }
+  else if (type === 'staff') { formTitle.textContent = "Rejoindre le Staff"; html = `<div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-staff-pseudo" required /></div><div class="form-group"><label>Prénom / Âge</label><input type="text" id="t-staff-age" required /></div><div class="form-group"><label>Poste</label><select id="t-staff-poste"><option>Modérateur</option><option>MJ</option></select></div><div class="form-group"><label>Motivations</label><textarea id="t-staff-motiv"></textarea></div><div class="form-group"><label>Dispo</label><input type="text" id="t-staff-dispo" /></div>`; }
   formFields.innerHTML = html;
 };
 
 document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
   let sujet = "", description = "";
   try {
-    if (currentTicketType === 'faction') {
-      sujet = "Faction: " + document.getElementById('t-faction-nom').value;
-      description = `Type: ${document.getElementById('t-faction-type').value}\nTerritoire: ${document.getElementById('t-faction-territoire').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\nLore:\n${document.getElementById('t-faction-lore').value}`;
-    } else if (currentTicketType === 'famille') {
-      sujet = "Famille: " + document.getElementById('t-famille-nom').value;
-      description = `Membres: ${document.getElementById('t-famille-membres').value}\nLien: ${document.getElementById('t-famille-clan').value}\n\nHistoire:\n${document.getElementById('t-famille-histoire').value}`;
-    } else if (currentTicketType === 'bug') {
-      sujet = "Bug: " + document.getElementById('t-bug-titre').value;
-      description = `Appareil: ${document.getElementById('t-bug-appareil').value}\n\n${document.getElementById('t-bug-desc').value}`;
-    } else if (currentTicketType === 'suggestion') {
-      sujet = "Suggestion: " + document.getElementById('t-sugg-titre').value;
-      description = `Catégorie: ${document.getElementById('t-sugg-cat').value}\n\n${document.getElementById('t-sugg-desc').value}`;
-    } else if (currentTicketType === 'joueur') {
-      sujet = "Signalement: " + document.getElementById('t-joueur-pseudo').value;
-      description = `Motif: ${document.getElementById('t-joueur-motif').value}\n\n${document.getElementById('t-joueur-desc').value}`;
-    } else if (currentTicketType === 'staff') {
-      sujet = "Candidature: " + document.getElementById('t-staff-pseudo').value;
-      description = `Age: ${document.getElementById('t-staff-age').value}\nPoste: ${document.getElementById('t-staff-poste').value}\nDispo: ${document.getElementById('t-staff-dispo').value}\n\n${document.getElementById('t-staff-motiv').value}`;
-    }
-  } catch(e) { alert("Merci de remplir les champs."); return; }
+    if (currentTicketType === 'faction') { sujet = "Faction: " + document.getElementById('t-faction-nom').value; description = `Type: ${document.getElementById('t-faction-type').value}\nTerritoire: ${document.getElementById('t-faction-territoire').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\n${document.getElementById('t-faction-lore').value}`; } 
+    else if (currentTicketType === 'famille') { sujet = "Famille: " + document.getElementById('t-famille-nom').value; description = `Membres: ${document.getElementById('t-famille-membres').value}\nLien: ${document.getElementById('t-famille-clan').value}\n\n${document.getElementById('t-famille-histoire').value}`; }
+    else if (currentTicketType === 'bug') { sujet = "Bug: " + document.getElementById('t-bug-titre').value; description = `Appareil: ${document.getElementById('t-bug-appareil').value}\n\n${document.getElementById('t-bug-desc').value}`; }
+    else if (currentTicketType === 'suggestion') { sujet = "Suggestion: " + document.getElementById('t-sugg-titre').value; description = `Catégorie: ${document.getElementById('t-sugg-cat').value}\n\n${document.getElementById('t-sugg-desc').value}`; }
+    else if (currentTicketType === 'joueur') { sujet = "Signalement: " + document.getElementById('t-joueur-pseudo').value; description = `Motif: ${document.getElementById('t-joueur-motif').value}\n\n${document.getElementById('t-joueur-desc').value}`; }
+    else if (currentTicketType === 'staff') { sujet = "Candidature: " + document.getElementById('t-staff-pseudo').value; description = `Age: ${document.getElementById('t-staff-age').value}\nPoste: ${document.getElementById('t-staff-poste').value}\nDispo: ${document.getElementById('t-staff-dispo').value}\n\n${document.getElementById('t-staff-motiv').value}`; }
+  } catch(e) { alert("Remplis les champs."); return; }
 
-  if (!sujet || sujet.endsWith(':')) { alert("Merci de remplir le titre/nom."); return; }
+  if (!sujet || sujet.endsWith(':')) { alert("Remplis le titre."); return; }
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return alert("Tu dois être connecté.");
-
-  const { error } = await supabase.from('tickets').insert({
-    user_id: user.id, type_ticket: currentTicketType, sujet: sujet, description: description
-  });
-
-  if (error) {
-    alert("Erreur : " + error.message);
-  } else {
+  const { error } = await supabase.from('tickets').insert({ user_id: user.id, type_ticket: currentTicketType, sujet: sujet, description: description });
+  if (error) { alert("Erreur : " + error.message); } 
+  else {
     document.getElementById('support-modal').classList.remove('active');
     const toast = document.getElementById('toast-success');
-    toast.querySelector('h4').textContent = "Ticket envoyé !";
-    toast.querySelector('p').textContent = "Le staff va traiter ta demande.";
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('show'), 50);
-    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+    toast.querySelector('h4').textContent = "Ticket envoyé !"; toast.querySelector('p').textContent = "Le staff va traiter ta demande.";
+    toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
   }
 });
 
@@ -723,141 +554,78 @@ document.getElementById('btn-submit-ticket').addEventListener('click', async () 
 const settingsModal = document.getElementById('settings-modal');
 document.getElementById('btn-open-settings').addEventListener('click', () => settingsModal.classList.add('active'));
 document.getElementById('btn-close-settings').addEventListener('click', () => settingsModal.classList.remove('active'));
-settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('active'); });
 
 document.getElementById('btn-open-credits').addEventListener('click', () => {
-  settingsModal.classList.remove('active');
-  screenApp.classList.remove('active');
-  screenCredits.classList.add('active');
-  
+  settingsModal.classList.remove('active'); screenApp.classList.remove('active'); screenCredits.classList.add('active');
   const btnContinue = document.getElementById('btn-continue-credits');
   btnContinue.textContent = "Retour à l'application";
-  btnContinue.onclick = () => {
-    screenCredits.classList.remove('active');
-    screenApp.classList.add('active');
-    btnContinue.textContent = "Entrer dans les Terres du Crépuscule";
-    btnContinue.onclick = null; 
-    window.location.reload(); 
-  };
+  btnContinue.onclick = () => { screenCredits.classList.remove('active'); screenApp.classList.add('active'); btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; btnContinue.onclick = null; window.location.reload(); };
 });
 
-// --- LOGIQUE DES RELATIONS (NOUVEL ONGLET) ---
-
-// On charge les relations du joueur quand il clique sur l'onglet
-document.querySelector('[data-sub="relations"]').addEventListener('click', loadMyRelations);
-
+// --- RELATIONS (NOUVEL ONGLET) ---
 async function loadMyRelations() {
   const container = document.getElementById('my-relations-container');
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   
   const { data: { user } } = await supabase.auth.getUser();
-  
-  // On va chercher les tickets de type "relation" envoyés par ce joueur
-  const { data: tickets, error } = await supabase
-    .from('tickets')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('type_ticket', 'relation')
-    .order('date_creation', { ascending: false });
+  const { data: tickets, error } = await supabase.from('tickets').select('*').eq('user_id', user.id).eq('type_ticket', 'relation').order('date_creation', { ascending: false });
 
   if (error || tickets.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune demande de relation pour le moment.</p>';
+    container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune demande pour le moment.</p>';
     return;
   }
-
   container.innerHTML = '';
   tickets.forEach(ticket => {
-    // On vérifie si c'est validé ou en attente dans le texte ou via une logique future
     const card = document.createElement('div');
-    card.className = 'fiche-card'; // On réutilise le style des cartes
-    card.innerHTML = `
-      <div class="fiche-card-header">
-        <h4>${ticket.sujet}</h4>
-        <span class="status-badge status-attente">En attente</span>
-      </div>
-      <p style="font-size: 0.9rem; color: #cbd5e1;">${ticket.description.split('\n')[0]}</p>
-    `;
+    card.className = 'fiche-card';
+    card.innerHTML = `<div class="fiche-card-header"><h4>${ticket.sujet}</h4><span class="status-badge status-attente">En attente</span></div><p style="font-size: 0.9rem; color: #cbd5e1;">${ticket.description.split('\n')[0]}</p>`;
     container.appendChild(card);
   });
 }
 
-// Ouvrir la modale de demande
 document.getElementById('btn-new-relation').addEventListener('click', async () => {
   document.getElementById('relation-modal').classList.add('active');
   document.getElementById('rel-message').value = '';
-  
   const { data: { user } } = await supabase.auth.getUser();
   
-  // 1. Charger MES fiches validées (Source)
   const { data: mesFiches } = await supabase.from('fiches_oc').select('id, nom').eq('user_id', user.id).eq('statut', 'Validée');
   const selectSource = document.getElementById('rel-source');
   selectSource.innerHTML = '<option value="">Choisir ton personnage...</option>';
-  if (mesFiches && mesFiches.length > 0) {
-    mesFiches.forEach(f => selectSource.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
-  } else {
-    selectSource.innerHTML = '<option value="">Aucune de tes fiches n\'est validée</option>';
-  }
+  if (mesFiches && mesFiches.length > 0) mesFiches.forEach(f => selectSource.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
+  else selectSource.innerHTML = '<option value="">Aucune fiche validée</option>';
 
-  // 2. Charger TOUTES les autres fiches validées (Cible)
   const { data: autresFiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée');
   const selectCible = document.getElementById('rel-cible');
-  selectCible.innerHTML = '<option value="">Choisir un personnage...</option>';
-  if (autresFiches && autresFiches.length > 0) {
-    autresFiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
-  }
+  selectCible.innerHTML = '<option value="">Choisir le personnage ciblé...</option>';
+  if (autresFiches && autresFiches.length > 0) autresFiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
 });
 
-document.getElementById('btn-close-relation').addEventListener('click', () => {
-  document.getElementById('relation-modal').classList.remove('active');
-});
+document.getElementById('btn-close-relation').addEventListener('click', () => document.getElementById('relation-modal').classList.remove('active'));
 
-// Envoyer la demande
 document.getElementById('btn-submit-relation').addEventListener('click', async () => {
   const sourceId = document.getElementById('rel-source').value;
   const cibleId = document.getElementById('rel-cible').value;
   const type = document.getElementById('rel-type').value;
   const message = document.getElementById('rel-message').value;
 
-  if (!sourceId || !cibleId || !message) { 
-    alert("Merci de choisir tes personnages et d'écrire un message."); 
-    return; 
-  }
-  if (sourceId === cibleId) {
-    alert("Tu ne peux pas créer une relation entre un personnage et lui-même !");
-    return;
-  }
+  if (!sourceId || !cibleId || !message) { alert("Remplis tous les champs."); return; }
+  if (sourceId === cibleId) { alert("Impossible de lier un personnage à lui-même !"); return; }
 
   const { data: { user } } = await supabase.auth.getUser();
-  
-  // Récupérer les noms pour le ticket
   const { data: ficheSource } = await supabase.from('fiches_oc').select('nom').eq('id', sourceId).single();
   const { data: ficheCible } = await supabase.from('fiches_oc').select('nom').eq('id', cibleId).single();
 
   const sujet = `Relation: ${ficheSource.nom} & ${ficheCible.nom}`;
   const description = `Type de lien : ${type}\n\nMessage : ${message}`;
 
-  // On enregistre dans les tickets
-  const { error } = await supabase.from('tickets').insert({
-    user_id: user.id, 
-    type_ticket: 'relation', 
-    sujet: sujet, 
-    description: description
-  });
+  const { error } = await supabase.from('tickets').insert({ user_id: user.id, type_ticket: 'relation', sujet: sujet, description: description });
 
-  if (error) {
-    alert("Erreur : " + error.message);
-  } else {
+  if (error) { alert("Erreur : " + error.message); } 
+  else {
     document.getElementById('relation-modal').classList.remove('active');
-    
-    // Popup succès
     const toast = document.getElementById('toast-success');
-    toast.querySelector('h4').textContent = "Demande envoyée !";
-    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur pour valider.";
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('show'), 50);
-    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
-
-    // Recharger la liste
+    toast.querySelector('h4').textContent = "Demande envoyée !"; toast.querySelector('p').textContent = "Le staff va valider.";
+    toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
     loadMyRelations();
   }
 });
