@@ -88,22 +88,77 @@
             </div>
           </div>
 
+          <!-- VUE MONDE (LORE & CARTE) -->
+          <div id="view-monde" class="view">
+            
+            <!-- Onglets du Monde -->
+            <div class="sub-tabs">
+              <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
+              <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
+              <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
+            </div>
+
+            <!-- Contenu : Histoire -->
+            <div id="lore-histoire" class="lore-content active">
+              <h3>La Création des Terres</h3>
+              <p>Il y a bien longtemps, quatre chats légendaires s'unirent pour vaincre une menace terrible dont le nom s'est perdu dans les brumes du temps. Après leur victoire, la discorde éclata. Se disputant les meilleures terres de chasse, ils se séparèrent, donnant naissance aux quatre Clans que nous connaissons aujourd'hui.</p>
+              
+              <h3>La Source Lunaire</h3>
+              <p>C'est dans une grotte souterraine, cachée dans une zone neutre, que se trouve le lien avec nos ancêtres. Un bassin aux eaux lumineuses permet aux Guérisseurs et aux Chefs de communiquer avec le Clan de la Lune.</p>
+            </div>
+
+            <!-- Contenu : Les Clans -->
+            <div id="lore-clans" class="lore-content">
+              <div class="clan-lore-card">
+                <h4>Clan de la Forêt</h4>
+                <p>Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p>
+              </div>
+              <div class="clan-lore-card">
+                <h4>Clan de la Pluie</h4>
+                <p>Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p>
+              </div>
+              <div class="clan-lore-card">
+                <h4>Clan du Zénith</h4>
+                <p>Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p>
+              </div>
+              <div class="clan-lore-card">
+                <h4>Clan de la Brume</h4>
+                <p>Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.</p>
+              </div>
+              
+              <h3 style="margin-top: 30px;">Les Clans Spirituels (Bientôt)</h3>
+              <div class="clan-lore-card" style="border-color: rgba(255,255,255,0.2); opacity: 0.7;">
+                <h4>Clan de la Lune</h4>
+                <p>Le royaume des esprits bienveillants et des ancêtres.</p>
+              </div>
+              <div class="clan-lore-card" style="border-color: rgba(255,255,255,0.2); opacity: 0.7;">
+                <h4>Forêt des Ronces</h4>
+                <p>Le lieu sombre où errent les esprits maudits.</p>
+              </div>
+            </div>
+
+            <!-- Contenu : Source Lunaire -->
+            <div id="lore-source" class="lore-content">
+              <div class="source-image" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop');"></div>
+              <p><strong>Lieu Neutre et Sacré</strong></p>
+              <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. C'est ici que le voile entre le monde des vivants et celui des esprits est le plus fin.</p>
+              <p><strong>La Trêve</strong> : Il est strictement interdit de verser le sang à la Source Lunaire. Quiconque enfreint cette règle s'attire la malédiction éternelle du Clan de la Lune.</p>
+            </div>
+
+          </div>
+
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
-            
             <div class="sub-tabs">
               <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
               <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
               <button type="button" class="sub-tab-btn" data-sub="all">Voir les fiches</button>
             </div>
 
-            <!-- CRÉER -->
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
-                <div class="progress-bar-bg">
-                  <div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div>
-                </div>
+                <div class="progress-bar-bg"><div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div></div>
               </div>
 
               <div class="wizard-form">
@@ -119,26 +174,22 @@
                   <label>Rang</label>
                   <select><option>Guerrier</option><option>Apprenti</option><option>Chef</option><option>Lieutenant</option><option>Guérisseur</option><option>Ancien</option></select>
                 </div>
-
                 <div class="wizard-step" id="step-2">
                   <h3>2. Apparence</h3>
                   <label>Couleur du pelage</label><input type="text" placeholder="Ex: Roux et blanc" />
                   <label>Couleur des yeux</label><input type="text" placeholder="Ex: Ambre" />
                 </div>
-
                 <div class="wizard-step" id="step-3">
                   <h3>3. Caractère</h3>
                   <label>Traits principaux</label><input type="text" placeholder="Ex: Loyal, Impulsif" />
                   <label>Qualités</label><input type="text" placeholder="Ex: Courageux, Honnête" />
                   <label>Défauts</label><input type="text" placeholder="Ex: Têtu, Impatient" />
                 </div>
-
                 <div class="wizard-step" id="step-4">
                   <h3>4. Histoire</h3>
                   <label>Origines / Naissance</label><textarea rows="3" placeholder="Où est-il né ?"></textarea>
                   <label>Événements marquants</label><textarea rows="4" placeholder="Qu'est-ce qui l'a façonné ?"></textarea>
                 </div>
-
                 <div class="wizard-step" id="step-5">
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
@@ -154,20 +205,17 @@
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
-
                 <div class="wizard-step" id="step-6">
                   <h3>6. Objectifs & Rêves</h3>
                   <label>Objectifs à court terme</label><input type="text" />
                   <label>Objectifs à long terme</label><input type="text" />
                   <label>Rêves secrets</label><textarea rows="2"></textarea>
                 </div>
-
                 <div class="wizard-step" id="step-7">
                   <h3>7. Faiblesses & Peurs</h3>
                   <label>Peurs / Phobies</label><input type="text" />
                   <label>Vulnérabilités</label><textarea rows="2"></textarea>
                 </div>
-
                 <div class="wizard-step" id="step-8">
                   <h3>8. Image</h3>
                   <label>Image de référence (Avatar)</label>
@@ -177,7 +225,6 @@
                     <img id="image-preview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 10px; margin: 15px auto 0; object-fit: cover;" />
                   </div>
                 </div>
-
                 <div class="wizard-step" id="step-9">
                   <h3>9. Statistiques</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">Points restants : <span id="points-left" style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">20</span></p>
@@ -195,29 +242,22 @@
               </div>
             </div>
 
-            <!-- MES FICHES -->
             <div id="subview-mine" class="subview">
-              <div id="my-fiches-container">
-                <p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p>
-              </div>
+              <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
-            <!-- VOIR LES FICHES -->
             <div id="subview-all" class="subview">
               <div class="search-container">
                 <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
                 <button type="button" class="btn-filter" onclick="alert('Bientôt dispo !')">⚙️</button>
               </div>
-              <div id="all-fiches-container">
-                <p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p>
-              </div>
+              <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
           </div>
 
           <!-- DÉTAIL D'UNE FICHE -->
           <div id="view-fiche-detail" class="view">
             <button type="button" id="btn-back-fiches" class="btn-back">← Retour</button>
-            
             <div class="detail-header">
               <div id="detail-image" class="detail-image"></div>
               <div class="detail-titles">
@@ -225,43 +265,24 @@
                 <p><span id="detail-clan">Clan</span> • <span id="detail-rang">Rang</span></p>
               </div>
             </div>
-
             <div class="detail-tabs">
               <button type="button" class="detail-tab-btn active" data-dtab="histoire">Histoire</button>
               <button type="button" class="detail-tab-btn" data-dtab="perso">Caractère</button>
               <button type="button" class="detail-tab-btn" data-dtab="stats">Compétences & Stats</button>
             </div>
-
             <div class="detail-content">
               <div id="dtab-histoire" class="dtab active">
-                <h3>Apparence</h3>
-                <p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p>
-                <p><strong>Yeux :</strong> <span id="detail-yeux">Non renseigné</span></p>
-                <h3>Origines</h3>
-                <p id="detail-origines">Non renseigné.</p>
-                <h3>Événements marquants</h3>
-                <p id="detail-evenements">Non renseigné.</p>
+                <h3>Apparence</h3><p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p><p><strong>Yeux :</strong> <span id="detail-yeux">Non renseigné</span></p>
+                <h3>Origines</h3><p id="detail-origines">Non renseigné.</p>
+                <h3>Événements marquants</h3><p id="detail-evenements">Non renseigné.</p>
               </div>
-
               <div id="dtab-perso" class="dtab">
-                <h3>Personnalité</h3>
-                <p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p>
-                <p><strong>Qualités :</strong> <span id="detail-qualites">Non renseigné</span></p>
-                <p><strong>Défauts :</strong> <span id="detail-defauts">Non renseigné</span></p>
-                <h3>Motivations</h3>
-                <p><strong>Objectifs court terme :</strong> <span id="detail-obj-court">Non renseigné</span></p>
-                <p><strong>Objectifs long terme :</strong> <span id="detail-obj-long">Non renseigné</span></p>
-                <p><strong>Rêves :</strong> <span id="detail-reves">Non renseigné</span></p>
-                <h3>Faiblesses</h3>
-                <p><strong>Peurs :</strong> <span id="detail-peurs">Non renseigné</span></p>
-                <p><strong>Vulnérabilités :</strong> <span id="detail-vulnerabilites">Non renseigné</span></p>
+                <h3>Personnalité</h3><p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p><p><strong>Qualités :</strong> <span id="detail-qualites">Non renseigné</span></p><p><strong>Défauts :</strong> <span id="detail-defauts">Non renseigné</span></p>
+                <h3>Motivations</h3><p><strong>Objectifs court terme :</strong> <span id="detail-obj-court">Non renseigné</span></p><p><strong>Objectifs long terme :</strong> <span id="detail-obj-long">Non renseigné</span></p><p><strong>Rêves :</strong> <span id="detail-reves">Non renseigné</span></p>
+                <h3>Faiblesses</h3><p><strong>Peurs :</strong> <span id="detail-peurs">Non renseigné</span></p><p><strong>Vulnérabilités :</strong> <span id="detail-vulnerabilites">Non renseigné</span></p>
               </div>
-
               <div id="dtab-stats" class="dtab">
-                <h3>Compétences</h3>
-                <div id="detail-competences-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
-                <p><em id="detail-competences-details">Aucun détail fourni.</em></p>
-                
+                <h3>Compétences</h3><div id="detail-competences-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div><p><em id="detail-competences-details">Aucun détail fourni.</em></p>
                 <h3 style="margin-top: 30px;">Statistiques</h3>
                 <div class="stat-bar-container"><span>Force</span><div class="stat-bar-bg"><div id="bar-force" class="stat-bar-fill"></div></div><span id="num-force">0</span></div>
                 <div class="stat-bar-container"><span>Agilité</span><div class="stat-bar-bg"><div id="bar-agilite" class="stat-bar-fill"></div></div><span id="num-agilite">0</span></div>

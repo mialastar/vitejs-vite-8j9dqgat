@@ -6,7 +6,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables globales
 let editingFicheId = null; 
 let currentEditingImage = ""; 
 
@@ -57,11 +56,26 @@ navBtns.forEach(btn => {
     e.currentTarget.classList.add('active');
     views.forEach(v => v.classList.remove('active'));
     const target = e.currentTarget.getAttribute('data-target');
+    
     if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
     if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
+    if(target === 'monde') document.getElementById('view-monde').classList.add('active');
   });
 });
 
+// --- ONGLETS LORE (MONDE) ---
+const loreTabBtns = document.querySelectorAll('.lore-tab-btn');
+const loreContents = document.querySelectorAll('.lore-content');
+loreTabBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    loreTabBtns.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    loreContents.forEach(c => c.classList.remove('active'));
+    document.getElementById(`lore-${e.currentTarget.getAttribute('data-lore')}`).classList.add('active');
+  });
+});
+
+// --- ONGLETS FICHES ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
 subTabBtns.forEach(btn => {
@@ -160,11 +174,9 @@ btnNext.addEventListener('click', async () => {
 
     let error;
     if (editingFicheId) {
-      // MODE MODIFICATION (écrase l'ancienne)
       const { error: updateError } = await supabase.from('fiches_oc').update(ficheData).eq('id', editingFicheId);
       error = updateError;
     } else {
-      // MODE CRÉATION (nouvelle ligne)
       const { error: insertError } = await supabase.from('fiches_oc').insert({ ...ficheData, user_id: user.id });
       error = insertError;
     }
@@ -177,7 +189,6 @@ btnNext.addEventListener('click', async () => {
       setTimeout(() => toast.classList.add('show'), 50);
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
 
-      // Reset complet du formulaire
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
@@ -190,7 +201,7 @@ btnNext.addEventListener('click', async () => {
       
       document.querySelector('[data-sub="mine"]').click();
       loadMyFiches();
-      loadAllFiches(); // Met à jour le catalogue public
+      loadAllFiches(); 
     }
   }
 });
@@ -305,7 +316,6 @@ window.editFiche = async function(id) {
   document.getElementById('stat-charisme').value = fiche.stats_charisme || 1;
   updateStats();
 
-  // On change d'onglet SANS utiliser le .click() pour ne pas effacer l'ID de modification
   document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
   document.querySelector('.sub-tab-btn[data-sub="create"]').classList.add('active');
