@@ -47,7 +47,7 @@ async function checkUser() {
 }
 checkUser();
 
-// --- NAVIGATION GLOBALE (CORRIGÉE) ---
+// --- NAVIGATION GLOBALE ---
 const navBtns = document.querySelectorAll('.nav-btn');
 const views = document.querySelectorAll('.view');
 navBtns.forEach(btn => {
@@ -63,7 +63,7 @@ navBtns.forEach(btn => {
     if(target === 'monde') document.getElementById('view-monde').classList.add('active');
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
-      loadProfil(); // <--- On charge les données du profil ici
+      loadProfil(); 
     }
   });
 });
@@ -473,27 +473,23 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('subview-all').classList.add('active');
 });
 
-// --- LOGIQUE DU PROFIL (AVEC VRAIE RÉPUTATION) ---
+// --- LOGIQUE DU PROFIL ---
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 1. Infos Discord
   const username = user.user_metadata.full_name || "Joueur Inconnu";
   const avatarUrl = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
   document.getElementById('profile-username').textContent = username;
   document.getElementById('profile-avatar').src = avatarUrl;
 
-  // 2. Récupérer ou CRÉER le profil dans la base de données
-  let { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   
   if (!profile) {
-    // Si le joueur n'a pas de profil (première connexion), on le crée
     const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single();
     profile = newProfile;
   }
 
-  // 3. Calculer le Rang en fonction des points
   const pts = profile ? profile.reputation_points : 0;
   let title = "Inconnu";
   let nextThreshold = 25;
@@ -508,21 +504,18 @@ async function loadProfil() {
   else if (pts >= 400 && pts < 500) { title = "Immortel"; nextThreshold = 500; }
   else if (pts >= 500) { title = "Au-delà des Lunes"; nextThreshold = 500; }
 
-  // 4. Afficher la réputation
   document.getElementById('profile-rep-points').textContent = `${pts} pts`;
   document.getElementById('profile-rep-title').textContent = title;
-  document.getElementById('profile-rep-fill').style.width = `${(pts / nextThreshold) * 100}%`;
+  document.getElementById('profile-rep-fill').style.width = `${Math.min((pts / nextThreshold) * 100, 100)}%`;
   document.getElementById('profile-rep-next').textContent = `Prochain rang : ${nextThreshold} pts`;
 
-  // 5. Gérer la bannière (Image de fond)
   const banner = document.getElementById('profile-banner');
   if (profile && profile.banner_url) {
     banner.style.backgroundImage = `url('${profile.banner_url}')`;
   } else {
-    banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; // Image par défaut
+    banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; 
   }
 
-  // 6. Récupérer les fiches OC
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
   const ocContainer = document.getElementById('profile-oc-preview');
   const ocCount = document.getElementById('profile-oc-count');
@@ -550,196 +543,71 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   await supabase.auth.signOut();
   window.location.reload();
 });
-
 document.getElementById('btn-admin-panel').style.display = 'block';
 
-// --- CARTE INTERACTIVE ET TIROIR GLISSANT ---
-
-// 1. Création du Tiroir (Bottom Sheet) invisible
-const mapSheetHTML = `
-  <div class="map-sheet-overlay" id="map-sheet-overlay">
-    <div class="map-sheet" id="map-sheet">
-      <div class="sheet-drag-handle"></div>
-      <h3 id="sheet-title">Nom du lieu</h3>
-      <p id="sheet-desc">Description...</p>
-      <button type="button" class="btn-close-sheet" id="btn-close-sheet">Fermer</button>
-    </div>
-  </div>
-`;
-document.body.insertAdjacentHTML('beforeend', mapSheetHTML);
-
-// 2. Les données des lieux
-const lieuxData = {
-  foret: {
-    titre: "Clan de la Forêt",
-    desc: "Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.",
-    isClan: true
-  },
-  brume: {
-    titre: "Clan de la Brume",
-    desc: "Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.",
-    isClan: true
-  },
-  zenith: {
-    titre: "Clan du Zénith",
-    desc: "Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.",
-    isClan: true
-  },
-  pluie: {
-    titre: "Clan de la Pluie",
-    desc: "Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.",
-    isClan: true
-  },
-  ile: {
-    titre: "Île Lunaire",
-    desc: "Au centre du grand lac, reliée par deux ponts dont un en ruine. C'est ici que se déroulent les grandes assemblées entre les clans.",
-    isClan: false
-  },
-  source: {
-    titre: "Source Lunaire",
-    desc: "Une grotte souterraine sacrée. Ses eaux cristallines brillent comme des étoiles et permettent aux guérisseurs de communiquer avec le Clan de la Lune.",
-    isClan: false
-  },
-  gare: {
-    titre: "Gare Abandonnée",
-    desc: "De vieux rails rouillés perdus dans la nature. Un vestige d'une époque lointaine, aujourd'hui recouvert par la végétation.",
-    isClan: false
-  },
-  ville: {
-    titre: "La Ville",
-    desc: "Une petite cité humaine cachée derrière les montagnes du Zénith. Les chats évitent généralement cet endroit bruyant et dangereux.",
-    isClan: false
-  }
-};
-
-// 3. Logique d'ouverture du tiroir
-document.querySelectorAll('.map-pin').forEach(pin => {
-  pin.addEventListener('click', (e) => {
-    const lieuId = e.currentTarget.getAttribute('data-lieu');
-    const data = lieuxData[lieuId];
-    
-    if (data) {
-      document.getElementById('sheet-title').textContent = data.titre;
-      document.getElementById('sheet-desc').textContent = data.desc;
-      
-      // Ouvre le tiroir
-      document.getElementById('map-sheet-overlay').classList.add('active');
-    }
-  });
-});
-
-// 4. Fermeture du tiroir
-document.getElementById('btn-close-sheet').addEventListener('click', () => {
-  document.getElementById('map-sheet-overlay').classList.remove('active');
-});
-
-document.getElementById('map-sheet-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'map-sheet-overlay') {
-    e.target.classList.remove('active');
-  }
-});
-
 // --- INITIALISATION DU ZOOM (PANZOOM) ---
-// On attend un petit peu que la page charge
 setTimeout(() => {
   const mapContent = document.getElementById('map-content');
   if (mapContent && typeof Panzoom !== 'undefined') {
-    // On active le zoom et le déplacement sur le contenu de la carte
     const panzoom = Panzoom(mapContent, {
-      maxScale: 4,       // Zoom maximum (x4)
-      minScale: 1,       // Zoom minimum (x1)
-      contain: 'outside', // Empêche de perdre la carte
-      cursor: 'grab'
+      maxScale: 4, minScale: 1, startScale: 1, contain: 'outside', cursor: 'grab'
     });
-
-    // Activer le zoom avec la molette de la souris
     document.getElementById('map-viewport').addEventListener('wheel', panzoom.zoomWithWheel);
   }
-}, 500); // On attend 500ms que l'image soit là
-
-const panzoom = Panzoom(mapContent, {
-  maxScale: 4,       
-  minScale: 1,       
-  startScale: 1, // <-- AJOUTE CETTE LIGNE
-  contain: 'outside', 
-  cursor: 'grab'
-});
+}, 500);
 
 // --- LOGIQUE DU SUPPORT (TICKETS) ---
 let currentTicketType = "";
 
-// Ouvrir le menu
 document.getElementById('btn-floating-support').addEventListener('click', () => {
   document.getElementById('support-modal').classList.add('active');
   document.getElementById('support-menu-view').style.display = 'block';
   document.getElementById('support-form-view').style.display = 'none';
 });
 
-// Fermer le menu
 document.getElementById('btn-close-support').addEventListener('click', () => {
   document.getElementById('support-modal').classList.remove('active');
 });
 
-// Retour arrière (du formulaire vers le menu)
 document.getElementById('btn-back-support').addEventListener('click', () => {
   document.getElementById('support-menu-view').style.display = 'block';
   document.getElementById('support-form-view').style.display = 'none';
 });
 
-// Ouvrir un formulaire spécifique
 window.openSupportForm = function(type) {
   currentTicketType = type;
   document.getElementById('support-menu-view').style.display = 'none';
   document.getElementById('support-form-view').style.display = 'block';
   
-  // Changer le titre selon le bouton cliqué
   const titles = {
-    clan: "Créer un clan",
-    famille: "Créer une famille",
-    suggestion: "Faire une suggestion",
-    staff: "Rejoindre le staff",
-    bug: "Signaler un bug",
-    joueur: "Signaler un joueur"
+    clan: "Créer un clan", famille: "Créer une famille", suggestion: "Faire une suggestion",
+    staff: "Rejoindre le staff", bug: "Signaler un bug", joueur: "Signaler un joueur"
   };
   document.getElementById('support-form-title').textContent = titles[type];
-  
-  // Vider les champs
   document.getElementById('support-sujet').value = '';
   document.getElementById('support-description').value = '';
 };
 
-// Envoyer le ticket à Supabase
 document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
   const sujet = document.getElementById('support-sujet').value;
   const description = document.getElementById('support-description').value;
 
-  if (!sujet || !description) {
-    alert("Merci de remplir tous les champs.");
-    return;
-  }
+  if (!sujet || !description) { alert("Merci de remplir tous les champs."); return; }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return alert("Tu dois être connecté.");
 
-  // Envoi à la base de données
   const { error } = await supabase.from('tickets').insert({
-    user_id: user.id,
-    type_ticket: currentTicketType,
-    sujet: sujet,
-    description: description
+    user_id: user.id, type_ticket: currentTicketType, sujet: sujet, description: description
   });
 
   if (error) {
     alert("Erreur lors de l'envoi : " + error.message);
   } else {
-    // Succès !
     document.getElementById('support-modal').classList.remove('active');
-    
-    // On réutilise ton popup de succès (toast)
     const toast = document.getElementById('toast-success');
     toast.querySelector('h4').textContent = "Ticket envoyé !";
     toast.querySelector('p').textContent = "Le staff va traiter ta demande dès que possible.";
-    
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('show'), 50);
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);

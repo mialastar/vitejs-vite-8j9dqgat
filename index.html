@@ -118,29 +118,27 @@
               </div>
             </div>
 
-                       <!-- CONTENU : CARTE -->
-                       <div id="monde-carte" class="monde-content">
-                        <div class="map-hint" id="map-hint">
-                          👆 Glisse pour te déplacer, pince avec 2 doigts ou utilise la molette pour zoomer.
-                        </div>
-          
-                        <!-- La fenêtre qui affiche la carte -->
-                        <div id="map-viewport" class="map-viewport">
-                          <!-- L'image et les points qui vont être zoomés -->
-                          <div id="map-content" class="map-content">
-                            <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
-                            
-                            <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
-                            <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
-                            <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
-                            <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie"><span class="pin-dot"></span></button>
-                            <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile"><span class="pin-dot pin-spirituel"></span></button>
-                            <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source"><span class="pin-dot pin-spirituel"></span></button>
-                            <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare"><span class="pin-dot pin-humain"></span></button>
-                            <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville"><span class="pin-dot pin-humain"></span></button>
-                          </div>
-                        </div>
-                      </div>
+            <!-- CONTENU : CARTE -->
+            <div id="monde-carte" class="monde-content">
+              <div class="map-hint" id="map-hint">
+                👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.
+              </div>
+              <div id="map-viewport" class="map-viewport">
+                <div id="map-content" class="map-content">
+                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
+                  
+                  <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
+                  <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
+                  <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
+                  <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie"><span class="pin-dot"></span></button>
+                  <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile"><span class="pin-dot pin-spirituel"></span></button>
+                  <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source"><span class="pin-dot pin-spirituel"></span></button>
+                  <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare"><span class="pin-dot pin-humain"></span></button>
+                  <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville"><span class="pin-dot pin-humain"></span></button>
+                </div>
+              </div>
+            </div>
+          </div> <!-- FIN DE VUE MONDE -->
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
@@ -342,6 +340,44 @@
             </div>
           </div>
 
+          <!-- BOUTON SUPPORT FLOTTANT -->
+          <button type="button" id="btn-floating-support" class="floating-support-btn">?</button>
+
+          <!-- MENU SUPPORT MODAL -->
+          <div id="support-modal" class="support-modal-overlay">
+            <div class="support-modal">
+              <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
+              
+              <!-- Vue 1 : Choix du type de ticket -->
+              <div id="support-menu-view">
+                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
+                <div class="support-grid">
+                  <button type="button" class="support-option" onclick="openSupportForm('clan')"><span class="icon">🛡️</span><span>Créer un clan</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('famille')"><span class="icon">🌳</span><span>Créer une famille</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('suggestion')"><span class="icon">💡</span><span>Faire une suggestion</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('staff')"><span class="icon">👑</span><span>Rejoindre le staff</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('bug')"><span class="icon">🐛</span><span>Signaler un bug</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('joueur')"><span class="icon">⚠️</span><span>Signaler un joueur</span></button>
+                </div>
+              </div>
+
+              <!-- Vue 2 : Le formulaire -->
+              <div id="support-form-view" style="display: none;">
+                <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
+                <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
+                
+                <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Sujet</label>
+                <input type="text" id="support-sujet" placeholder="En quelques mots..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 15px;" />
+                
+                <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Description</label>
+                <textarea id="support-description" rows="4" placeholder="Explique ta demande en détail..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 20px;"></textarea>
+                
+                <button type="button" id="btn-submit-ticket" class="btn-primary" style="width: 100%;">Envoyer le ticket</button>
+              </div>
+
+            </div>
+          </div>
+
         </div> <!-- FIN APP-CONTENT -->
 
         <!-- BARRE DE NAVIGATION -->
@@ -352,56 +388,6 @@
           <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
-
-                  <!-- BOUTON SUPPORT FLOTTANT -->
-                  <button type="button" id="btn-floating-support" class="floating-support-btn">?</button>
-
-                  <!-- MENU SUPPORT MODAL -->
-                  <div id="support-modal" class="support-modal-overlay">
-                    <div class="support-modal">
-                      <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
-                      
-                      <!-- Vue 1 : Choix du type de ticket -->
-                      <div id="support-menu-view">
-                        <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
-                        <div class="support-grid">
-                          <button type="button" class="support-option" onclick="openSupportForm('clan')">
-                            <span class="icon">🛡️</span><span>Créer un clan</span>
-                          </button>
-                          <button type="button" class="support-option" onclick="openSupportForm('famille')">
-                            <span class="icon">🌳</span><span>Créer une famille</span>
-                          </button>
-                          <button type="button" class="support-option" onclick="openSupportForm('suggestion')">
-                            <span class="icon">💡</span><span>Faire une suggestion</span>
-                          </button>
-                          <button type="button" class="support-option" onclick="openSupportForm('staff')">
-                            <span class="icon">👑</span><span>Rejoindre le staff</span>
-                          </button>
-                          <button type="button" class="support-option" onclick="openSupportForm('bug')">
-                            <span class="icon">🐛</span><span>Signaler un bug</span>
-                          </button>
-                          <button type="button" class="support-option" onclick="openSupportForm('joueur')">
-                            <span class="icon">⚠️</span><span>Signaler un joueur</span>
-                          </button>
-                        </div>
-                      </div>
-        
-                      <!-- Vue 2 : Le formulaire (caché au début) -->
-                      <div id="support-form-view" style="display: none;">
-                        <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
-                        <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
-                        
-                        <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Sujet</label>
-                        <input type="text" id="support-sujet" placeholder="En quelques mots..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 15px;" />
-                        
-                        <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Description</label>
-                        <textarea id="support-description" rows="4" placeholder="Explique ta demande en détail..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 20px;"></textarea>
-                        
-                        <button type="button" id="btn-submit-ticket" class="btn-primary" style="width: 100%;">Envoyer le ticket</button>
-                      </div>
-        
-                    </div>
-                  </div>
       </div> <!-- FIN SCREEN-APP -->
 
       <div id="toast-success" class="toast hidden">
