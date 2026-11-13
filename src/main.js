@@ -717,3 +717,36 @@ document.getElementById('btn-submit-ticket').addEventListener('click', async () 
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
   }
 });
+
+// --- LOGIQUE DES PARAMÈTRES ---
+const settingsModal = document.getElementById('settings-modal');
+
+document.getElementById('btn-open-settings').addEventListener('click', () => {
+  settingsModal.classList.add('active');
+});
+
+document.getElementById('btn-close-settings').addEventListener('click', () => {
+  settingsModal.classList.remove('active');
+});
+
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) settingsModal.classList.remove('active');
+});
+
+// --- LOGIQUE POUR RELIRE LES CRÉDITS DEPUIS LES PARAMÈTRES ---
+document.getElementById('btn-open-credits').addEventListener('click', () => {
+  settingsModal.classList.remove('active');
+  screenApp.classList.remove('active');
+  screenCredits.classList.add('active');
+  
+  const btnContinue = document.getElementById('btn-continue-credits');
+  btnContinue.textContent = "Retour à l'application";
+  
+  btnContinue.onclick = () => {
+    screenCredits.classList.remove('active');
+    screenApp.classList.add('active');
+    btnContinue.textContent = "Entrer dans les Terres du Crépuscule";
+    btnContinue.onclick = null; 
+    window.location.reload(); // Recharge pour réinitialiser le bouton
+  };
+});
