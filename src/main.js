@@ -664,3 +664,84 @@ const panzoom = Panzoom(mapContent, {
   contain: 'outside', 
   cursor: 'grab'
 });
+
+// --- LOGIQUE DU SUPPORT (TICKETS) ---
+let currentTicketType = "";
+
+// Ouvrir le menu
+document.getElementById('btn-floating-support').addEventListener('click', () => {
+  document.getElementById('support-modal').classList.add('active');
+  document.getElementById('support-menu-view').style.display = 'block';
+  document.getElementById('support-form-view').style.display = 'none';
+});
+
+// Fermer le menu
+document.getElementById('btn-close-support').addEventListener('click', () => {
+  document.getElementById('support-modal').classList.remove('active');
+});
+
+// Retour arrière (du formulaire vers le menu)
+document.getElementById('btn-back-support').addEventListener('click', () => {
+  document.getElementById('support-menu-view').style.display = 'block';
+  document.getElementById('support-form-view').style.display = 'none';
+});
+
+// Ouvrir un formulaire spécifique
+window.openSupportForm = function(type) {
+  currentTicketType = type;
+  document.getElementById('support-menu-view').style.display = 'none';
+  document.getElementById('support-form-view').style.display = 'block';
+  
+  // Changer le titre selon le bouton cliqué
+  const titles = {
+    clan: "Créer un clan",
+    famille: "Créer une famille",
+    suggestion: "Faire une suggestion",
+    staff: "Rejoindre le staff",
+    bug: "Signaler un bug",
+    joueur: "Signaler un joueur"
+  };
+  document.getElementById('support-form-title').textContent = titles[type];
+  
+  // Vider les champs
+  document.getElementById('support-sujet').value = '';
+  document.getElementById('support-description').value = '';
+};
+
+// Envoyer le ticket à Supabase
+document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
+  const sujet = document.getElementById('support-sujet').value;
+  const description = document.getElementById('support-description').value;
+
+  if (!sujet || !description) {
+    alert("Merci de remplir tous les champs.");
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return alert("Tu dois être connecté.");
+
+  // Envoi à la base de données
+  const { error } = await supabase.from('tickets').insert({
+    user_id: user.id,
+    type_ticket: currentTicketType,
+    sujet: sujet,
+    description: description
+  });
+
+  if (error) {
+    alert("Erreur lors de l'envoi : " + error.message);
+  } else {
+    // Succès !
+    document.getElementById('support-modal').classList.remove('active');
+    
+    // On réutilise ton popup de succès (toast)
+    const toast = document.getElementById('toast-success');
+    toast.querySelector('h4').textContent = "Ticket envoyé !";
+    toast.querySelector('p').textContent = "Le staff va traiter ta demande dès que possible.";
+    
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('show'), 50);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+  }
+});
