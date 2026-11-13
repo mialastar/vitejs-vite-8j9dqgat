@@ -389,6 +389,7 @@ document.querySelector('[data-sub="all"]').addEventListener('click', loadAllFich
 
 // --- PAGE DE DÉTAIL ---
 function openFicheDetail(fiche) {
+  currentRelationFicheId = fiche.id; 
   document.getElementById('view-fiches').classList.remove('active');
   document.getElementById('view-fiche-detail').classList.add('active');
   window.scrollTo(0, 0);
@@ -749,4 +750,78 @@ document.getElementById('btn-open-credits').addEventListener('click', () => {
     btnContinue.onclick = null; 
     window.location.reload(); // Recharge pour réinitialiser le bouton
   };
+});
+
+// --- LOGIQUE DES RELATIONS ---
+let currentRelationFicheId = null; // Sert à savoir de quelle fiche on part
+
+// Quand on clique sur le bouton "Demander" dans l'onglet Relations
+document.getElementById('btn-request-relation').addEventListener('click', async () => {
+  // currentRelationFicheId est récupéré dans la fonction openFicheDetail
+  if(!currentRelationFicheId) return;
+
+  document.getElementById('relation-modal').classList.add('active');
+  document.getElementById('rel-message').value = '';
+
+  const selectCible = document.getElementById('rel-cible');
+  selectCible.innerHTML = '<option value="">Chargement...</option>';
+
+  // On va chercher toutes les fiches validées SAUF la fiche actuelle
+  const { data: fiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée').neq('id', currentRelationFicheId);
+  
+  selectCible.innerHTML = '<option value="">Choisir un personnage...</option>';
+  if (fiches && fiches.length > 0) {
+    fiches.forEach(f => {
+      selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`;
+    });
+  } else {
+    selectCible.innerHTML = '<option value="">Aucun autre personnage disponible</option>';
+  }
+});
+
+// Fermer la modale
+document.getElementById('btn-close-relation').addEventListener('click', () => {
+  document.getElementById('relation-modal').classList.remove('active');
+});
+
+// Envoyer la demande (crée un ticket)
+document.getElementById('btn-submit-relation').addEventListener('click', async () => {
+  const type = document.getElementById('rel-type').value;
+  const cibleId = document.getElementById('rel-cible').value;
+  const message = document.getElementById('rel-message').value;
+
+  if (!cibleId || !message) {
+    alert("Merci de choisir un personnage et d'écrire un petit message.");
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // On récupère les noms pour faire un joli ticket
+  const { data: ficheSource } = await supabase.from('fiches_oc').select('nom').eq('id', currentRelationFicheId).single();
+  const { data: ficheCible } = await supabase.from('fiches_oc').select('nom').eq('id', cibleId).single();
+
+  const sujet = `Relation: ${ficheSource.nom} & ${ficheCible.nom}`;
+  const description = `Type de lien : ${type}\n\nMessage : ${message}`;
+
+  // On crée le ticket pour le staff
+  const { error } = await supabase.from('tickets').insert({
+    user_id: user.id, 
+    type_ticket: 'relation', 
+    sujet: sujet, 
+    description: description
+  });
+
+  if (error) {
+    alert("Erreur lors de l'envoi : " + error.message);
+  } else {
+    document.getElementById('relation-modal').classList.remove('active');
+    
+    const toast = document.getElementById('toast-success');
+    toast.querySelector('h4').textContent = "Demande envoyée !";
+    toast.querySelector('p').textContent = "Le staff va contacter l'autre joueur pour valider cette relation.";
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('show'), 50);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+  }
 });

@@ -258,22 +258,27 @@
                 <p><span id="detail-clan">Clan</span> • <span id="detail-rang">Rang</span></p>
               </div>
             </div>
+            
             <div class="detail-tabs">
               <button type="button" class="detail-tab-btn active" data-dtab="histoire">Histoire</button>
               <button type="button" class="detail-tab-btn" data-dtab="perso">Caractère</button>
-              <button type="button" class="detail-tab-btn" data-dtab="stats">Compétences & Stats</button>
+              <button type="button" class="detail-tab-btn" data-dtab="stats">Stats</button>
+              <button type="button" class="detail-tab-btn" data-dtab="relations">Relations</button>
             </div>
+            
             <div class="detail-content">
               <div id="dtab-histoire" class="dtab active">
                 <h3>Apparence</h3><p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p><p><strong>Yeux :</strong> <span id="detail-yeux">Non renseigné</span></p>
                 <h3>Origines</h3><p id="detail-origines">Non renseigné.</p>
                 <h3>Événements marquants</h3><p id="detail-evenements">Non renseigné.</p>
               </div>
+              
               <div id="dtab-perso" class="dtab">
                 <h3>Personnalité</h3><p><strong>Traits :</strong> <span id="detail-traits">Non renseigné</span></p><p><strong>Qualités :</strong> <span id="detail-qualites">Non renseigné</span></p><p><strong>Défauts :</strong> <span id="detail-defauts">Non renseigné</span></p>
                 <h3>Motivations</h3><p><strong>Objectifs court terme :</strong> <span id="detail-obj-court">Non renseigné</span></p><p><strong>Objectifs long terme :</strong> <span id="detail-obj-long">Non renseigné</span></p><p><strong>Rêves :</strong> <span id="detail-reves">Non renseigné</span></p>
                 <h3>Faiblesses</h3><p><strong>Peurs :</strong> <span id="detail-peurs">Non renseigné</span></p><p><strong>Vulnérabilités :</strong> <span id="detail-vulnerabilites">Non renseigné</span></p>
               </div>
+              
               <div id="dtab-stats" class="dtab">
                 <h3>Compétences</h3><div id="detail-competences-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div><p><em id="detail-competences-details">Aucun détail fourni.</em></p>
                 <h3 style="margin-top: 30px;">Statistiques</h3>
@@ -282,6 +287,18 @@
                 <div class="stat-bar-container"><span>Endurance</span><div class="stat-bar-bg"><div id="bar-endurance" class="stat-bar-fill"></div></div><span id="num-endurance">0</span></div>
                 <div class="stat-bar-container"><span>Ruse</span><div class="stat-bar-bg"><div id="bar-ruse" class="stat-bar-fill"></div></div><span id="num-ruse">0</span></div>
                 <div class="stat-bar-container"><span>Charisme</span><div class="stat-bar-bg"><div id="bar-charisme" class="stat-bar-fill"></div></div><span id="num-charisme">0</span></div>
+              </div>
+
+              <!-- Onglet 4 : Relations -->
+              <div id="dtab-relations" class="dtab">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                  <h3 style="margin: 0;">Relations</h3>
+                  <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-request-relation">➕ Demander</button>
+                </div>
+                
+                <div id="detail-relations-list">
+                  <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Aucune relation validée pour le moment.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -383,7 +400,7 @@
                 <button type="button" class="btn-secondary" id="btn-open-credits" style="justify-content: flex-start; gap: 10px;">
                   ⭐ Relire les crédits
                 </button>
-                <button type="button" class="btn-secondary" onclick="window.open('https://discord.gg/PwxZMT3RAG')" style="justify-content: flex-start; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="window.open('https://discord.gg/TON_LIEN_DISCORD', '_blank')" style="justify-content: flex-start; gap: 10px;">
                   💬 Rejoindre le Discord
                 </button>
                 <button type="button" class="btn-secondary" onclick="alert('Gestion des notifications bientôt disponible !')" style="justify-content: flex-start; gap: 10px;">
@@ -393,6 +410,41 @@
                   🚪 Se déconnecter
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- MODAL DEMANDE DE RELATION -->
+          <div id="relation-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 450px;">
+              <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
+              
+              <div class="form-group">
+                <label>Type de relation</label>
+                <select id="rel-type">
+                  <option>Famille</option>
+                  <option>Compagnon</option>
+                  <option>Ami</option>
+                  <option>Rival</option>
+                  <option>Ennemi</option>
+                  <option>Mentor</option>
+                  <option>Apprenti</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Personnage ciblé</label>
+                <select id="rel-cible">
+                  <option value="">Chargement des personnages...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Message pour le staff (et le joueur ciblé)</label>
+                <textarea id="rel-message" rows="3" placeholder="Explique brièvement l'histoire de cette relation..."></textarea>
+              </div>
+
+              <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
             </div>
           </div>
 
