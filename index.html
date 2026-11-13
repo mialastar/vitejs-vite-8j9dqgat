@@ -300,7 +300,7 @@
             <div class="profile-header">
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
-              <p id="profile-title-badge" class="profile-title-badge">Titre (Bientôt)</p>
+              <p id="profile-title-badge" class="profile-title-badge">Aucun rôle</p>
               <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
             </div>
 
@@ -338,7 +338,10 @@
             <div class="profile-actions">
               <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span></button>
               <button type="button" class="btn-secondary" id="btn-open-settings">⚙️ Paramètres</button>
-              <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel de Gestion</button>
+              <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel Admin</button>
+              
+              <!-- NOUVEAU BOUTON : PANEL DE GESTION RP -->
+              <button type="button" class="btn-secondary" style="display: none;" id="btn-rp-panel">👑 Gérer mon Clan</button>
               <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">Déconnexion</button>
             </div>
           </div>
@@ -420,6 +423,26 @@
           <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
+
+                  <!-- MODAL PANEL DE GESTION RP (CHEF) -->
+                  <div id="rp-panel-modal" class="support-modal-overlay">
+                    <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                      <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
+                      <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
+                      
+                      <!-- Boutons d'actions -->
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Assemblée bientôt disponible !')">📢 Convoquer Assemblée</button>
+                        <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Guerre bientôt disponible !')">⚔️ Déclarer Guerre</button>
+                      </div>
+        
+                      <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
+                      
+                      <div id="rp-members-list">
+                        <p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement des membres...</p>
+                      </div>
+                    </div>
+                  </div>
       </div> <!-- FIN SCREEN-APP -->
 
       <div id="toast-success" class="toast hidden">

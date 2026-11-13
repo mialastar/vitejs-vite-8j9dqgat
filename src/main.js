@@ -448,6 +448,7 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
 });
 
 // --- PROFIL ---
+// --- LOGIQUE PROFIL (MISE À JOUR) ---
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -457,6 +458,19 @@ async function loadProfil() {
 
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if (!profile) { const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); profile = newProfile; }
+
+  // --- NOUVEAU : AFFICHER LE RÔLE RP ---
+  const roleRP = profile.role_rp || 'Aucun rôle';
+  document.getElementById('profile-title-badge').textContent = roleRP;
+
+  // Si c'est un Chef, on affiche le bouton de gestion
+  const btnRpPanel = document.getElementById('btn-rp-panel');
+  if (roleRP === 'Chef' || roleRP === 'Chef de Clan') {
+    btnRpPanel.style.display = 'flex';
+    btnRpPanel.onclick = () => openRpPanel();
+  } else {
+    btnRpPanel.style.display = 'none';
+  }
 
   const pts = profile ? profile.reputation_points : 0;
   let title = "Inconnu", nextThreshold = 25;
@@ -629,3 +643,59 @@ document.getElementById('btn-submit-relation').addEventListener('click', async (
     loadMyRelations();
   }
 });
+
+// --- LOGIQUE DU PANEL DE GESTION RP (CHEF) ---
+document.getElementById('btn-close-rp-panel').addEventListener('click', () => {
+  document.getElementById('rp-panel-modal').classList.remove('active');
+});
+
+async function openRpPanel() {
+  document.getElementById('rp-panel-modal').classList.add('active');
+  const container = document.getElementById('rp-members-list');
+  container.innerHTML = '<p style="color: gray; text-align: center;">Chargement des membres...</p>';
+
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // 1. On trouve le clan du Chef (grâce à sa fiche OC validée)
+  const { data: myFiche } = await supabase.from('fiches_oc').select('clan').eq('user_id', user.id).eq('statut', 'Validée').single();
+  
+  if (!myFiche) {
+    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Impossible de trouver ton clan.</p>';
+    return;
+  }
+
+  // 2. On va chercher toutes les fiches validées de ce même clan
+  const { data: membres, error } = await supabase
+    .from('fiches_oc')
+    .select('id, nom, rang, user_id, image_url')
+    .eq('clan', myFiche.clan)
+    .eq('statut', 'Validée');
+
+  if (error || membres.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun membre trouvé.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  membres.forEach(membre => {
+    const card = document.createElement('div');
+    card.className = 'fiche-card';
+    card.style.padding = '15px';
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('${membre.image_url || 'https://cdn.discordapp.com/embed/avatars/0.png'}'); background-size: cover; background-position: center; border: 1px solid var(--accent);"></div>
+          <div>
+            <h4 style="font-family: var(--font-title); color: var(--accent); font-size: 1.1rem; margin: 0;">${membre.nom}</h4>
+            <span style="font-size: 0.8rem; color: gray;">Rang : ${membre.rang}</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn-action btn-modifier" style="font-size: 0.7rem; padding: 5px 10px;" onclick="alert('Promotion à venir')">Promouvoir</button>
+          <button class="btn-action btn-supprimer" style="font-size: 0.7rem; padding: 5px 10px;" onclick="alert('Exil à venir')">Exiler</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
