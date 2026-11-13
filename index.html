@@ -273,58 +273,80 @@
             </div>
           </div>
 
-          <!-- VUE PROFIL -->
-          <div id="view-profil" class="view">
-            <div class="profile-header">
-              <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
-              <h2 id="profile-username">Chargement...</h2>
-              <p id="profile-role" class="profile-role-badge">Joueur</p>
-              <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
-            </div>
-
-            <div class="profile-card">
-              <div class="rep-header">
-                <span id="profile-rep-title">Inconnu</span>
-                <span id="profile-rep-points">0 pts</span>
-              </div>
-              <div class="progress-bar-bg" style="margin-top: 10px;">
-                <div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div>
-              </div>
-              <p style="font-size: 0.75rem; color: gray; margin-top: 5px; text-align: right;">Prochain rang : 25 pts</p>
-            </div>
-
-            <div class="profile-card">
-              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Mes personnages</h3>
-              <div id="profile-oc-preview" style="display: flex; gap: 10px;">
-                <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
-              </div>
-              <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
-            </div>
-
-            <div class="profile-card">
-              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Notifications</h3>
-              <div id="profile-notifications">
-                <p style="color: gray; font-size: 0.9rem;">Aucune nouvelle notification.</p>
-              </div>
-            </div>
-
-            <div class="profile-actions">
-              <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">
-                🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span>
-              </button>
-              <button type="button" class="btn-secondary" onclick="alert('Ouverture des paramètres...')">
-                ⚙️ Paramètres
-              </button>
-              <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">
-                🛡️ Panel de Gestion
-              </button>
-              <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">
-                Déconnexion
-              </button>
-            </div>
-          </div>
-
-        </div>
+                    <!-- VUE PROFIL -->
+                    <div id="view-profil" class="view">
+            
+                      <!-- Bannière de profil -->
+                      <div id="profile-banner" class="profile-banner"></div>
+          
+                      <div class="profile-header">
+                        <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
+                        <h2 id="profile-username">Chargement...</h2>
+                        <p id="profile-title-badge" class="profile-title-badge">Titre (Bientôt)</p>
+                        <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
+                      </div>
+          
+                      <!-- Réputation & Progression -->
+                      <div class="profile-card">
+                        <div class="rep-header">
+                          <span id="profile-rep-title">Inconnu</span>
+                          <span id="profile-rep-points">0 pts</span>
+                        </div>
+                        <div class="progress-bar-bg" style="margin-top: 10px;">
+                          <div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <p id="profile-rep-next" style="font-size: 0.75rem; color: gray; margin-top: 5px; text-align: right;">Prochain rang : 25 pts</p>
+                        <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                          <p style="font-size: 0.8rem; color: #cbd5e1;"><strong>Dernière action :</strong> Bienvenue sur le site (+0)</p>
+                        </div>
+                      </div>
+          
+                      <!-- Mes OC -->
+                      <div class="profile-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                          <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.2rem;">Mes personnages</h3>
+                          <span id="profile-oc-count" style="font-size: 0.8rem; color: gray;">0 / 5</span>
+                        </div>
+                        <div id="profile-oc-preview" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                          <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
+                        </div>
+                        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
+                      </div>
+          
+                      <!-- Relations / Famille (Bientôt) -->
+                      <div class="profile-card">
+                        <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Relations</h3>
+                        <p style="color: gray; font-size: 0.9rem;">Système de liens et de familles en cours de création...</p>
+                      </div>
+          
+                      <!-- Raccourcis -->
+                      <div class="profile-card">
+                        <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">Liens utiles</h3>
+                        <div class="quick-links-grid">
+                          <button type="button" class="btn-secondary" onclick="alert('Ouverture du Discord...')">💬 Discord</button>
+                          <button type="button" class="btn-secondary" onclick="alert('Ouverture du Code du Guerrier...')">📜 Règles</button>
+                          <button type="button" class="btn-secondary" onclick="alert('Ouverture des Tickets...')">🎫 Support</button>
+                          <button type="button" class="btn-secondary" onclick="alert('Ouverture des Crédits...')">⭐ Crédits</button>
+                        </div>
+                      </div>
+          
+                      <!-- Boutons d'action -->
+                      <div class="profile-actions">
+                        <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">
+                          🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span>
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="alert('Ouverture des paramètres...')">
+                          ⚙️ Paramètres
+                        </button>
+                        <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">
+                          🛡️ Panel de Gestion
+                        </button>
+                        <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">
+                          Déconnexion
+                        </button>
+                      </div>
+          
+                    </div>
 
         <nav class="bottom-nav">
           <button type="button" class="nav-btn active" data-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>

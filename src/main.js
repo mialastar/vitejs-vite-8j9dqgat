@@ -473,26 +473,69 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.getElementById('subview-all').classList.add('active');
 });
 
-// --- LOGIQUE DU PROFIL ---
+// --- LOGIQUE DU PROFIL (AVEC VRAIE RÉPUTATION) ---
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  // 1. Infos Discord
   const username = user.user_metadata.full_name || "Joueur Inconnu";
   const avatarUrl = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-  
   document.getElementById('profile-username').textContent = username;
   document.getElementById('profile-avatar').src = avatarUrl;
 
+  // 2. Récupérer ou CRÉER le profil dans la base de données
+  let { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  
+  if (!profile) {
+    // Si le joueur n'a pas de profil (première connexion), on le crée
+    const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single();
+    profile = newProfile;
+  }
+
+  // 3. Calculer le Rang en fonction des points
+  const pts = profile ? profile.reputation_points : 0;
+  let title = "Inconnu";
+  let nextThreshold = 25;
+
+  if (pts >= 25 && pts < 50) { title = "Loyal"; nextThreshold = 50; }
+  else if (pts >= 50 && pts < 80) { title = "Fiable"; nextThreshold = 80; }
+  else if (pts >= 80 && pts < 120) { title = "Respecté"; nextThreshold = 120; }
+  else if (pts >= 120 && pts < 170) { title = "Vétéran"; nextThreshold = 170; }
+  else if (pts >= 170 && pts < 230) { title = "Stratège"; nextThreshold = 230; }
+  else if (pts >= 230 && pts < 300) { title = "Légende"; nextThreshold = 300; }
+  else if (pts >= 300 && pts < 400) { title = "Étoile Vivante"; nextThreshold = 400; }
+  else if (pts >= 400 && pts < 500) { title = "Immortel"; nextThreshold = 500; }
+  else if (pts >= 500) { title = "Au-delà des Lunes"; nextThreshold = 500; }
+
+  // 4. Afficher la réputation
+  document.getElementById('profile-rep-points').textContent = `${pts} pts`;
+  document.getElementById('profile-rep-title').textContent = title;
+  document.getElementById('profile-rep-fill').style.width = `${(pts / nextThreshold) * 100}%`;
+  document.getElementById('profile-rep-next').textContent = `Prochain rang : ${nextThreshold} pts`;
+
+  // 5. Gérer la bannière (Image de fond)
+  const banner = document.getElementById('profile-banner');
+  if (profile && profile.banner_url) {
+    banner.style.backgroundImage = `url('${profile.banner_url}')`;
+  } else {
+    banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; // Image par défaut
+  }
+
+  // 6. Récupérer les fiches OC
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
   const ocContainer = document.getElementById('profile-oc-preview');
+  const ocCount = document.getElementById('profile-oc-count');
   ocContainer.innerHTML = ''; 
+
+  const fichesLength = fiches ? fiches.length : 0;
+  ocCount.textContent = `${fichesLength} / 5`;
 
   if (fiches && fiches.length > 0) {
     fiches.forEach(fiche => {
       const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
       ocContainer.innerHTML += `
-        <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()">
           <div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div>
           <span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span>
         </div>
@@ -501,11 +544,6 @@ async function loadProfil() {
   } else {
     ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>';
   }
-
-  const repPoints = 15; 
-  document.getElementById('profile-rep-points').textContent = `${repPoints} pts`;
-  document.getElementById('profile-rep-title').textContent = "Inconnu";
-  document.getElementById('profile-rep-fill').style.width = `${(repPoints / 25) * 100}%`;
 }
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
