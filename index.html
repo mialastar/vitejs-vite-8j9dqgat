@@ -91,58 +91,61 @@
           <!-- VUE MONDE (LORE & CARTE) -->
           <div id="view-monde" class="view">
             
-            <!-- Onglets du Monde -->
-            <div class="sub-tabs">
-              <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
-              <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
-              <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
+            <!-- LES 2 GRANDS ONGLETS -->
+            <div class="main-tabs">
+              <button type="button" class="monde-tab-btn active" data-monde="lore">Lore</button>
+              <button type="button" class="monde-tab-btn" data-monde="carte">Carte</button>
             </div>
 
-            <!-- Contenu : Histoire -->
-            <div id="lore-histoire" class="lore-content active">
-              <h3>La Création des Terres</h3>
-              <p>Il y a bien longtemps, quatre chats légendaires s'unirent pour vaincre une menace terrible dont le nom s'est perdu dans les brumes du temps. Après leur victoire, la discorde éclata. Se disputant les meilleures terres de chasse, ils se séparèrent, donnant naissance aux quatre Clans que nous connaissons aujourd'hui.</p>
-              
-              <h3>La Source Lunaire</h3>
-              <p>C'est dans une grotte souterraine, cachée dans une zone neutre, que se trouve le lien avec nos ancêtres. Un bassin aux eaux lumineuses permet aux Guérisseurs et aux Chefs de communiquer avec le Clan de la Lune.</p>
+            <!-- CONTENU : LORE -->
+            <div id="monde-lore" class="monde-content active">
+              <!-- Sous-onglets du Lore -->
+              <div class="sub-tabs">
+                <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
+                <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
+                <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
+              </div>
+
+              <!-- Histoire -->
+              <div id="lore-histoire" class="lore-content active">
+                <h3>La Création des Terres</h3>
+                <p>Il y a bien longtemps, quatre chats légendaires s'unirent pour vaincre une menace terrible dont le nom s'est perdu dans les brumes du temps. Après leur victoire, la discorde éclata. Se disputant les meilleures terres de chasse, ils se séparèrent, donnant naissance aux quatre Clans que nous connaissons aujourd'hui.</p>
+              </div>
+
+              <!-- Clans -->
+              <div id="lore-clans" class="lore-content">
+                <div class="clan-lore-card">
+                  <h4>Clan de la Forêt</h4>
+                  <p>Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p>
+                </div>
+                <div class="clan-lore-card">
+                  <h4>Clan de la Pluie</h4>
+                  <p>Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p>
+                </div>
+                <div class="clan-lore-card">
+                  <h4>Clan du Zénith</h4>
+                  <p>Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p>
+                </div>
+                <div class="clan-lore-card">
+                  <h4>Clan de la Brume</h4>
+                  <p>Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.</p>
+                </div>
+              </div>
+
+              <!-- Source Lunaire -->
+              <div id="lore-source" class="lore-content">
+                <div class="source-image" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop');"></div>
+                <p><strong>Lieu Neutre et Sacré</strong></p>
+                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. C'est ici que le voile entre le monde des vivants et celui des esprits est le plus fin.</p>
+              </div>
             </div>
 
-            <!-- Contenu : Les Clans -->
-            <div id="lore-clans" class="lore-content">
-              <div class="clan-lore-card">
-                <h4>Clan de la Forêt</h4>
-                <p>Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p>
+            <!-- CONTENU : CARTE -->
+            <div id="monde-carte" class="monde-content">
+              <div class="map-container" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop');">
+                <p>La carte interactive des Terres du Crépuscule est en cours de création...</p>
+                <p style="font-size: 0.8rem; margin-top: 10px;">(Bientôt disponible)</p>
               </div>
-              <div class="clan-lore-card">
-                <h4>Clan de la Pluie</h4>
-                <p>Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p>
-              </div>
-              <div class="clan-lore-card">
-                <h4>Clan du Zénith</h4>
-                <p>Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p>
-              </div>
-              <div class="clan-lore-card">
-                <h4>Clan de la Brume</h4>
-                <p>Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.</p>
-              </div>
-              
-              <h3 style="margin-top: 30px;">Les Clans Spirituels (Bientôt)</h3>
-              <div class="clan-lore-card" style="border-color: rgba(255,255,255,0.2); opacity: 0.7;">
-                <h4>Clan de la Lune</h4>
-                <p>Le royaume des esprits bienveillants et des ancêtres.</p>
-              </div>
-              <div class="clan-lore-card" style="border-color: rgba(255,255,255,0.2); opacity: 0.7;">
-                <h4>Forêt des Ronces</h4>
-                <p>Le lieu sombre où errent les esprits maudits.</p>
-              </div>
-            </div>
-
-            <!-- Contenu : Source Lunaire -->
-            <div id="lore-source" class="lore-content">
-              <div class="source-image" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop');"></div>
-              <p><strong>Lieu Neutre et Sacré</strong></p>
-              <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. C'est ici que le voile entre le monde des vivants et celui des esprits est le plus fin.</p>
-              <p><strong>La Trêve</strong> : Il est strictement interdit de verser le sang à la Source Lunaire. Quiconque enfreint cette règle s'attire la malédiction éternelle du Clan de la Lune.</p>
             </div>
 
           </div>

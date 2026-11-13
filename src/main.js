@@ -47,7 +47,7 @@ async function checkUser() {
 }
 checkUser();
 
-// --- NAVIGATION ---
+// --- NAVIGATION GLOBALE ---
 const navBtns = document.querySelectorAll('.nav-btn');
 const views = document.querySelectorAll('.view');
 navBtns.forEach(btn => {
@@ -63,7 +63,19 @@ navBtns.forEach(btn => {
   });
 });
 
-// --- ONGLETS LORE (MONDE) ---
+// --- ONGLETS DU MONDE (LORE / CARTE) ---
+const mondeTabBtns = document.querySelectorAll('.monde-tab-btn');
+const mondeContents = document.querySelectorAll('.monde-content');
+mondeTabBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    mondeTabBtns.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    mondeContents.forEach(c => c.classList.remove('active'));
+    document.getElementById(`monde-${e.currentTarget.getAttribute('data-monde')}`).classList.add('active');
+  });
+});
+
+// --- SOUS-ONGLETS LORE ---
 const loreTabBtns = document.querySelectorAll('.lore-tab-btn');
 const loreContents = document.querySelectorAll('.lore-content');
 loreTabBtns.forEach(btn => {
@@ -75,7 +87,7 @@ loreTabBtns.forEach(btn => {
   });
 });
 
-// --- ONGLETS FICHES ---
+// --- SOUS-ONGLETS FICHES ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
 subTabBtns.forEach(btn => {
@@ -145,7 +157,6 @@ btnNext.addEventListener('click', async () => {
     const stats_ruse = document.getElementById('stat-ruse').value;
     const stats_charisme = document.getElementById('stat-charisme').value;
 
-    // --- UPLOAD DE L'IMAGE ---
     let imageUrl = currentEditingImage; 
     const fileInput = document.getElementById('image-upload');
     
