@@ -117,13 +117,12 @@
               </div>
             </div>
 
+            <!-- CONTENU : CARTE (CORRIGÉ) -->
             <div id="monde-carte" class="monde-content">
-              <div class="map-wrapper">
-                <img id="map-image" src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop" alt="Carte des Terres" />
-                <button type="button" class="map-pin" style="top: 25%; left: 30%;" data-lieu="foret" title="Clan de la Forêt"><span class="pin-dot"></span></button>
-                <button type="button" class="map-pin" style="top: 60%; left: 70%;" data-lieu="pluie" title="Clan de la Pluie"><span class="pin-dot"></span></button>
-                <button type="button" class="map-pin" style="top: 15%; left: 80%;" data-lieu="zenith" title="Clan du Zénith"><span class="pin-dot"></span></button>
-                <button type="button" class="map-pin" style="top: 75%; left: 20%;" data-lieu="brume" title="Clan de la Brume"><span class="pin-dot"></span></button>
+              <div class="map-container">
+                <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin-bottom: 15px;">Carte des Terres</h3>
+                <p>La carte interactive est en cours de création par les cartographes du Crépuscule.</p>
+                <p style="font-size: 0.8rem; margin-top: 10px; color: gray;">(Bientôt disponible)</p>
               </div>
             </div>
           </div>
@@ -276,8 +275,6 @@
 
           <!-- VUE PROFIL -->
           <div id="view-profil" class="view">
-            
-            <!-- En-tête du profil -->
             <div class="profile-header">
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
@@ -285,7 +282,6 @@
               <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
             </div>
 
-            <!-- Réputation -->
             <div class="profile-card">
               <div class="rep-header">
                 <span id="profile-rep-title">Inconnu</span>
@@ -297,7 +293,6 @@
               <p style="font-size: 0.75rem; color: gray; margin-top: 5px; text-align: right;">Prochain rang : 25 pts</p>
             </div>
 
-            <!-- Mes OC -->
             <div class="profile-card">
               <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Mes personnages</h3>
               <div id="profile-oc-preview" style="display: flex; gap: 10px;">
@@ -306,7 +301,6 @@
               <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
             </div>
 
-            <!-- Notifications -->
             <div class="profile-card">
               <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Notifications</h3>
               <div id="profile-notifications">
@@ -314,7 +308,6 @@
               </div>
             </div>
 
-            <!-- Boutons d'action -->
             <div class="profile-actions">
               <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">
                 🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span>
@@ -329,7 +322,6 @@
                 Déconnexion
               </button>
             </div>
-
           </div>
 
         </div>

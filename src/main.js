@@ -47,7 +47,7 @@ async function checkUser() {
 }
 checkUser();
 
-// --- NAVIGATION GLOBALE ---
+// --- NAVIGATION GLOBALE (CORRIGÉE) ---
 const navBtns = document.querySelectorAll('.nav-btn');
 const views = document.querySelectorAll('.view');
 navBtns.forEach(btn => {
@@ -55,15 +55,20 @@ navBtns.forEach(btn => {
     navBtns.forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     views.forEach(v => v.classList.remove('active'));
+    
     const target = e.currentTarget.getAttribute('data-target');
     
     if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
     if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
     if(target === 'monde') document.getElementById('view-monde').classList.add('active');
+    if(target === 'profil') {
+      document.getElementById('view-profil').classList.add('active');
+      loadProfil(); // <--- On charge les données du profil ici
+    }
   });
 });
 
-// --- ONGLETS DU MONDE (LORE / CARTE) ---
+// --- ONGLETS DU MONDE ---
 const mondeTabBtns = document.querySelectorAll('.monde-tab-btn');
 const mondeContents = document.querySelectorAll('.monde-content');
 mondeTabBtns.forEach(btn => {
@@ -75,7 +80,6 @@ mondeTabBtns.forEach(btn => {
   });
 });
 
-// --- SOUS-ONGLETS LORE ---
 const loreTabBtns = document.querySelectorAll('.lore-tab-btn');
 const loreContents = document.querySelectorAll('.lore-content');
 loreTabBtns.forEach(btn => {
@@ -87,7 +91,7 @@ loreTabBtns.forEach(btn => {
   });
 });
 
-// --- SOUS-ONGLETS FICHES ---
+// --- ONGLETS FICHES ---
 const subTabBtns = document.querySelectorAll('.sub-tab-btn');
 const subviews = document.querySelectorAll('.subview');
 subTabBtns.forEach(btn => {
@@ -474,14 +478,12 @@ async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 1. Infos Discord de base
   const username = user.user_metadata.full_name || "Joueur Inconnu";
   const avatarUrl = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
   
   document.getElementById('profile-username').textContent = username;
   document.getElementById('profile-avatar').src = avatarUrl;
 
-  // 2. Récupérer les vraies fiches de l'utilisateur
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
   const ocContainer = document.getElementById('profile-oc-preview');
   ocContainer.innerHTML = ''; 
@@ -500,21 +502,15 @@ async function loadProfil() {
     ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>';
   }
 
-  // 3. Réputation (On utilise des fausses données en attendant que tu la crées)
-  const repPoints = 15; // À remplacer par les vraies données plus tard
+  const repPoints = 15; 
   document.getElementById('profile-rep-points').textContent = `${repPoints} pts`;
   document.getElementById('profile-rep-title').textContent = "Inconnu";
   document.getElementById('profile-rep-fill').style.width = `${(repPoints / 25) * 100}%`;
 }
 
-// Bouton Déconnexion
 document.getElementById('btn-logout').addEventListener('click', async () => {
   await supabase.auth.signOut();
   window.location.reload();
 });
 
-// Bouton Admin (Pour l'instant, on l'affiche tout le temps pour tester, plus tard on vérifiera le rôle)
 document.getElementById('btn-admin-panel').style.display = 'block';
-
-// Appeler la fonction quand on clique sur l'onglet Profil
-document.querySelector('[data-target="profil"]').addEventListener('click', loadProfil);
