@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Les Terres du Crépuscule</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -117,29 +118,29 @@
               </div>
             </div>
 
-            <!-- CONTENU : CARTE -->
-            <div id="monde-carte" class="monde-content">
-              <div class="map-hint" id="map-hint">
-                👆 Glisse pour explorer, clique sur les points lumineux pour voir les détails
-              </div>
-
-              <div class="map-scroll-container">
-                <div class="map-wrapper">
-                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
-                  
-                  <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
-                  <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
-                  <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
-                  <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie"><span class="pin-dot"></span></button>
-                  <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile"><span class="pin-dot pin-spirituel"></span></button>
-                  <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source"><span class="pin-dot pin-spirituel"></span></button>
-                  <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare"><span class="pin-dot pin-humain"></span></button>
-                  <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville"><span class="pin-dot pin-humain"></span></button>
-                </div>
-              </div>
-            </div>
-
-          </div> <!-- FIN DE VUE MONDE -->
+                       <!-- CONTENU : CARTE -->
+                       <div id="monde-carte" class="monde-content">
+                        <div class="map-hint" id="map-hint">
+                          👆 Glisse pour te déplacer, pince avec 2 doigts ou utilise la molette pour zoomer.
+                        </div>
+          
+                        <!-- La fenêtre qui affiche la carte -->
+                        <div id="map-viewport" class="map-viewport">
+                          <!-- L'image et les points qui vont être zoomés -->
+                          <div id="map-content" class="map-content">
+                            <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
+                            
+                            <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
+                            <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
+                            <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
+                            <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie"><span class="pin-dot"></span></button>
+                            <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile"><span class="pin-dot pin-spirituel"></span></button>
+                            <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source"><span class="pin-dot pin-spirituel"></span></button>
+                            <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare"><span class="pin-dot pin-humain"></span></button>
+                            <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville"><span class="pin-dot pin-humain"></span></button>
+                          </div>
+                        </div>
+                      </div>
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">

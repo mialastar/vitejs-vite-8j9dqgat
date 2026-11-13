@@ -638,3 +638,21 @@ document.getElementById('map-sheet-overlay').addEventListener('click', (e) => {
     e.target.classList.remove('active');
   }
 });
+
+// --- INITIALISATION DU ZOOM (PANZOOM) ---
+// On attend un petit peu que la page charge
+setTimeout(() => {
+  const mapContent = document.getElementById('map-content');
+  if (mapContent && typeof Panzoom !== 'undefined') {
+    // On active le zoom et le déplacement sur le contenu de la carte
+    const panzoom = Panzoom(mapContent, {
+      maxScale: 4,       // Zoom maximum (x4)
+      minScale: 1,       // Zoom minimum (x1)
+      contain: 'outside', // Empêche de perdre la carte
+      cursor: 'grab'
+    });
+
+    // Activer le zoom avec la molette de la souris
+    document.getElementById('map-viewport').addEventListener('wheel', panzoom.zoomWithWheel);
+  }
+}, 500); // On attend 500ms que l'image soit là

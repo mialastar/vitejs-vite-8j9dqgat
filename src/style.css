@@ -918,7 +918,8 @@ body {
 .map-pin:active .pin-spirituel { background: #60a5fa; box-shadow: 0 0 25px #60a5fa; }
 .map-pin:hover .pin-humain,
 .map-pin:active .pin-humain { background: #9ca3af; box-shadow: 0 0 25px #9ca3af; }
-/* --- CARTE INTERACTIVE (IMMENSE ET PROPRE) --- */
+
+/* --- CARTE INTERACTIVE AVEC ZOOM --- */
 .map-hint {
   background: rgba(251, 191, 36, 0.15);
   color: var(--accent);
@@ -926,51 +927,53 @@ body {
   padding: 10px;
   border-radius: 8px;
   font-size: 0.85rem;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   border: 1px solid rgba(251, 191, 36, 0.3);
-  animation: fadeOutHint 6s forwards;
 }
 
-@keyframes fadeOutHint {
-  0%, 70% { opacity: 1; }
-  100% { opacity: 0.2; } /* Devient transparent à la fin */
-}
-
-/* Conteneur de scroll horizontal */
-.map-scroll-container {
-  width: 100vw;
-  margin-left: calc(-50vw + 50%); /* Fait déborder la carte sur les côtés */
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch; 
-  padding-bottom: 15px;
-}
-
-.map-wrapper {
+/* La fenêtre qui contient la carte (taille fixe) */
+.map-viewport {
+  width: 100%;
+  height: 60vh; /* Prend 60% de la hauteur de l'écran */
+  min-height: 400px;
+  overflow: hidden; /* Empêche de déborder */
   position: relative;
-  width: 1500px; /* La carte est immense ! */
-  max-width: none;
-  margin: 0 auto;
-  border-top: 2px solid rgba(251, 191, 36, 0.3);
-  border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+  border-radius: 15px;
+  border: 2px solid rgba(251, 191, 36, 0.4);
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  background: #0a0a14;
+  cursor: grab;
+}
+
+.map-viewport:active {
+  cursor: grabbing;
+}
+
+/* Le contenu zoomable */
+.map-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: 0 0; /* Important pour Panzoom */
 }
 
 #map-image {
   width: 100%;
+  height: 100%;
+  object-fit: cover; /* L'image remplit la fenêtre sans se déformer */
   display: block;
-  object-fit: cover;
+  pointer-events: none; /* Empêche de glisser l'image seule */
 }
 
-/* --- LES POINTS (PINS) INVISIBLES AU DEPART --- */
+/* --- LES POINTS (PINS) --- */
 .map-pin {
   position: absolute;
   transform: translate(-50%, -50%);
   background: transparent;
   border: none;
   cursor: pointer;
-  width: 40px; /* Zone cliquable plus grande */
-  height: 40px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -978,48 +981,23 @@ body {
 }
 
 .pin-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--accent);
   border: 2px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 15px var(--accent);
-  
-  /* C'est ici que ça devient transparent */
-  opacity: 0.25; 
+  box-shadow: 0 0 10px var(--accent);
+  opacity: 0.4; /* Invisible au repos */
   transition: all 0.3s ease;
 }
 
-.pin-spirituel { background: #60a5fa; box-shadow: 0 0 15px #60a5fa; }
-.pin-humain { background: #9ca3af; box-shadow: 0 0 15px #9ca3af; }
+.pin-spirituel { background: #60a5fa; box-shadow: 0 0 10px #60a5fa; }
+.pin-humain { background: #9ca3af; box-shadow: 0 0 10px #9ca3af; }
 
-/* Effet quand on passe la souris ou qu'on touche l'écran */
+/* Devient visible au survol/clic */
 .map-pin:hover .pin-dot,
 .map-pin:active .pin-dot {
-  opacity: 1; /* Devient 100% visible */
-  transform: scale(1.6); /* Grossit */
-  box-shadow: 0 0 25px var(--accent), 0 0 40px var(--accent); /* Brille fort */
+  opacity: 1;
+  transform: scale(1.5);
+  box-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent);
 }
-
-/* --- TIROIR GLISSANT (BOTTOM SHEET) --- */
-/* Garde ton code du Bottom Sheet existant ici */
-.map-sheet-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s ease;
-}
-.map-sheet-overlay.active { opacity: 1; visibility: visible; }
-.map-sheet {
-  position: absolute; bottom: 0; left: 0; width: 100%;
-  background: rgba(15, 15, 25, 0.95); backdrop-filter: blur(15px);
-  border-top-left-radius: 20px; border-top-right-radius: 20px;
-  padding: 20px 25px 30px; transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  border-top: 2px solid var(--accent); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-}
-.map-sheet-overlay.active .map-sheet { transform: translateY(0); }
-.sheet-drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 15px auto; }
-.map-sheet h3 { font-family: var(--font-title); color: var(--accent); font-size: 1.6rem; margin-bottom: 10px; }
-.map-sheet p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
-.btn-close-sheet { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-family: var(--font-body); font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-.btn-close-sheet:hover { background: #fcd34d; transform: translateY(-2px); }
