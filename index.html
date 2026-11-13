@@ -117,24 +117,24 @@
               </div>
             </div>
 
-                       <!-- CONTENU : CARTE -->
-                       <div id="monde-carte" class="monde-content">
-                        <div class="map-wrapper">
-                          <!-- REMPLACE LE LIEN CI-DESSOUS PAR TON LIEN D'IMAGE -->
-                          <img id="map-image" src="VOTRE_LIEN_IMAGE_ICI" alt="Carte des Terres du Crépuscule" />
-                          
-                          <!-- Les 8 points interactifs -->
-                          <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret" title="Clan de la Forêt"><span class="pin-dot"></span></button>
-                          <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume" title="Clan de la Brume"><span class="pin-dot"></span></button>
-                          <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith" title="Clan du Zénith"><span class="pin-dot"></span></button>
-                          <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie" title="Clan de la Pluie"><span class="pin-dot"></span></button>
-                          
-                          <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile" title="Île Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
-                          <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source" title="Source Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
-                          <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare" title="Gare Abandonnée"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
-                          <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville" title="La Ville"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
-                        </div>
-                      </div>
+            <!-- CONTENU : CARTE -->
+            <div id="monde-carte" class="monde-content">
+              <div class="map-wrapper">
+                <!-- REMPLACE CE LIEN PAR CELUI DE TON IMAGE -->
+                <img id="map-image" src="https://share.gemini.google/nUfiessZCYtd" alt="Carte des Terres" />
+                
+                <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret" title="Clan de la Forêt"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume" title="Clan de la Brume"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith" title="Clan du Zénith"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie" title="Clan de la Pluie"><span class="pin-dot"></span></button>
+                
+                <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile" title="Île Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
+                <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source" title="Source Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
+                <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare" title="Gare Abandonnée"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
+                <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville" title="La Ville"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
+              </div>
+            </div>
+          </div>
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
@@ -282,82 +282,63 @@
             </div>
           </div>
 
-                    <!-- VUE PROFIL -->
-                    <div id="view-profil" class="view">
-            
-                      <!-- Bannière de profil -->
-                      <div id="profile-banner" class="profile-banner"></div>
-          
-                      <div class="profile-header">
-                        <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
-                        <h2 id="profile-username">Chargement...</h2>
-                        <p id="profile-title-badge" class="profile-title-badge">Titre (Bientôt)</p>
-                        <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
-                      </div>
-          
-                                  <!-- Réputation & Progression -->
+          <!-- VUE PROFIL -->
+          <div id="view-profil" class="view">
+            <div id="profile-banner" class="profile-banner"></div>
+            <div class="profile-header">
+              <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
+              <h2 id="profile-username">Chargement...</h2>
+              <p id="profile-title-badge" class="profile-title-badge">Titre (Bientôt)</p>
+              <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
+            </div>
+
             <div class="profile-card">
               <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.3rem; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Réputation</h3>
-              
               <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;">
                 <span id="profile-rep-title" style="font-size: 1.6rem; color: #fff; font-weight: bold; font-family: var(--font-title);">Inconnu</span>
                 <span id="profile-rep-points" style="font-size: 1.1rem; color: var(--accent); font-weight: bold;">0 pts</span>
               </div>
-
-              <div class="progress-bar-bg" style="margin-top: 10px; height: 8px;">
-                <div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div>
-              </div>
-              
+              <div class="progress-bar-bg" style="margin-top: 10px; height: 8px;"><div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div></div>
               <p id="profile-rep-next" style="font-size: 0.8rem; color: gray; margin-top: 8px; text-align: right;">Prochain rang : 25 pts</p>
             </div>
-          
-                      <!-- Mes OC -->
-                      <div class="profile-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                          <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.2rem;">Mes personnages</h3>
-                          <span id="profile-oc-count" style="font-size: 0.8rem; color: gray;">0 / 5</span>
-                        </div>
-                        <div id="profile-oc-preview" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                          <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
-                        </div>
-                        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
-                      </div>
-          
-                      <!-- Relations / Famille (Bientôt) -->
-                      <div class="profile-card">
-                        <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Relations</h3>
-                        <p style="color: gray; font-size: 0.9rem;">Système de liens et de familles en cours de création...</p>
-                      </div>
-          
-                      <!-- Raccourcis -->
-                      <div class="profile-card">
-                        <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">Liens utiles</h3>
-                        <div class="quick-links-grid">
-                          <button type="button" class="btn-secondary" onclick="alert('Ouverture du Discord...')">💬 Discord</button>
-                          <button type="button" class="btn-secondary" onclick="alert('Ouverture du Code du Guerrier...')">📜 Règles</button>
-                          <button type="button" class="btn-secondary" onclick="alert('Ouverture des Tickets...')">🎫 Support</button>
-                          <button type="button" class="btn-secondary" onclick="alert('Ouverture des Crédits...')">⭐ Crédits</button>
-                        </div>
-                      </div>
-          
-                      <!-- Boutons d'action -->
-                      <div class="profile-actions">
-                        <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">
-                          🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span>
-                        </button>
-                        <button type="button" class="btn-secondary" onclick="alert('Ouverture des paramètres...')">
-                          ⚙️ Paramètres
-                        </button>
-                        <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">
-                          🛡️ Panel de Gestion
-                        </button>
-                        <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">
-                          Déconnexion
-                        </button>
-                      </div>
-          
-                    </div>
 
+            <div class="profile-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.2rem;">Mes personnages</h3>
+                <span id="profile-oc-count" style="font-size: 0.8rem; color: gray;">0 / 5</span>
+              </div>
+              <div id="profile-oc-preview" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
+              </div>
+              <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
+            </div>
+
+            <div class="profile-card">
+              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Relations</h3>
+              <p style="color: gray; font-size: 0.9rem;">Système de liens et de familles en cours de création...</p>
+            </div>
+
+            <div class="profile-card">
+              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">Liens utiles</h3>
+              <div class="quick-links-grid">
+                <button type="button" class="btn-secondary" onclick="alert('Ouverture du Discord...')">💬 Discord</button>
+                <button type="button" class="btn-secondary" onclick="alert('Ouverture du Code du Guerrier...')">📜 Règles</button>
+                <button type="button" class="btn-secondary" onclick="alert('Ouverture des Tickets...')">🎫 Support</button>
+                <button type="button" class="btn-secondary" onclick="alert('Ouverture des Crédits...')">⭐ Crédits</button>
+              </div>
+            </div>
+
+            <div class="profile-actions">
+              <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span></button>
+              <button type="button" class="btn-secondary" onclick="alert('Ouverture des paramètres...')">⚙️ Paramètres</button>
+              <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel de Gestion</button>
+              <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">Déconnexion</button>
+            </div>
+          </div>
+
+        </div> <!-- FIN DE APP-CONTENT -->
+
+        <!-- LA BARRE DE NAVIGATION EST BIEN LÀ -->
         <nav class="bottom-nav">
           <button type="button" class="nav-btn active" data-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
@@ -365,7 +346,7 @@
           <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
-      </div>
+      </div> <!-- FIN DE SCREEN-APP -->
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
