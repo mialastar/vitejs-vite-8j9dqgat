@@ -934,9 +934,9 @@ body {
 /* La fenêtre qui contient la carte (taille fixe) */
 .map-viewport {
   width: 100%;
-  height: 60vh; /* Prend 60% de la hauteur de l'écran */
-  min-height: 400px;
-  overflow: hidden; /* Empêche de déborder */
+  aspect-ratio: 16 / 9; /* Force la carte à avoir la forme de ton image */
+  max-height: 55vh; /* Empêche la carte de devenir trop haute sur grand écran */
+  overflow: hidden;
   position: relative;
   border-radius: 15px;
   border: 2px solid rgba(251, 191, 36, 0.4);
@@ -960,9 +960,9 @@ body {
 #map-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* L'image remplit la fenêtre sans se déformer */
+  object-fit: cover; /* Remplit parfaitement la fenêtre sans se déformer */
   display: block;
-  pointer-events: none; /* Empêche de glisser l'image seule */
+  pointer-events: none;
 }
 
 /* --- LES POINTS (PINS) --- */

@@ -656,3 +656,11 @@ setTimeout(() => {
     document.getElementById('map-viewport').addEventListener('wheel', panzoom.zoomWithWheel);
   }
 }, 500); // On attend 500ms que l'image soit là
+
+const panzoom = Panzoom(mapContent, {
+  maxScale: 4,       
+  minScale: 1,       
+  startScale: 1, // <-- AJOUTE CETTE LIGNE
+  contain: 'outside', 
+  cursor: 'grab'
+});
