@@ -459,13 +459,15 @@ async function loadProfil() {
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if (!profile) { const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); profile = newProfile; }
 
-  // --- NOUVEAU : AFFICHER LE RÔLE RP ---
-  const roleRP = profile.role_rp || 'Aucun rôle';
-  document.getElementById('profile-title-badge').textContent = roleRP;
+  // --- GESTION DU RÔLE (Version intelligente) ---
+  // On regarde si le rôle est dans 'role_rp' ou dans 'title', et on ignore les majuscules/minuscules
+  const roleBrut = profile.role_rp || profile.title || 'Aucun rôle';
+  document.getElementById('profile-title-badge').textContent = roleBrut;
 
-  // Si c'est un Chef, on affiche le bouton de gestion
   const btnRpPanel = document.getElementById('btn-rp-panel');
-  if (roleRP === 'Chef' || roleRP === 'Chef de Clan') {
+  
+  // Si le mot "chef" est présent (peu importe la casse), on affiche le bouton
+  if (roleBrut.toLowerCase().includes('chef')) {
     btnRpPanel.style.display = 'flex';
     btnRpPanel.onclick = () => openRpPanel();
   } else {
