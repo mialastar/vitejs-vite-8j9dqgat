@@ -96,14 +96,32 @@ body {
 }
 
 /* --- BANNIERE ACCUEIL --- */
+/* --- BANNIÈRE AUTOMNE --- */
 .season-banner {
-  background-image: linear-gradient(to bottom, rgba(10, 10, 20, 0.3), rgba(10, 10, 20, 0.8)), url('https://images.unsplash.com/photo-1507370273382-2b317af0db55?q=80&w=1000&auto=format&fit=crop');
-  background-size: cover; background-position: center;
-  border-radius: 15px; padding: 50px 20px; text-align: center; margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #78350f; /* Couleur de secours si l'image ne charge pas */
+  background-image: linear-gradient(to bottom, rgba(10, 10, 20, 0.2), rgba(10, 10, 20, 0.8)), url('https://images.unsplash.com/photo-1476820865390-c52aeebb9891?q=80&w=1000&auto=format&fit=crop');
+  background-size: cover; 
+  background-position: center;
+  border-radius: 15px; 
+  padding: 50px 20px; 
+  text-align: center; 
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.season-banner h2 { font-family: var(--font-title); font-size: 2.5rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
-.season-banner p { color: #fcd34d; font-size: 1rem; margin-top: 5px; font-weight: 600; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
+.season-banner h2 { 
+  font-family: var(--font-title); 
+  font-size: 2.5rem; 
+  color: #fff; 
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9); 
+}
+.season-banner p { 
+  color: #fcd34d; 
+  font-size: 1rem; 
+  margin-top: 5px; 
+  font-weight: 600; 
+  text-shadow: 0 2px 5px rgba(0,0,0,0.9); 
+}
 
 .feed-card { background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
 .feed-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.8rem; color: var(--text-dim); }
