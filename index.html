@@ -117,15 +117,24 @@
               </div>
             </div>
 
-            <!-- CONTENU : CARTE (CORRIGÉ) -->
-            <div id="monde-carte" class="monde-content">
-              <div class="map-container">
-                <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin-bottom: 15px;">Carte des Terres</h3>
-                <p>La carte interactive est en cours de création par les cartographes du Crépuscule.</p>
-                <p style="font-size: 0.8rem; margin-top: 10px; color: gray;">(Bientôt disponible)</p>
-              </div>
-            </div>
-          </div>
+                       <!-- CONTENU : CARTE -->
+                       <div id="monde-carte" class="monde-content">
+                        <div class="map-wrapper">
+                          <!-- REMPLACE LE LIEN CI-DESSOUS PAR TON LIEN D'IMAGE -->
+                          <img id="map-image" src="VOTRE_LIEN_IMAGE_ICI" alt="Carte des Terres du Crépuscule" />
+                          
+                          <!-- Les 8 points interactifs -->
+                          <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret" title="Clan de la Forêt"><span class="pin-dot"></span></button>
+                          <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume" title="Clan de la Brume"><span class="pin-dot"></span></button>
+                          <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith" title="Clan du Zénith"><span class="pin-dot"></span></button>
+                          <button type="button" class="map-pin" style="top: 74%; left: 30%;" data-lieu="pluie" title="Clan de la Pluie"><span class="pin-dot"></span></button>
+                          
+                          <button type="button" class="map-pin" style="top: 26%; left: 26%;" data-lieu="ile" title="Île Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
+                          <button type="button" class="map-pin" style="top: 22%; left: 80%;" data-lieu="source" title="Source Lunaire"><span class="pin-dot" style="background: #60a5fa; box-shadow: 0 0 15px #60a5fa;"></span></button>
+                          <button type="button" class="map-pin" style="top: 85%; left: 10%;" data-lieu="gare" title="Gare Abandonnée"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
+                          <button type="button" class="map-pin" style="top: 86%; left: 86%;" data-lieu="ville" title="La Ville"><span class="pin-dot" style="background: #9ca3af; box-shadow: 0 0 15px #9ca3af;"></span></button>
+                        </div>
+                      </div>
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">

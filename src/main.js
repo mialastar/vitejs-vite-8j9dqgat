@@ -552,3 +552,89 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 });
 
 document.getElementById('btn-admin-panel').style.display = 'block';
+
+// --- CARTE INTERACTIVE ET TIROIR GLISSANT ---
+
+// 1. Création du Tiroir (Bottom Sheet) invisible
+const mapSheetHTML = `
+  <div class="map-sheet-overlay" id="map-sheet-overlay">
+    <div class="map-sheet" id="map-sheet">
+      <div class="sheet-drag-handle"></div>
+      <h3 id="sheet-title">Nom du lieu</h3>
+      <p id="sheet-desc">Description...</p>
+      <button type="button" class="btn-close-sheet" id="btn-close-sheet">Fermer</button>
+    </div>
+  </div>
+`;
+document.body.insertAdjacentHTML('beforeend', mapSheetHTML);
+
+// 2. Les données des lieux
+const lieuxData = {
+  foret: {
+    titre: "Clan de la Forêt",
+    desc: "Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.",
+    isClan: true
+  },
+  brume: {
+    titre: "Clan de la Brume",
+    desc: "Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.",
+    isClan: true
+  },
+  zenith: {
+    titre: "Clan du Zénith",
+    desc: "Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.",
+    isClan: true
+  },
+  pluie: {
+    titre: "Clan de la Pluie",
+    desc: "Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.",
+    isClan: true
+  },
+  ile: {
+    titre: "Île Lunaire",
+    desc: "Au centre du grand lac, reliée par deux ponts dont un en ruine. C'est ici que se déroulent les grandes assemblées entre les clans.",
+    isClan: false
+  },
+  source: {
+    titre: "Source Lunaire",
+    desc: "Une grotte souterraine sacrée. Ses eaux cristallines brillent comme des étoiles et permettent aux guérisseurs de communiquer avec le Clan de la Lune.",
+    isClan: false
+  },
+  gare: {
+    titre: "Gare Abandonnée",
+    desc: "De vieux rails rouillés perdus dans la nature. Un vestige d'une époque lointaine, aujourd'hui recouvert par la végétation.",
+    isClan: false
+  },
+  ville: {
+    titre: "La Ville",
+    desc: "Une petite cité humaine cachée derrière les montagnes du Zénith. Les chats évitent généralement cet endroit bruyant et dangereux.",
+    isClan: false
+  }
+};
+
+// 3. Logique d'ouverture du tiroir
+document.querySelectorAll('.map-pin').forEach(pin => {
+  pin.addEventListener('click', (e) => {
+    const lieuId = e.currentTarget.getAttribute('data-lieu');
+    const data = lieuxData[lieuId];
+    
+    if (data) {
+      document.getElementById('sheet-title').textContent = data.titre;
+      document.getElementById('sheet-desc').textContent = data.desc;
+      
+      // Ouvre le tiroir
+      document.getElementById('map-sheet-overlay').classList.add('active');
+    }
+  });
+});
+
+// 4. Fermeture du tiroir
+document.getElementById('btn-close-sheet').addEventListener('click', () => {
+  document.getElementById('map-sheet-overlay').classList.remove('active');
+});
+
+document.getElementById('map-sheet-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'map-sheet-overlay') {
+    e.target.classList.remove('active');
+  }
+});
