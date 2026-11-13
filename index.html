@@ -90,64 +90,42 @@
 
           <!-- VUE MONDE (LORE & CARTE) -->
           <div id="view-monde" class="view">
-            
-            <!-- LES 2 GRANDS ONGLETS -->
             <div class="main-tabs">
               <button type="button" class="monde-tab-btn active" data-monde="lore">Lore</button>
               <button type="button" class="monde-tab-btn" data-monde="carte">Carte</button>
             </div>
 
-            <!-- CONTENU : LORE -->
             <div id="monde-lore" class="monde-content active">
-              <!-- Sous-onglets du Lore -->
               <div class="sub-tabs">
                 <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
                 <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
                 <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
               </div>
-
-              <!-- Histoire -->
               <div id="lore-histoire" class="lore-content active">
                 <h3>La Création des Terres</h3>
                 <p>Il y a bien longtemps, quatre chats légendaires s'unirent pour vaincre une menace terrible dont le nom s'est perdu dans les brumes du temps. Après leur victoire, la discorde éclata. Se disputant les meilleures terres de chasse, ils se séparèrent, donnant naissance aux quatre Clans que nous connaissons aujourd'hui.</p>
               </div>
-
-              <!-- Clans -->
               <div id="lore-clans" class="lore-content">
-                <div class="clan-lore-card">
-                  <h4>Clan de la Forêt</h4>
-                  <p>Discrets, furtifs et connectés à la nature. Ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p>
-                </div>
-                <div class="clan-lore-card">
-                  <h4>Clan de la Pluie</h4>
-                  <p>Agiles, imprévisibles et rapides. Maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p>
-                </div>
-                <div class="clan-lore-card">
-                  <h4>Clan du Zénith</h4>
-                  <p>Sages, observateurs et proches du ciel. Ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p>
-                </div>
-                <div class="clan-lore-card">
-                  <h4>Clan de la Brume</h4>
-                  <p>Mystérieux et proches des esprits. Vivant dans les marais, ils connaissent les poisons et les plantes rares.</p>
-                </div>
+                <div class="clan-lore-card"><h4>Clan de la Forêt</h4><p>Discrets, furtifs et connectés à la nature.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Pluie</h4><p>Agiles, imprévisibles et rapides.</p></div>
+                <div class="clan-lore-card"><h4>Clan du Zénith</h4><p>Sages, observateurs et proches du ciel.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Brume</h4><p>Mystérieux et proches des esprits.</p></div>
               </div>
-
-              <!-- Source Lunaire -->
               <div id="lore-source" class="lore-content">
-                <div class="source-image" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop');"></div>
                 <p><strong>Lieu Neutre et Sacré</strong></p>
-                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. C'est ici que le voile entre le monde des vivants et celui des esprits est le plus fin.</p>
+                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles.</p>
               </div>
             </div>
 
-            <!-- CONTENU : CARTE -->
             <div id="monde-carte" class="monde-content">
-              <div class="map-container" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop');">
-                <p>La carte interactive des Terres du Crépuscule est en cours de création...</p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">(Bientôt disponible)</p>
+              <div class="map-wrapper">
+                <img id="map-image" src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop" alt="Carte des Terres" />
+                <button type="button" class="map-pin" style="top: 25%; left: 30%;" data-lieu="foret" title="Clan de la Forêt"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 60%; left: 70%;" data-lieu="pluie" title="Clan de la Pluie"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 15%; left: 80%;" data-lieu="zenith" title="Clan du Zénith"><span class="pin-dot"></span></button>
+                <button type="button" class="map-pin" style="top: 75%; left: 20%;" data-lieu="brume" title="Clan de la Brume"><span class="pin-dot"></span></button>
               </div>
             </div>
-
           </div>
 
           <!-- VUE FICHES OC -->
@@ -294,6 +272,64 @@
                 <div class="stat-bar-container"><span>Charisme</span><div class="stat-bar-bg"><div id="bar-charisme" class="stat-bar-fill"></div></div><span id="num-charisme">0</span></div>
               </div>
             </div>
+          </div>
+
+          <!-- VUE PROFIL -->
+          <div id="view-profil" class="view">
+            
+            <!-- En-tête du profil -->
+            <div class="profile-header">
+              <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
+              <h2 id="profile-username">Chargement...</h2>
+              <p id="profile-role" class="profile-role-badge">Joueur</p>
+              <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
+            </div>
+
+            <!-- Réputation -->
+            <div class="profile-card">
+              <div class="rep-header">
+                <span id="profile-rep-title">Inconnu</span>
+                <span id="profile-rep-points">0 pts</span>
+              </div>
+              <div class="progress-bar-bg" style="margin-top: 10px;">
+                <div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <p style="font-size: 0.75rem; color: gray; margin-top: 5px; text-align: right;">Prochain rang : 25 pts</p>
+            </div>
+
+            <!-- Mes OC -->
+            <div class="profile-card">
+              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Mes personnages</h3>
+              <div id="profile-oc-preview" style="display: flex; gap: 10px;">
+                <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
+              </div>
+              <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
+            </div>
+
+            <!-- Notifications -->
+            <div class="profile-card">
+              <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 10px; font-size: 1.2rem;">Notifications</h3>
+              <div id="profile-notifications">
+                <p style="color: gray; font-size: 0.9rem;">Aucune nouvelle notification.</p>
+              </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="profile-actions">
+              <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">
+                🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span>
+              </button>
+              <button type="button" class="btn-secondary" onclick="alert('Ouverture des paramètres...')">
+                ⚙️ Paramètres
+              </button>
+              <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">
+                🛡️ Panel de Gestion
+              </button>
+              <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">
+                Déconnexion
+              </button>
+            </div>
+
           </div>
 
         </div>

@@ -468,3 +468,53 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
   document.querySelector('[data-sub="all"]').classList.add('active');
   document.getElementById('subview-all').classList.add('active');
 });
+
+// --- LOGIQUE DU PROFIL ---
+async function loadProfil() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // 1. Infos Discord de base
+  const username = user.user_metadata.full_name || "Joueur Inconnu";
+  const avatarUrl = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+  
+  document.getElementById('profile-username').textContent = username;
+  document.getElementById('profile-avatar').src = avatarUrl;
+
+  // 2. Récupérer les vraies fiches de l'utilisateur
+  const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
+  const ocContainer = document.getElementById('profile-oc-preview');
+  ocContainer.innerHTML = ''; 
+
+  if (fiches && fiches.length > 0) {
+    fiches.forEach(fiche => {
+      const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
+      ocContainer.innerHTML += `
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div>
+          <span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span>
+        </div>
+      `;
+    });
+  } else {
+    ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>';
+  }
+
+  // 3. Réputation (On utilise des fausses données en attendant que tu la crées)
+  const repPoints = 15; // À remplacer par les vraies données plus tard
+  document.getElementById('profile-rep-points').textContent = `${repPoints} pts`;
+  document.getElementById('profile-rep-title').textContent = "Inconnu";
+  document.getElementById('profile-rep-fill').style.width = `${(repPoints / 25) * 100}%`;
+}
+
+// Bouton Déconnexion
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.reload();
+});
+
+// Bouton Admin (Pour l'instant, on l'affiche tout le temps pour tester, plus tard on vérifiera le rôle)
+document.getElementById('btn-admin-panel').style.display = 'block';
+
+// Appeler la fonction quand on clique sur l'onglet Profil
+document.querySelector('[data-target="profil"]').addEventListener('click', loadProfil);
