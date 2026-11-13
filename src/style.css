@@ -1066,3 +1066,37 @@ body {
   background: transparent; border: none; color: var(--text-dim);
   cursor: pointer; margin-bottom: 10px; font-family: var(--font-body);
 }
+
+/* --- CHAMPS DE FORMULAIRE SUPPORT DYNAMIQUE --- */
+.form-group {
+  margin-bottom: 15px;
+}
+.form-group label {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}

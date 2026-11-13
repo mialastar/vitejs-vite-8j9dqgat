@@ -556,7 +556,7 @@ setTimeout(() => {
   }
 }, 500);
 
-// --- LOGIQUE DU SUPPORT (TICKETS) ---
+// --- LOGIQUE DU SUPPORT (TICKETS DYNAMIQUES) ---
 let currentTicketType = "";
 
 document.getElementById('btn-floating-support').addEventListener('click', () => {
@@ -574,29 +574,131 @@ document.getElementById('btn-back-support').addEventListener('click', () => {
   document.getElementById('support-form-view').style.display = 'none';
 });
 
+// Injecter le bon formulaire selon le bouton cliqué
 window.openSupportForm = function(type) {
   currentTicketType = type;
   document.getElementById('support-menu-view').style.display = 'none';
   document.getElementById('support-form-view').style.display = 'block';
   
-  const titles = {
-    clan: "Créer un clan", famille: "Créer une famille", suggestion: "Faire une suggestion",
-    staff: "Rejoindre le staff", bug: "Signaler un bug", joueur: "Signaler un joueur"
-  };
-  document.getElementById('support-form-title').textContent = titles[type];
-  document.getElementById('support-sujet').value = '';
-  document.getElementById('support-description').value = '';
+  const formFields = document.getElementById('dynamic-form-fields');
+  const formTitle = document.getElementById('support-form-title');
+  
+  let html = "";
+
+  if (type === 'faction') {
+    formTitle.textContent = "Créer une Faction (Clan / Tribu / Groupe)";
+    html = `
+      <div class="form-group"><label>Nom de la Faction</label><input type="text" id="t-faction-nom" required /></div>
+      <div class="form-group">
+        <label>Type de Faction</label>
+        <select id="t-faction-type">
+          <option>Clan</option><option>Tribu</option><option>Groupe de solitaires</option><option>Domestiques</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Territoire souhaité</label><input type="text" id="t-faction-territoire" placeholder="Ex: Près de la rivière au sud..." /></div>
+      <div class="form-group"><label>Membres fondateurs (pseudos Discord)</label><input type="text" id="t-faction-membres" /></div>
+      <div class="form-group"><label>Description / Lore</label><textarea id="t-faction-lore" placeholder="But, règles, histoire du groupe..."></textarea></div>
+    `;
+  } 
+  else if (type === 'famille') {
+    formTitle.textContent = "Créer une Famille";
+    html = `
+      <div class="form-group"><label>Nom de la famille</label><input type="text" id="t-famille-nom" required /></div>
+      <div class="form-group"><label>Membres actuels (pseudos)</label><input type="text" id="t-famille-membres" /></div>
+      <div class="form-group"><label>Lien avec un clan</label><input type="text" id="t-famille-clan" placeholder="Ex: Clan de la Forêt, ou Neutre..." /></div>
+      <div class="form-group"><label>Origines / Histoire</label><textarea id="t-famille-histoire"></textarea></div>
+    `;
+  }
+  else if (type === 'bug') {
+    formTitle.textContent = "Signaler un Bug";
+    html = `
+      <div class="form-group"><label>Titre du problème</label><input type="text" id="t-bug-titre" required /></div>
+      <div class="form-group">
+        <label>Sur quel appareil ?</label>
+        <select id="t-bug-appareil"><option>Mobile</option><option>PC</option><option>Tablette</option></select>
+      </div>
+      <div class="form-group"><label>Description détaillée</label><textarea id="t-bug-desc" placeholder="Que faisais-tu quand c'est arrivé ?"></textarea></div>
+    `;
+  }
+  else if (type === 'suggestion') {
+    formTitle.textContent = "Faire une Suggestion";
+    html = `
+      <div class="form-group"><label>Titre de la suggestion</label><input type="text" id="t-sugg-titre" required /></div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select id="t-sugg-cat"><option>Site Web</option><option>Règles du RP</option><option>Événement</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Description de l'idée</label><textarea id="t-sugg-desc"></textarea></div>
+    `;
+  }
+  else if (type === 'joueur') {
+    formTitle.textContent = "Signaler un Joueur";
+    html = `
+      <div class="form-group"><label>Pseudo Discord du joueur signalé</label><input type="text" id="t-joueur-pseudo" required /></div>
+      <div class="form-group">
+        <label>Motif du signalement</label>
+        <select id="t-joueur-motif"><option>Non-respect du Code</option><option>Harcèlement</option><option>Triche</option><option>HRP (Hors-RP)</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Description (Que s'est-il passé ?)</label><textarea id="t-joueur-desc"></textarea></div>
+    `;
+  }
+  else if (type === 'staff') {
+    formTitle.textContent = "Rejoindre le Staff";
+    html = `
+      <div class="form-group"><label>Pseudo Discord</label><input type="text" id="t-staff-pseudo" required /></div>
+      <div class="form-group"><label>Prénom / Âge</label><input type="text" id="t-staff-age" required /></div>
+      <div class="form-group">
+        <label>Poste souhaité</label>
+        <select id="t-staff-poste"><option>Modérateur</option><option>Maître du Jeu (MJ)</option><option>Graphiste</option><option>Développeur</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Motivations & Expériences</label><textarea id="t-staff-motiv"></textarea></div>
+      <div class="form-group"><label>Disponibilités</label><input type="text" id="t-staff-dispo" placeholder="Ex: 2h par jour le soir" /></div>
+    `;
+  }
+
+  formFields.innerHTML = html;
 };
 
+// Envoyer le ticket à Supabase (en fusionnant tous les champs)
 document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
-  const sujet = document.getElementById('support-sujet').value;
-  const description = document.getElementById('support-description').value;
+  let sujet = "";
+  let description = "";
 
-  if (!sujet || !description) { alert("Merci de remplir tous les champs."); return; }
+  // On récupère les données selon le type de ticket
+  if (currentTicketType === 'faction') {
+    sujet = "Création de Faction: " + document.getElementById('t-faction-nom').value;
+    description = `Type: ${document.getElementById('t-faction-type').value}\nTerritoire: ${document.getElementById('t-faction-territoire').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\nLore:\n${document.getElementById('t-faction-lore').value}`;
+  } 
+  else if (currentTicketType === 'famille') {
+    sujet = "Création de Famille: " + document.getElementById('t-famille-nom').value;
+    description = `Membres: ${document.getElementById('t-famille-membres').value}\nLien Clan: ${document.getElementById('t-famille-clan').value}\n\nOrigines:\n${document.getElementById('t-famille-histoire').value}`;
+  }
+  else if (currentTicketType === 'bug') {
+    sujet = "Bug: " + document.getElementById('t-bug-titre').value;
+    description = `Appareil: ${document.getElementById('t-bug-appareil').value}\n\nDescription:\n${document.getElementById('t-bug-desc').value}`;
+  }
+  else if (currentTicketType === 'suggestion') {
+    sujet = "Suggestion: " + document.getElementById('t-sugg-titre').value;
+    description = `Catégorie: ${document.getElementById('t-sugg-cat').value}\n\nIdée:\n${document.getElementById('t-sugg-desc').value}`;
+  }
+  else if (currentTicketType === 'joueur') {
+    sujet = "Signalement Joueur: " + document.getElementById('t-joueur-pseudo').value;
+    description = `Motif: ${document.getElementById('t-joueur-motif').value}\n\nDescription:\n${document.getElementById('t-joueur-desc').value}`;
+  }
+  else if (currentTicketType === 'staff') {
+    sujet = "Candidature Staff: " + document.getElementById('t-staff-pseudo').value;
+    description = `Prénom/Age: ${document.getElementById('t-staff-age').value}\nPoste: ${document.getElementById('t-staff-poste').value}\nDispo: ${document.getElementById('t-staff-dispo').value}\n\nMotivations:\n${document.getElementById('t-staff-motiv').value}`;
+  }
+
+  // Vérification basique
+  if (!sujet || sujet.includes('undefined') || sujet.trim() === "" || sujet.endsWith(':')) {
+    alert("Merci de remplir les champs obligatoires (notamment le nom/titre)."); return;
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return alert("Tu dois être connecté.");
 
+  // Envoi à la base de données
   const { error } = await supabase.from('tickets').insert({
     user_id: user.id, type_ticket: currentTicketType, sujet: sujet, description: description
   });
@@ -605,6 +707,8 @@ document.getElementById('btn-submit-ticket').addEventListener('click', async () 
     alert("Erreur lors de l'envoi : " + error.message);
   } else {
     document.getElementById('support-modal').classList.remove('active');
+    
+    // Popup de succès
     const toast = document.getElementById('toast-success');
     toast.querySelector('h4').textContent = "Ticket envoyé !";
     toast.querySelector('p').textContent = "Le staff va traiter ta demande dès que possible.";

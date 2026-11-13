@@ -343,40 +343,37 @@
           <!-- BOUTON SUPPORT FLOTTANT -->
           <button type="button" id="btn-floating-support" class="floating-support-btn">?</button>
 
-          <!-- MENU SUPPORT MODAL -->
-          <div id="support-modal" class="support-modal-overlay">
-            <div class="support-modal">
-              <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
-              
-              <!-- Vue 1 : Choix du type de ticket -->
-              <div id="support-menu-view">
-                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
-                <div class="support-grid">
-                  <button type="button" class="support-option" onclick="openSupportForm('clan')"><span class="icon">🛡️</span><span>Créer un clan</span></button>
-                  <button type="button" class="support-option" onclick="openSupportForm('famille')"><span class="icon">🌳</span><span>Créer une famille</span></button>
-                  <button type="button" class="support-option" onclick="openSupportForm('suggestion')"><span class="icon">💡</span><span>Faire une suggestion</span></button>
-                  <button type="button" class="support-option" onclick="openSupportForm('staff')"><span class="icon">👑</span><span>Rejoindre le staff</span></button>
-                  <button type="button" class="support-option" onclick="openSupportForm('bug')"><span class="icon">🐛</span><span>Signaler un bug</span></button>
-                  <button type="button" class="support-option" onclick="openSupportForm('joueur')"><span class="icon">⚠️</span><span>Signaler un joueur</span></button>
-                </div>
-              </div>
-
-              <!-- Vue 2 : Le formulaire -->
-              <div id="support-form-view" style="display: none;">
-                <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
-                <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
-                
-                <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Sujet</label>
-                <input type="text" id="support-sujet" placeholder="En quelques mots..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 15px;" />
-                
-                <label style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 5px; display: block;">Description</label>
-                <textarea id="support-description" rows="4" placeholder="Explique ta demande en détail..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 20px;"></textarea>
-                
-                <button type="button" id="btn-submit-ticket" class="btn-primary" style="width: 100%;">Envoyer le ticket</button>
-              </div>
-
-            </div>
-          </div>
+                    <!-- MENU SUPPORT MODAL -->
+                    <div id="support-modal" class="support-modal-overlay">
+                      <div class="support-modal">
+                        <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
+                        
+                        <!-- Vue 1 : Choix du type de ticket -->
+                        <div id="support-menu-view">
+                          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
+                          <div class="support-grid">
+                            <button type="button" class="support-option" onclick="openSupportForm('faction')"><span class="icon">🛡️</span><span>Créer une Faction</span></button>
+                            <button type="button" class="support-option" onclick="openSupportForm('famille')"><span class="icon">🌳</span><span>Créer une famille</span></button>
+                            <button type="button" class="support-option" onclick="openSupportForm('suggestion')"><span class="icon">💡</span><span>Faire une suggestion</span></button>
+                            <button type="button" class="support-option" onclick="openSupportForm('staff')"><span class="icon">👑</span><span>Rejoindre le staff</span></button>
+                            <button type="button" class="support-option" onclick="openSupportForm('bug')"><span class="icon">🐛</span><span>Signaler un bug</span></button>
+                            <button type="button" class="support-option" onclick="openSupportForm('joueur')"><span class="icon">⚠️</span><span>Signaler un joueur</span></button>
+                          </div>
+                        </div>
+          
+                        <!-- Vue 2 : Le formulaire dynamique -->
+                        <div id="support-form-view" style="display: none;">
+                          <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
+                          <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
+                          
+                          <!-- C'est ici que les champs vont être injectés par le JS -->
+                          <div id="dynamic-form-fields"></div>
+                          
+                          <button type="button" id="btn-submit-ticket" class="btn-primary" style="width: 100%; margin-top: 20px;">Envoyer le ticket</button>
+                        </div>
+          
+                      </div>
+                    </div>
 
         </div> <!-- FIN APP-CONTENT -->
 
