@@ -434,8 +434,10 @@
               <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
               <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Assemblée bientôt disponible !')">📢 Convoquer Assemblée</button>
-                <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Guerre bientôt disponible !')">⚔️ Déclarer Guerre</button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                  <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="convoquerAssemblee()">📢 Convoquer Assemblée</button>
+                  <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="declarerGuerre()">⚔️ Déclarer Guerre</button>
+                </div>
               </div>
               <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
               <div id="rp-members-list"><p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement...</p></div>

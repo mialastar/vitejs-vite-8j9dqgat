@@ -1301,3 +1301,64 @@ window.toggleHistory = async function() {
     `;
   });
 };
+
+// ==========================================
+// --- GUERRE & ASSEMBLÉE (PANEL CHEF) ---
+// ==========================================
+window.convoquerAssemblee = async function() {
+  const { data: { user } } = await supabase.auth.getUser();
+  // On récupère le clan du chef
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  
+  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
+
+  const sujet = prompt("Quel est le sujet de l'assemblée ? (ex: Réunion d'urgence, Cérémonie, Annonce...)");
+  if (!sujet) return; // Si le chef annule
+
+  const titre = `📢 Assemblée du ${profile.clan}`;
+  const contenu = `Le chef du ${profile.clan} convoque une assemblée.\n\nSujet : ${sujet}`;
+
+  // On publie dans le fil d'actualité
+  const { error } = await supabase.from('actualites').insert({
+    titre: titre,
+    auteur: `Chef du ${profile.clan}`,
+    contenu: contenu,
+    couleur: '#60a5fa' // Bleu clair
+  });
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    alert("L'assemblée a été annoncée sur le fil d'actualité !");
+    loadActualites(); // Rafraîchir l'accueil
+  }
+};
+
+window.declarerGuerre = async function() {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  
+  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
+
+  const cible = prompt("Contre quel clan veux-tu déclarer la guerre ? (ex: Clan de la Pluie)");
+  if (!cible) return;
+
+  const raison = prompt("Quelle est la raison de cette déclaration de guerre ?");
+  if (!raison) return;
+
+  const titre = `⚔️ Déclaration de Guerre !`;
+  const contenu = `Le ${profile.clan} déclare la guerre au ${cible}.\n\nRaison : ${raison}`;
+
+  // On publie dans le fil d'actualité
+  const { error } = await supabase.from('actualites').insert({
+    titre: titre,
+    auteur: `Chef du ${profile.clan}`,
+    contenu: contenu,
+    couleur: '#ef4444' // Rouge sang
+  });
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    alert("La déclaration de guerre a été publiée sur le fil d'actualité !");
+    loadActualites(); // Rafraîchir l'accueil
+  }
+};
