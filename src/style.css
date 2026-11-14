@@ -10,7 +10,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* L'image de la forêt optimisée (w=800) + filtre sombre pour lire le texte */
+  /* L'image de la forêt optimisée + filtre sombre */
   background-image: linear-gradient(rgba(5, 10, 6, 0.7), rgba(5, 10, 6, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
@@ -113,7 +113,7 @@ body {
 .monde-content.active { display: block; }
 
 .sub-tabs { display: flex; background: rgba(15, 20, 15, 0.8); border-radius: 10px; padding: 5px; margin-bottom: 20px; }
-.sub-tab-btn, .lore-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--font-body); font-weight: 600; transition: 0.3s; font-size: 0.85rem; }
+.sub-tab-btn, .lore-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--font-body); font-weight: 600; transition: 0.3s; font-size: 0.75rem; }
 .sub-tab-btn.active, .lore-tab-btn.active { background: var(--accent); color: #000; }
 .subview { display: none; }
 .subview.active { display: block; animation: fadeIn 0.3s ease; }
@@ -224,7 +224,7 @@ body {
 .profile-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 .profile-actions button { padding: 15px; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; }
 
-/* --- MODALES (SUPPORT, PARAM, RELATION) --- */
+/* --- MODALES (SUPPORT, PARAM, RELATION, RP) --- */
 .support-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
 .support-modal-overlay.active { opacity: 1; visibility: visible; }
 .support-modal { background: #0f150f; width: 90%; max-width: 500px; border-radius: 15px; padding: 30px; border: 1px solid rgba(251, 191, 36, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
@@ -277,7 +277,51 @@ body {
 .toast-text h4 { color: #fff; font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 2px; }
 .toast-text p { color: var(--text-dim); font-size: 0.85rem; line-height: 1.3; }
 
-.sub-tab-btn {
-  font-size: 0.75rem !important;
-  padding: 8px 4px !important;
+/* --- STYLE POUR L'ADMIN --- */
+.admin-layout {
+  background-image: linear-gradient(rgba(10, 5, 5, 0.85), rgba(10, 5, 5, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');
 }
+
+.admin-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+}
+
+.admin-header h2 {
+  font-family: var(--font-title);
+  color: var(--accent);
+  font-size: 1.8rem;
+}
+
+.admin-header span {
+  font-size: 0.8rem;
+  color: gray;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.admin-title {
+  font-family: var(--font-title);
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.admin-nav {
+  background: rgba(20, 10, 10, 0.95) !important;
+  border-top: 1px solid rgba(251, 191, 36, 0.2) !important;
+}
+
+.admin-nav .nav-btn.active {
+  color: #f87171; /* Rouge/Orange pour différencier l'admin */
+}
+
+.admin-nav .nav-btn.active .icon {
+  filter: drop-shadow(0 0 8px #f87171);
+}
+
+/* --- PANEL ADMIN --- */
+.admin-view { display: none; }
+.admin-view.active { display: block; animation: fadeIn 0.3s ease; }

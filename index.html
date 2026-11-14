@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <!-- ÉCRAN 3 : APPLICATION -->
+      <!-- ÉCRAN 3 : APPLICATION JOUEUR -->
       <div id="screen-app" class="screen app-layout">
         <div class="app-content">
           
@@ -119,10 +119,13 @@
             </div>
 
             <div id="monde-carte" class="monde-content">
-              <div class="map-hint" id="map-hint">👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.</div>
+              <div class="map-hint" id="map-hint">
+                👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.
+              </div>
               <div id="map-viewport" class="map-viewport">
                 <div id="map-content" class="map-content">
-                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte" />
+                  <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
+                  
                   <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
@@ -138,7 +141,6 @@
 
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
-            <!-- LES 4 ONGLETS -->
             <div class="sub-tabs">
               <button type="button" class="sub-tab-btn active" data-sub="create">Créer</button>
               <button type="button" class="sub-tab-btn" data-sub="mine">Mes fiches</button>
@@ -146,12 +148,12 @@
               <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
             </div>
 
-            <!-- 1. CRÉER -->
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
                 <div class="progress-bar-bg"><div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div></div>
               </div>
+
               <div class="wizard-form">
                 <div class="wizard-step active" id="step-1">
                   <h3>1. Identité</h3>
@@ -185,10 +187,14 @@
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
                   <div class="checkbox-grid">
-                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
@@ -222,18 +228,17 @@
                   <div class="stat-row"><label>Charisme <span id="val-charisme">5</span></label><input type="range" class="stat-slider" id="stat-charisme" min="1" max="10" value="5" /></div>
                 </div>
               </div>
+
               <div class="wizard-buttons">
                 <button type="button" id="btn-prev" class="btn-secondary" style="visibility: hidden;">Précédent</button>
                 <button type="button" id="btn-next" class="btn-primary">Suivant</button>
               </div>
             </div>
 
-            <!-- 2. MES FICHES -->
             <div id="subview-mine" class="subview">
               <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
-            <!-- 3. VOIR LES FICHES -->
             <div id="subview-all" class="subview">
               <div class="search-container">
                 <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
@@ -242,7 +247,6 @@
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
-            <!-- 4. RELATIONS -->
             <div id="subview-relations" class="subview">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
@@ -339,8 +343,6 @@
               <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span></button>
               <button type="button" class="btn-secondary" id="btn-open-settings">⚙️ Paramètres</button>
               <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel Admin</button>
-              
-              <!-- NOUVEAU BOUTON : PANEL DE GESTION RP -->
               <button type="button" class="btn-secondary" style="display: none;" id="btn-rp-panel">👑 Gérer mon Clan</button>
               <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">Déconnexion</button>
             </div>
@@ -413,37 +415,88 @@
             </div>
           </div>
 
-        </div> <!-- FIN APP-CONTENT -->
+          <!-- MODAL PANEL DE GESTION RP (CHEF) -->
+          <div id="rp-panel-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
+              
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Assemblée bientôt disponible !')">📢 Convoquer Assemblée</button>
+                <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Guerre bientôt disponible !')">⚔️ Déclarer Guerre</button>
+              </div>
 
-        <!-- BARRE DE NAVIGATION -->
+              <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
+              <div id="rp-members-list"><p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement...</p></div>
+            </div>
+          </div>
+
+        </div> <!-- FIN APP-CONTENT JOUEUR -->
+
+        <!-- BARRE DE NAVIGATION JOUEUR -->
         <nav class="bottom-nav">
           <button type="button" class="nav-btn active" data-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
           <button type="button" class="nav-btn" data-target="monde"><span class="icon">🗺️</span><span class="label">Monde</span></button>
-          <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
+      </div> <!-- FIN SCREEN-APP JOUEUR -->
 
-                  <!-- MODAL PANEL DE GESTION RP (CHEF) -->
-                  <div id="rp-panel-modal" class="support-modal-overlay">
-                    <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
-                      <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
-                      <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
-                      
-                      <!-- Boutons d'actions -->
-                      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                        <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Assemblée bientôt disponible !')">📢 Convoquer Assemblée</button>
-                        <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Guerre bientôt disponible !')">⚔️ Déclarer Guerre</button>
-                      </div>
-        
-                      <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
-                      
-                      <div id="rp-members-list">
-                        <p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement des membres...</p>
-                      </div>
-                    </div>
-                  </div>
-      </div> <!-- FIN SCREEN-APP -->
+      <!-- ÉCRAN 4 : APPLICATION ADMIN (LE NOUVEL UNIVERS) -->
+      <div id="screen-admin" class="screen app-layout admin-layout">
+        <div class="app-content">
+          
+          <div class="admin-header">
+            <h2>Panneau d'Administration</h2>
+            <span>Moonlight Studio</span>
+          </div>
+
+          <!-- ADMIN : ACCUEIL -->
+          <div id="admin-view-accueil" class="view active">
+            <h3 class="admin-title">Gestion de l'Accueil</h3>
+            <div class="profile-card">
+              <p style="color: gray;">Publier des messages, changer la saison...</p>
+            </div>
+          </div>
+
+          <!-- ADMIN : FICHES -->
+          <div id="admin-view-fiches" class="view">
+            <h3 class="admin-title">Fiches en attente</h3>
+            <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
+          <!-- ADMIN : MEMBRES -->
+          <div id="admin-view-membres" class="view">
+            <h3 class="admin-title">Gestion des Membres</h3>
+            <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
+          <!-- ADMIN : CHRONIQUES -->
+          <div id="admin-view-chroniques" class="view">
+            <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
+            <div class="profile-card">
+              <p style="color: gray;">Écrire les chroniques, gérer le temps RP...</p>
+            </div>
+          </div>
+
+          <!-- ADMIN : TICKETS -->
+          <div id="admin-view-tickets" class="view">
+            <h3 class="admin-title">Tickets & Support</h3>
+            <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
+        </div>
+
+        <!-- BARRE DE NAVIGATION ADMIN -->
+        <nav class="bottom-nav admin-nav">
+          <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
+          <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
+          <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
+          <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
+          <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
+          <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
+        </nav>
+      </div> <!-- FIN SCREEN-ADMIN -->
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
