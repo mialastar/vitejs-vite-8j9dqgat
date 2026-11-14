@@ -39,13 +39,6 @@
               <p><strong>Front-End, Back-End, Design & Shaders :</strong> Moonlight Studio</p>
               <p><strong>Testeurs :</strong> Mialastar</p>
             </div>
-            <div class="credit-section">
-              <h3>Équipe Staff (Discord)</h3>
-              <p><strong>Fondateurs :</strong> Kln.nts, Eliot.nts</p>
-              <p><strong>Administrateurs :</strong> Ebène, whistlingfall, Mialastar, Mathis</p>
-              <p><strong>Support & Tickets :</strong> Mialastar</p>
-              <p><strong>Validation des Fiches :</strong> Ebène, Mialastar</p>
-            </div>
             <div class="credit-section legal">
               <p>© 2024 Les Terres du Crépuscule.</p>
               <p>Tous droits réservés.</p>
@@ -73,9 +66,10 @@
           
           <!-- VUE ACCUEIL -->
           <div id="view-accueil" class="view active">
+            <!-- BANNIÈRE MISE À JOUR DYNAMIQUEMENT -->
             <div class="season-banner">
-              <h2>Automne</h2>
-              <p>Lune des Feuilles Mortes</p>
+              <h2 id="display-saison">Automne</h2>
+              <p id="display-lune">Lune des Feuilles Mortes</p>
             </div>
             <div class="feed-container">
               <div id="actualites-container" style="margin-bottom: 20px;"></div>
@@ -312,7 +306,6 @@
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
               
-              <!-- Les 3 badges distincts -->
               <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
                 <p id="profile-app-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #60a5fa;">APP: ...</p>
                 <p id="profile-rp-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #fbbf24;">RP: ...</p>
@@ -356,7 +349,6 @@
             <div class="profile-actions">
               <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span></button>
               <button type="button" class="btn-secondary" id="btn-open-settings">⚙️ Paramètres</button>
-              <!-- AJOUT : BOUTON MES TICKETS -->
               <button type="button" class="btn-secondary" id="btn-my-tickets">🎫 Mes Tickets en cours</button>
               <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel Admin</button>
               <button type="button" class="btn-secondary" style="display: none;" id="btn-rp-panel">👑 Gérer mon Clan</button>
@@ -477,6 +469,25 @@
 
           <!-- VUE ACCUEIL ADMIN -->
           <div id="admin-view-accueil" class="view active">
+            
+            <!-- GESTION DU TEMPS RP -->
+            <h3 class="admin-title">Gestion du Temps RP</h3>
+            <div class="profile-card" style="margin-bottom: 20px;">
+              <label style="color: var(--text-dim);">Saison actuelle :</label>
+              <select id="admin-saison-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+                <option>Printemps</option>
+                <option>Été</option>
+                <option>Automne</option>
+                <option>Hiver</option>
+              </select>
+              
+              <label style="color: var(--text-dim);">Nom de la Lune :</label>
+              <input type="text" id="admin-lune-input" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #10b981;" onclick="updateTempsRP()">Mettre à jour le temps</button>
+            </div>
+
+            <!-- GESTION DES ACTUS -->
             <h3 class="admin-title">Gestion de l'Accueil (Embed)</h3>
             <div class="profile-card">
               <label style="color: var(--text-dim);">Couleur :</label>
@@ -552,7 +563,7 @@
         </nav>
       </div> <!-- FIN SCREEN-ADMIN -->
 
-      <!-- MODAL CHAT TICKET (DÉPLACÉ TOUT EN BAS POUR ÊTRE ACCESSIBLE PARTOUT) -->
+      <!-- MODAL CHAT TICKET (UNIVERSELLE) -->
       <div id="ticket-chat-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 500px; padding: 0; display: flex; flex-direction: column; height: 75vh; overflow: hidden;">
           <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;">

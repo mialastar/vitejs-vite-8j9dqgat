@@ -942,6 +942,53 @@ async function loadAdminTickets() {
 }
 
 // ==========================================
+// --- TEMPS RP (SAISONS & LUNES) ---
+// ==========================================
+async function loadTempsRP() {
+  const { data } = await supabase.from('config').select('*');
+  if (!data) return;
+
+  let saison = "Automne";
+  let lune = "Lune des Feuilles Mortes";
+
+  data.forEach(item => {
+    if (item.key === 'saison') saison = item.value;
+    if (item.key === 'lune') lune = item.value;
+  });
+
+  const displaySaison = document.getElementById('display-saison');
+  const displayLune = document.getElementById('display-lune');
+  
+  if (displaySaison) displaySaison.textContent = saison;
+  if (displayLune) displayLune.textContent = lune;
+
+  // Remplir les champs de l'admin
+  const adminSaison = document.getElementById('admin-saison-select');
+  const adminLune = document.getElementById('admin-lune-input');
+  if (adminSaison) adminSaison.value = saison;
+  if (adminLune) adminLune.value = lune;
+}
+loadTempsRP();
+
+window.updateTempsRP = async function() {
+  const newSaison = document.getElementById('admin-saison-select').value;
+  const newLune = document.getElementById('admin-lune-input').value;
+
+  if (!newLune) return alert("Écris le nom de la lune.");
+
+  const { error } = await supabase.from('config').upsert([
+    { key: 'saison', value: newSaison },
+    { key: 'lune', value: newLune }
+  ]);
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    alert("Temps RP mis à jour !");
+    loadTempsRP();
+  }
+};
+
+// ==========================================
 // --- ACTUALITÉS (ACCUEIL EMBEDS) ---
 // ==========================================
 window.publierActu = async function() {
@@ -1101,7 +1148,7 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   if (messages && messages.length > 0) {
     messages.forEach(msg => {
       const isMe = msg.sender_id === user.id;
-      const bubbleClass = isMe ? 'staff' : 'player'; // On utilise 'staff' pour la couleur de droite (soi-même) et 'player' pour l'autre
+      const bubbleClass = isMe ? 'staff' : 'player';
       const align = isMe ? 'flex-end' : 'flex-start';
 
       messagesContainer.innerHTML += `
@@ -1126,7 +1173,7 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // On enregistre le message dans la NOUVELLE table
+  // On enregistre le message dans la table
   const { error } = await supabase.from('ticket_messages').insert({
     ticket_id: currentChatTicketId,
     sender_id: user.id,
@@ -1137,12 +1184,11 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
   if (error) {
     alert("Erreur lors de l'envoi : " + error.message);
   } else {
-    // On change le statut du ticket en "Répondu"
+    // On change le statut du ticket
     await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
     
     // On rafraichit le chat
     openTicketChat(currentChatTicketId, currentChatIsAdmin);
-    // On rafraichit la liste en arrière-plan
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
 });
