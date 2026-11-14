@@ -1022,50 +1022,6 @@ window.publierActu = async function() {
   }
 };
 
-async function loadActualites() {
-  const container = document.getElementById('actualites-container');
-  if (!container) return;
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  
-  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).single();
-  const monClan = profile ? profile.clan : 'Aucun';
-  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
-
-  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
-  if (!data || data.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  const actusVisibles = data.filter(actu => {
-    if (!actu.clan_cible) return true; 
-    return actu.clan_cible === monClan; 
-  });
-
-  if (actusVisibles.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  container.innerHTML = actusVisibles.map(actu => `
-    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
-      <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
-      ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
-      <div class="embed-desc">${actu.contenu}</div>
-      ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
-      
-      <!-- BOUTON SUPPRIMER CLAIR -->
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" onclick="supprimerActu('${actu.id}')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
 // ==========================================
 // --- CHRONIQUES (MJ EMBEDS) ---
 // ==========================================
@@ -1088,37 +1044,6 @@ window.publierChronique = async function() {
     loadChroniques();
   }
 };
-
-async function loadChroniques() {
-  const container = document.getElementById('chroniques-container');
-  if (!container) return;
-
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
-  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
-
-  const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
-    return;
-  }
-
-  container.innerHTML = data.map(chro => `
-    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
-      <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
-      <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
-      <div class="embed-desc">${chro.contenu}</div>
-      ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
-      
-      <!-- BOUTON SUPPRIMER CLAIR -->
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" onclick="supprimerChronique('${chro.id}')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
 
 // ==========================================
 // --- MES TICKETS (JOUEUR - CHAT) ---
@@ -1483,24 +1408,108 @@ window.envoyerGuerre = async function() {
   }
 };
 
-window.supprimerActu = async function(id) {
-  if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette actualité ?")) {
-    const { error } = await supabase.from('actualites').delete().eq('id', id);
-    if (error) alert("Erreur : " + error.message);
-    else {
-      // On rafraîchit la liste immédiatement sans recharger la page
-      loadActualites(); 
-    }
-  }
-};
+// ==========================================
+// --- ACTUALITÉS (ACCUEIL EMBEDS) ---
+// ==========================================
+async function loadActualites() {
+  const container = document.getElementById('actualites-container');
+  if (!container) return;
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  
+  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).single();
+  const monClan = profile ? profile.clan : 'Aucun';
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
-window.supprimerChronique = async function(id) {
-  if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette chronique ?")) {
-    const { error } = await supabase.from('chroniques').delete().eq('id', id);
-    if (error) alert("Erreur : " + error.message);
-    else {
-      // On rafraîchit la liste immédiatement sans recharger la page
-      loadChroniques(); 
-    }
+  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
+  
+  if (!data || data.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const actusVisibles = data.filter(actu => {
+    if (!actu.clan_cible) return true; 
+    return actu.clan_cible === monClan; 
+  });
+
+  if (actusVisibles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = actusVisibles.map(actu => `
+    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
+      <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
+      ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
+      <div class="embed-desc">${actu.contenu}</div>
+      ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
+      
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${actu.id}" onclick="supprimerElement(this, 'actualites')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// --- CHRONIQUES (MJ EMBEDS) ---
+// ==========================================
+async function loadChroniques() {
+  const container = document.getElementById('chroniques-container');
+  if (!container) return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
+
+  const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = data.map(chro => `
+    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
+      <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
+      <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
+      <div class="embed-desc">${chro.contenu}</div>
+      ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
+      
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${chro.id}" onclick="supprimerElement(this, 'chroniques')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// --- FONCTION DE SUPPRESSION UNIVERSELLE ---
+// ==========================================
+window.supprimerElement = async function(btn, table) {
+  const id = btn.getAttribute('data-id');
+  if (!id) return alert("Erreur: Impossible de trouver l'ID.");
+
+  if (!confirm("⚠️ Es-tu sûr de vouloir supprimer ce message ? Il sera effacé de la base de données.")) return;
+
+  // On désactive le bouton le temps de la suppression
+  btn.textContent = "Suppression...";
+  btn.disabled = true;
+
+  const { error } = await supabase.from(table).delete().eq('id', id);
+
+  if (error) {
+    alert("Erreur de suppression : " + error.message);
+    btn.textContent = "🗑️ Supprimer";
+    btn.disabled = false;
+  } else {
+    // Si ça marche, on rafraîchit la liste sans recharger la page
+    if (table === 'actualites') loadActualites();
+    if (table === 'chroniques') loadChroniques();
   }
 };
