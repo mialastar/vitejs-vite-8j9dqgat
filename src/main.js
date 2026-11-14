@@ -10,6 +10,8 @@ let editingFicheId = null;
 let currentEditingImage = ""; 
 let currentTicketType = "";
 let currentRelationFicheId = null;
+let currentChatTicketId = null;
+let currentChatIsAdmin = false;
 
 // ==========================================
 // --- GESTION DES ÉCRANS ---
@@ -125,22 +127,22 @@ const stepNumText = document.getElementById('current-step-num');
 function updateWizard() {
   document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
   document.getElementById(`step-${currentStep}`).classList.add('active');
-  stepNumText.textContent = currentStep;
-  progressFill.style.width = `${(currentStep / totalSteps) * 100}%`;
-  btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  if(stepNumText) stepNumText.textContent = currentStep;
+  if(progressFill) progressFill.style.width = `${(currentStep / totalSteps) * 100}%`;
+  if(btnPrev) btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
   
-  if (currentStep === totalSteps) {
+  if (currentStep === totalSteps && btnNext) {
     btnNext.textContent = editingFicheId ? 'Mettre à jour' : 'Soumettre';
     btnNext.style.background = '#10b981';
-  } else {
+  } else if (btnNext) {
     btnNext.textContent = 'Suivant';
     btnNext.style.background = '';
   }
 }
 
-btnPrev.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
+if(btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
 
-btnNext.addEventListener('click', async () => {
+if(btnNext) btnNext.addEventListener('click', async () => {
   if (currentStep < totalSteps) {
     currentStep++;
     updateWizard();
@@ -211,21 +213,24 @@ btnNext.addEventListener('click', async () => {
       alert("Erreur : " + error.message);
     } else {
       const toast = document.getElementById('toast-success');
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('show'), 50);
-      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+      if(toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('show'), 50);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+      }
 
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
-      document.getElementById('image-preview').style.display = 'none';
+      const preview = document.getElementById('image-preview');
+      if(preview) preview.style.display = 'none';
       
       editingFicheId = null; 
       currentEditingImage = "";
       currentStep = 1;
       updateWizard();
       
-      document.querySelector('[data-sub="mine"]').click();
+      document.querySelector('[data-sub="mine"]')?.click();
     }
   }
 });
@@ -238,10 +243,13 @@ function updateStats() {
   let totalUsed = 0;
   sliders.forEach(s => {
     totalUsed += parseInt(s.value);
-    document.getElementById(`val-${s.id.split('-')[1]}`).textContent = s.value;
+    const el = document.getElementById(`val-${s.id.split('-')[1]}`);
+    if(el) el.textContent = s.value;
   });
-  pointsLeftDisplay.textContent = maxPoints - totalUsed;
-  pointsLeftDisplay.style.color = (maxPoints - totalUsed) < 0 ? '#ef4444' : 'var(--accent)';
+  if(pointsLeftDisplay) {
+    pointsLeftDisplay.textContent = maxPoints - totalUsed;
+    pointsLeftDisplay.style.color = (maxPoints - totalUsed) < 0 ? '#ef4444' : 'var(--accent)';
+  }
 }
 
 sliders.forEach(s => {
@@ -253,29 +261,35 @@ sliders.forEach(s => {
 });
 updateStats();
 
-document.getElementById('image-upload').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const preview = document.getElementById('image-preview');
-      preview.src = event.target.result;
-      preview.style.display = 'block';
+const fileInput = document.getElementById('image-upload');
+if(fileInput) {
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const preview = document.getElementById('image-preview');
+        if(preview) {
+          preview.src = event.target.result;
+          preview.style.display = 'block';
+        }
+      }
+      reader.readAsDataURL(file);
     }
-    reader.readAsDataURL(file);
-  }
-});
+  });
+}
 
 // ==========================================
 // --- FICHES : MES FICHES, VOIR, DETAILS ---
 // ==========================================
 async function loadMyFiches() {
   const container = document.getElementById('my-fiches-container');
+  if(!container) return;
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   const { data: { user } } = await supabase.auth.getUser();
   const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
 
-  if (error || fiches.length === 0) {
+  if (error || !fiches || fiches.length === 0) {
     container.innerHTML = '<p style="text-align: center; color: gray;">Tu n\'as pas encore de fiche.</p>';
     return;
   }
@@ -326,7 +340,9 @@ window.editFiche = async function(id) {
   document.querySelector('#step-7 textarea').value = fiche.vulnerabilites || '';
   
   const preview = document.getElementById('image-preview');
-  if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  if(preview) {
+    if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  }
   
   document.getElementById('stat-force').value = fiche.stats_force || 1;
   document.getElementById('stat-agilite').value = fiche.stats_agilite || 1;
@@ -350,10 +366,11 @@ window.deleteFiche = async function(id) {
 let allValidatedFiches = [];
 async function loadAllFiches() {
   const container = document.getElementById('all-fiches-container');
+  if(!container) return;
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('statut', 'Validée').order('date_creation', { ascending: false });
   
-  if (error || fiches.length === 0) {
+  if (error || !fiches || fiches.length === 0) {
     container.innerHTML = '<p style="text-align: center; color: gray;">Aucune fiche validée.</p>';
     return;
   }
@@ -363,6 +380,7 @@ async function loadAllFiches() {
 
 function renderPublicFiches(fiches) {
   const container = document.getElementById('all-fiches-container');
+  if(!container) return;
   container.innerHTML = '';
   fiches.forEach(fiche => {
     let imageHtml = (fiche.image_url && fiche.image_url.trim() !== '') ? `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>` : '';
@@ -374,10 +392,13 @@ function renderPublicFiches(fiches) {
   });
 }
 
-document.getElementById('search-fiches').addEventListener('input', (e) => {
-  const term = e.target.value.toLowerCase();
-  renderPublicFiches(allValidatedFiches.filter(f => f.nom.toLowerCase().includes(term)));
-});
+const searchFiches = document.getElementById('search-fiches');
+if(searchFiches) {
+  searchFiches.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    renderPublicFiches(allValidatedFiches.filter(f => f.nom.toLowerCase().includes(term)));
+  });
+}
 
 function openFicheDetail(fiche) {
   currentRelationFicheId = fiche.id;
@@ -404,31 +425,39 @@ function openFicheDetail(fiche) {
   document.getElementById('detail-vulnerabilites').textContent = fiche.vulnerabilites || 'Non renseigné';
 
   const compContainer = document.getElementById('detail-competences-list');
-  compContainer.innerHTML = '';
-  if (fiche.competences_list) {
-    fiche.competences_list.split(',').forEach(comp => {
-      if(comp.trim()) { compContainer.innerHTML += `<span class="tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent);">${comp.trim()}</span>`; }
-    });
+  if(compContainer) {
+    compContainer.innerHTML = '';
+    if (fiche.competences_list) {
+      fiche.competences_list.split(',').forEach(comp => {
+        if(comp.trim()) { compContainer.innerHTML += `<span class="tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent);">${comp.trim()}</span>`; }
+      });
+    }
   }
-  document.getElementById('detail-competences-details').textContent = fiche.competences_details || 'Aucun détail.';
+  
+  const compDetails = document.getElementById('detail-competences-details');
+  if(compDetails) compDetails.textContent = fiche.competences_details || 'Aucun détail.';
 
   const imgContainer = document.getElementById('detail-image');
-  if (fiche.image_url && fiche.image_url.trim() !== '') {
-    imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
-    imgContainer.style.display = 'block';
-  } else { imgContainer.style.display = 'none'; }
+  if(imgContainer) {
+    if (fiche.image_url && fiche.image_url.trim() !== '') {
+      imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
+      imgContainer.style.display = 'block';
+    } else { imgContainer.style.display = 'none'; }
+  }
 
   const stats = [{ id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite }, { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse }, { id: 'charisme', val: fiche.stats_charisme }];
   stats.forEach(stat => {
     const val = stat.val || 0;
-    document.getElementById(`num-${stat.id}`).textContent = val;
-    document.getElementById(`bar-${stat.id}`).style.width = `${(val / 10) * 100}%`;
+    const numEl = document.getElementById(`num-${stat.id}`);
+    const barEl = document.getElementById(`bar-${stat.id}`);
+    if(numEl) numEl.textContent = val;
+    if(barEl) barEl.style.width = `${(val / 10) * 100}%`;
   });
 
   document.querySelectorAll('.detail-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.detail-tab-btn[data-dtab="histoire"]').classList.add('active');
+  document.querySelector('.detail-tab-btn[data-dtab="histoire"]')?.classList.add('active');
   document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
-  document.getElementById('dtab-histoire').classList.add('active');
+  document.getElementById('dtab-histoire')?.classList.add('active');
 }
 
 document.querySelectorAll('.detail-tab-btn').forEach(btn => {
@@ -440,11 +469,11 @@ document.querySelectorAll('.detail-tab-btn').forEach(btn => {
   });
 });
 
-document.getElementById('btn-back-fiches').addEventListener('click', () => {
+document.getElementById('btn-back-fiches')?.addEventListener('click', () => {
   document.getElementById('view-fiche-detail').classList.remove('active');
   document.getElementById('view-fiches').classList.add('active');
-  document.querySelector('[data-sub="all"]').classList.add('active');
-  document.getElementById('subview-all').classList.add('active');
+  document.querySelector('[data-sub="all"]')?.classList.add('active');
+  document.getElementById('subview-all')?.classList.add('active');
 });
 
 // ==========================================
@@ -452,12 +481,13 @@ document.getElementById('btn-back-fiches').addEventListener('click', () => {
 // ==========================================
 async function loadMyRelations() {
   const container = document.getElementById('my-relations-container');
+  if(!container) return;
   container.innerHTML = '<p style="text-align: center; color: gray;">Chargement...</p>';
   
   const { data: { user } } = await supabase.auth.getUser();
   const { data: tickets, error } = await supabase.from('tickets').select('*').eq('user_id', user.id).eq('type_ticket', 'relation').order('date_creation', { ascending: false });
 
-  if (error || tickets.length === 0) {
+  if (error || !tickets || tickets.length === 0) {
     container.innerHTML = '<p style="text-align: center; color: gray; margin-top: 20px;">Aucune demande pour le moment.</p>';
     return;
   }
@@ -470,26 +500,30 @@ async function loadMyRelations() {
   });
 }
 
-document.getElementById('btn-new-relation').addEventListener('click', async () => {
+document.getElementById('btn-new-relation')?.addEventListener('click', async () => {
   document.getElementById('relation-modal').classList.add('active');
   document.getElementById('rel-message').value = '';
   const { data: { user } } = await supabase.auth.getUser();
   
   const { data: mesFiches } = await supabase.from('fiches_oc').select('id, nom').eq('user_id', user.id).eq('statut', 'Validée');
   const selectSource = document.getElementById('rel-source');
-  selectSource.innerHTML = '<option value="">Choisir ton personnage...</option>';
-  if (mesFiches && mesFiches.length > 0) mesFiches.forEach(f => selectSource.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
-  else selectSource.innerHTML = '<option value="">Aucune fiche validée</option>';
+  if(selectSource) {
+    selectSource.innerHTML = '<option value="">Choisir ton personnage...</option>';
+    if (mesFiches && mesFiches.length > 0) mesFiches.forEach(f => selectSource.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
+    else selectSource.innerHTML = '<option value="">Aucune fiche validée</option>';
+  }
 
   const { data: autresFiches } = await supabase.from('fiches_oc').select('id, nom').eq('statut', 'Validée');
   const selectCible = document.getElementById('rel-cible');
-  selectCible.innerHTML = '<option value="">Choisir le personnage ciblé...</option>';
-  if (autresFiches && autresFiches.length > 0) autresFiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
+  if(selectCible) {
+    selectCible.innerHTML = '<option value="">Choisir le personnage ciblé...</option>';
+    if (autresFiches && autresFiches.length > 0) autresFiches.forEach(f => selectCible.innerHTML += `<option value="${f.id}">${f.nom}</option>`);
+  }
 });
 
-document.getElementById('btn-close-relation').addEventListener('click', () => document.getElementById('relation-modal').classList.remove('active'));
+document.getElementById('btn-close-relation')?.addEventListener('click', () => document.getElementById('relation-modal').classList.remove('active'));
 
-document.getElementById('btn-submit-relation').addEventListener('click', async () => {
+document.getElementById('btn-submit-relation')?.addEventListener('click', async () => {
   const sourceId = document.getElementById('rel-source').value;
   const cibleId = document.getElementById('rel-cible').value;
   const type = document.getElementById('rel-type').value;
@@ -511,8 +545,10 @@ document.getElementById('btn-submit-relation').addEventListener('click', async (
   else {
     document.getElementById('relation-modal').classList.remove('active');
     const toast = document.getElementById('toast-success');
-    toast.querySelector('h4').textContent = "Demande envoyée !"; toast.querySelector('p').textContent = "Le staff va valider.";
-    toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+    if(toast) {
+      toast.querySelector('h4').textContent = "Demande envoyée !"; toast.querySelector('p').textContent = "Le staff va valider.";
+      toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+    }
     loadMyRelations();
   }
 });
@@ -601,7 +637,8 @@ async function loadProfil() {
   const ocContainer = document.getElementById('profile-oc-preview');
   if(ocContainer) {
     ocContainer.innerHTML = ''; 
-    document.getElementById('profile-oc-count').textContent = `${fiches ? fiches.length : 0} / 5`;
+    const countEl = document.getElementById('profile-oc-count');
+    if(countEl) countEl.textContent = `${fiches ? fiches.length : 0} / 5`;
 
     if (fiches && fiches.length > 0) {
       fiches.forEach(fiche => {
@@ -612,32 +649,37 @@ async function loadProfil() {
   }
 }
 
-document.getElementById('btn-logout').addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
+document.getElementById('btn-logout')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
 
 // ==========================================
 // --- PANEL DE GESTION RP (CHEF) ---
 // ==========================================
-document.getElementById('btn-close-rp-panel').addEventListener('click', () => {
+document.getElementById('btn-close-rp-panel')?.addEventListener('click', () => {
   document.getElementById('rp-panel-modal').classList.remove('active');
 });
 
 async function openRpPanel() {
   document.getElementById('rp-panel-modal').classList.add('active');
   const container = document.getElementById('rp-members-list');
+  if(!container) return;
   container.innerHTML = '<p style="color: gray; text-align: center;">Chargement des membres...</p>';
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: myFiche } = await supabase.from('fiches_oc').select('clan').eq('user_id', user.id).eq('statut', 'Validée').single();
   
-  if (!myFiche) {
-    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Impossible de trouver ton clan (as-tu une fiche validée ?).</p>';
+  // On récupère le clan depuis le PROFIL du joueur
+  let { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  const monClan = profile?.clan;
+
+  if (!monClan || monClan === 'Aucun') {
+    container.innerHTML = '<p style="color: red; text-align: center;">Tu n\'as pas de clan attribué dans ton profil.</p>';
     return;
   }
 
-  const { data: membres, error } = await supabase.from('fiches_oc').select('id, nom, rang, user_id, image_url').eq('clan', myFiche.clan).eq('statut', 'Validée');
+  // On cherche les fiches validées qui ont ce clan
+  const { data: membres, error } = await supabase.from('fiches_oc').select('id, nom, rang, user_id, image_url').eq('clan', monClan).eq('statut', 'Validée');
 
-  if (error || membres.length === 0) {
-    container.innerHTML = `<p style="color: gray; text-align: center;">Aucun membre validé dans le ${myFiche.clan}.</p>`;
+  if (error || !membres || membres.length === 0) {
+    container.innerHTML = `<p style="color: gray; text-align: center;">Aucun membre validé dans le ${monClan}.</p>`;
     return;
   }
 
@@ -658,7 +700,7 @@ async function openRpPanel() {
         </div>
         ${!isSelf ? `
         <div style="display: flex; gap: 5px;">
-          <button class="btn-action btn-modifier" style="font-size: 0.7rem; padding: 5px 10px;" onclick="promoteMember('${membre.id}', '${membre.rang}')">Promouvoir</button>
+          <button class="btn-action btn-modifier" style="font-size: 0.7rem; padding: 5px 10px;" onclick="promoteMember('${membre.id}')">Promouvoir</button>
           <button class="btn-action btn-supprimer" style="font-size: 0.7rem; padding: 5px 10px;" onclick="exileMember('${membre.id}')">Exiler</button>
         </div>` : '<span style="font-size: 0.8rem; color: var(--accent); font-weight: bold;">(Vous)</span>'}
       </div>
@@ -667,9 +709,9 @@ async function openRpPanel() {
   });
 }
 
-window.promoteMember = async function(ficheId, currentRang) {
-  const newRang = prompt(`Rang actuel : ${currentRang}\n\nQuel est le nouveau rang de ce membre ?`, currentRang);
-  if (newRang && newRang !== currentRang) {
+window.promoteMember = async function(ficheId) {
+  const newRang = prompt(`Quel est le nouveau rang de ce membre ? (ex: Guerrier, Lieutenant, Guérisseur...)`);
+  if (newRang) {
     const { error } = await supabase.from('fiches_oc').update({ rang: newRang }).eq('id', ficheId);
     if (error) alert("Erreur : " + error.message);
     else { alert("Rang mis à jour !"); openRpPanel(); }
@@ -677,7 +719,7 @@ window.promoteMember = async function(ficheId, currentRang) {
 };
 
 window.exileMember = async function(ficheId) {
-  if (confirm("⚠️ Es-tu sûr de vouloir exiler ce membre ?")) {
+  if (confirm("⚠️ Es-tu sûr de vouloir exiler ce membre ? Il deviendra Solitaire.")) {
     const { error } = await supabase.from('fiches_oc').update({ clan: 'Solitaire', rang: 'Solitaire' }).eq('id', ficheId);
     if (error) alert("Erreur : " + error.message);
     else { alert("Membre exilé !"); openRpPanel(); }
@@ -691,7 +733,7 @@ setTimeout(() => {
   const mapContent = document.getElementById('map-content');
   if (mapContent && typeof Panzoom !== 'undefined') {
     const panzoom = Panzoom(mapContent, { maxScale: 4, minScale: 1, startScale: 1, contain: 'outside', cursor: 'grab' });
-    document.getElementById('map-viewport').addEventListener('wheel', panzoom.zoomWithWheel);
+    document.getElementById('map-viewport')?.addEventListener('wheel', panzoom.zoomWithWheel);
   }
 }, 500);
 
@@ -728,15 +770,15 @@ document.querySelectorAll('.map-pin').forEach(pin => {
     }
   });
 });
-document.getElementById('btn-close-sheet').addEventListener('click', () => document.getElementById('map-sheet-overlay').classList.remove('active'));
-document.getElementById('map-sheet-overlay').addEventListener('click', (e) => { if (e.target.id === 'map-sheet-overlay') e.target.classList.remove('active'); });
+document.getElementById('btn-close-sheet')?.addEventListener('click', () => document.getElementById('map-sheet-overlay').classList.remove('active'));
+document.getElementById('map-sheet-overlay')?.addEventListener('click', (e) => { if (e.target.id === 'map-sheet-overlay') e.target.classList.remove('active'); });
 
 // ==========================================
 // --- SUPPORT (TICKETS) ---
 // ==========================================
-document.getElementById('btn-floating-support').addEventListener('click', () => { document.getElementById('support-modal').classList.add('active'); document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
-document.getElementById('btn-close-support').addEventListener('click', () => { document.getElementById('support-modal').classList.remove('active'); });
-document.getElementById('btn-back-support').addEventListener('click', () => { document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
+document.getElementById('btn-floating-support')?.addEventListener('click', () => { document.getElementById('support-modal').classList.add('active'); document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
+document.getElementById('btn-close-support')?.addEventListener('click', () => { document.getElementById('support-modal').classList.remove('active'); });
+document.getElementById('btn-back-support')?.addEventListener('click', () => { document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
 
 window.openSupportForm = function(type) {
   currentTicketType = type;
@@ -754,7 +796,7 @@ window.openSupportForm = function(type) {
   formFields.innerHTML = html;
 };
 
-document.getElementById('btn-submit-ticket').addEventListener('click', async () => {
+document.getElementById('btn-submit-ticket')?.addEventListener('click', async () => {
   let sujet = "", description = "";
   try {
     if (currentTicketType === 'faction') { sujet = "Faction: " + document.getElementById('t-faction-nom').value; description = `Type: ${document.getElementById('t-faction-type').value}\nMembres: ${document.getElementById('t-faction-membres').value}\n\n${document.getElementById('t-faction-lore').value}`; } 
@@ -773,8 +815,10 @@ document.getElementById('btn-submit-ticket').addEventListener('click', async () 
   else {
     document.getElementById('support-modal').classList.remove('active');
     const toast = document.getElementById('toast-success');
-    toast.querySelector('h4').textContent = "Ticket envoyé !";
-    toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+    if(toast) {
+      toast.querySelector('h4').textContent = "Ticket envoyé !";
+      toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+    }
   }
 });
 
@@ -782,20 +826,22 @@ document.getElementById('btn-submit-ticket').addEventListener('click', async () 
 // --- PARAMÈTRES ---
 // ==========================================
 const settingsModal = document.getElementById('settings-modal');
-document.getElementById('btn-open-settings').addEventListener('click', () => settingsModal.classList.add('active'));
-document.getElementById('btn-close-settings').addEventListener('click', () => settingsModal.classList.remove('active'));
+document.getElementById('btn-open-settings')?.addEventListener('click', () => settingsModal.classList.add('active'));
+document.getElementById('btn-close-settings')?.addEventListener('click', () => settingsModal.classList.remove('active'));
 
-document.getElementById('btn-open-credits').addEventListener('click', () => {
+document.getElementById('btn-open-credits')?.addEventListener('click', () => {
   settingsModal.classList.remove('active'); screenApp.classList.remove('active'); screenCredits.classList.add('active');
   const btnContinue = document.getElementById('btn-continue-credits');
-  btnContinue.textContent = "Retour à l'application";
-  btnContinue.onclick = () => { screenCredits.classList.remove('active'); screenApp.classList.add('active'); btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; btnContinue.onclick = null; window.location.reload(); };
+  if(btnContinue) {
+    btnContinue.textContent = "Retour à l'application";
+    btnContinue.onclick = () => { screenCredits.classList.remove('active'); screenApp.classList.add('active'); btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; btnContinue.onclick = null; window.location.reload(); };
+  }
 });
 
 // ==========================================
 // --- BASCULE ADMIN & GESTION ---
 // ==========================================
-document.getElementById('btn-admin-panel').addEventListener('click', () => {
+document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-admin').classList.add('active');
   loadAdminFiches();
@@ -803,7 +849,7 @@ document.getElementById('btn-admin-panel').addEventListener('click', () => {
   loadAdminTickets();
 });
 
-document.getElementById('btn-quit-admin').addEventListener('click', () => {
+document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
   document.getElementById('screen-admin').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
 });
@@ -819,6 +865,7 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
 
 async function loadAdminFiches() {
   const container = document.getElementById('admin-fiches-list');
+  if(!container) return;
   const { data: fiches } = await supabase.from('fiches_oc').select('*').eq('statut', 'En attente');
   if (!fiches || fiches.length === 0) { container.innerHTML = '<p style="color: #10b981;">Aucune fiche en attente.</p>'; return; }
   container.innerHTML = '';
@@ -848,13 +895,11 @@ async function loadAdminMembres() {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px;">
         <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
-        
         <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle APP :</strong> ${profil.role_app || 'JOUEUR'}</p>
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
           <p style="margin: 0; font-size: 0.85rem;"><strong>Clan :</strong> ${profil.clan || 'Aucun'}</p>
         </div>
-        
         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
           <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')">Modif APP</button>
           <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Modif RP</button>
@@ -869,22 +914,10 @@ window.changerRoleRP = async function(id) {
   const newRole = prompt("Nouveau rôle RP (Chef, Guérisseur, Guerrier...) :");
   if (newRole) { await supabase.from('profiles').update({ role_rp: newRole }).eq('id', id); loadAdminMembres(); }
 };
-
 window.changerClan = async function(id) {
   const newClan = prompt("Nouveau Clan (Forêt, Pluie, Zénith, Brume, Solitaire...) :");
   if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
 };
-
-window.changerRoleRP = async function(id) {
-  const newRole = prompt("Nouveau rôle RP (Chef, Guérisseur, Guerrier...) :");
-  if (newRole) { await supabase.from('profiles').update({ role_rp: newRole }).eq('id', id); loadAdminMembres(); }
-};
-
-window.changerClan = async function(id) {
-  const newClan = prompt("Nouveau Clan (Forêt, Pluie, Zénith, Brume, Solitaire...) :");
-  if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
-};
-
 window.changerRoleApp = async function(id) {
   const newRole = prompt("Nouveau rôle APP (ADMIN, MJ, JOUEUR) :");
   if (newRole) { await supabase.from('profiles').update({ role_app: newRole.toUpperCase() }).eq('id', id); loadAdminMembres(); }
@@ -894,39 +927,19 @@ async function loadAdminTickets() {
   const container = document.getElementById('admin-tickets-list');
   if(!container) return;
   const { data: tickets } = await supabase.from('tickets').select('*').order('date_creation', { ascending: false });
-  
-  if (!tickets || tickets.length === 0) { 
-    container.innerHTML = '<p style="color: gray;">Aucun ticket.</p>'; 
-    return; 
-  }
+  if (!tickets || tickets.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun ticket.</p>'; return; }
   
   container.innerHTML = '';
   tickets.forEach(t => {
     container.innerHTML += `
-      <div class="profile-card" style="margin-bottom: 15px; border-left: 3px solid var(--accent);">
+      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent); cursor: pointer;" onclick="openTicketChat('${t.id}', true)">
         <h4 style="font-size: 1rem; color: #fff;">${t.sujet} <span style="font-size: 0.7rem; color: gray;">[${t.statut || 'Ouvert'}]</span></h4>
-        <p style="font-size: 0.75rem; color: gray; margin-bottom: 8px;">Type: ${t.type_ticket} | ID Joueur: ${t.user_id.substring(0, 6)}</p>
-        <p style="font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap;">${t.description}</p>
-        
-        ${t.reponse_joueur ? `<div style="background: rgba(96,165,250,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #60a5fa;"><p style="font-size: 0.85rem; color: #60a5fa; font-weight: bold; margin-bottom: 2px;">Message du Joueur :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_joueur}</p></div>` : ''}
-        ${t.reponse_staff ? `<div style="background: rgba(16,185,129,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #10b981;"><p style="font-size: 0.85rem; color: #10b981; font-weight: bold; margin-bottom: 2px;">Votre Réponse :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_staff}</p></div>` : ''}
-        
-        <div style="margin-top: 15px; display: flex; gap: 5px;">
-          <input type="text" id="admin-reply-${t.id}" placeholder="Répondre au joueur..." style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          <button class="btn-action btn-modifier" style="padding: 10px; width: auto; background: rgba(16,185,129,0.2); color: #10b981;" onclick="replyAdminTicket('${t.id}')">Répondre</button>
-        </div>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">Type: ${t.type_ticket}</p>
+        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 5px; font-weight: bold;">👉 Clique pour ouvrir la discussion</p>
       </div>
     `;
   });
 }
-
-window.replyAdminTicket = async function(id) {
-  const input = document.getElementById(`admin-reply-${id}`).value;
-  if(!input) return;
-  const { error } = await supabase.from('tickets').update({ reponse_staff: input, statut: 'Répondu' }).eq('id', id);
-  if(error) alert("Erreur : " + error.message);
-  else { alert("Réponse envoyée au joueur !"); loadAdminTickets(); }
-};
 
 // ==========================================
 // --- ACTUALITÉS (ACCUEIL) ---
@@ -952,8 +965,9 @@ async function loadActualites() {
   if (!data || data.length === 0) return;
 
   container.innerHTML = data.map(actu => `
-    <div class="feed-card" style="border-left: 4px solid var(--accent); margin-bottom: 10px;">
-      <p style="font-size: 0.95rem; color: #fff;">${actu.contenu}</p>
+    <div class="embed-card">
+      <div class="embed-header">📢 Moonlight Studio</div>
+      <div class="embed-desc">${actu.contenu}</div>
     </div>
   `).join('');
 }
@@ -988,17 +1002,17 @@ async function loadChroniques() {
   }
 
   container.innerHTML = data.map(chro => `
-    <div class="feed-card" style="margin-bottom: 15px;">
-      <div class="feed-header"><span class="author">${chro.auteur}</span></div>
-      <h3>${chro.titre}</h3>
-      <p>${chro.contenu}</p>
+    <div class="embed-card">
+      <div class="embed-header">📜 ${chro.auteur || 'Maître du Jeu'}</div>
+      <div class="embed-title">${chro.titre}</div>
+      <div class="embed-desc">${chro.contenu}</div>
     </div>
   `).join('');
 }
 loadChroniques();
 
 // ==========================================
-// --- MES TICKETS (JOUEUR) ---
+// --- MES TICKETS (JOUEUR - CHAT) ---
 // ==========================================
 document.getElementById('btn-my-tickets')?.addEventListener('click', () => {
   document.getElementById('player-tickets-modal').classList.add('active');
@@ -1014,33 +1028,95 @@ async function loadPlayerTickets() {
   const { data: tickets } = await supabase.from('tickets').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
 
   if (!tickets || tickets.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Tu n\'as aucun ticket pour le moment.</p>';
+    container.innerHTML = '<p style="color: gray; text-align: center;">Tu n\'as aucun ticket.</p>';
     return;
   }
 
   container.innerHTML = '';
   tickets.forEach(t => {
     container.innerHTML += `
-      <div class="profile-card" style="margin-bottom: 15px; border-left: 3px solid var(--accent);">
+      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent); cursor: pointer;" onclick="openTicketChat('${t.id}', false)">
         <h4 style="color: var(--accent); margin-bottom: 5px;">${t.sujet} <span style="font-size: 0.7rem; color: gray;">[${t.statut || 'Ouvert'}]</span></h4>
-        <p style="font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap;">${t.description}</p>
-        
-        ${t.reponse_staff ? `<div style="background: rgba(16,185,129,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #10b981;"><p style="font-size: 0.85rem; color: #10b981; font-weight: bold; margin-bottom: 2px;">Réponse du Staff :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_staff}</p></div>` : ''}
-        ${t.reponse_joueur ? `<div style="background: rgba(96,165,250,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #60a5fa;"><p style="font-size: 0.85rem; color: #60a5fa; font-weight: bold; margin-bottom: 2px;">Ton message :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_joueur}</p></div>` : ''}
-        
-        <div style="margin-top: 15px; display: flex; gap: 5px;">
-          <input type="text" id="reply-${t.id}" placeholder="Répondre au staff..." style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          <button class="btn-action btn-modifier" style="padding: 10px; width: auto;" onclick="replyTicket('${t.id}')">Envoyer</button>
-        </div>
+        <p style="font-size: 0.85rem; color: #cbd5e1;">${t.description.substring(0, 50)}...</p>
+        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 5px; font-weight: bold;">👉 Clique pour ouvrir la discussion</p>
       </div>
     `;
   });
 }
 
-window.replyTicket = async function(id) {
-  const input = document.getElementById(`reply-${id}`).value;
-  if(!input) return;
-  const { error } = await supabase.from('tickets').update({ reponse_joueur: input }).eq('id', id);
-  if(error) alert("Erreur : " + error.message);
-  else { alert("Message envoyé au staff !"); loadPlayerTickets(); }
+// ==========================================
+// --- SYSTEME DE CHAT (TICKETS) ---
+// ==========================================
+window.openTicketChat = async function(ticketId, isAdmin) {
+  currentChatTicketId = ticketId;
+  currentChatIsAdmin = isAdmin;
+  
+  document.getElementById('ticket-chat-modal').classList.add('active');
+  document.getElementById('chat-messages').innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
+  
+  const { data: t, error } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
+  if (error) {
+    document.getElementById('chat-messages').innerHTML = '<p style="color: red; text-align: center;">Erreur de chargement.</p>';
+    return;
+  }
+
+  document.getElementById('chat-title').textContent = t.sujet;
+
+  const messagesContainer = document.getElementById('chat-messages');
+  messagesContainer.innerHTML = '';
+
+  // Message initial (Joueur)
+  messagesContainer.innerHTML += `
+    <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.1); border-color: gray;">
+      <span class="chat-sender">Joueur (Message initial)</span>
+      ${t.description}
+    </div>
+  `;
+
+  if (t.reponse_staff) {
+    messagesContainer.innerHTML += `
+      <div class="chat-bubble staff">
+        <span class="chat-sender">Staff</span>
+        ${t.reponse_staff}
+      </div>
+    `;
+  }
+
+  if (t.reponse_joueur) {
+    messagesContainer.innerHTML += `
+      <div class="chat-bubble player">
+        <span class="chat-sender">Joueur</span>
+        ${t.reponse_joueur}
+      </div>
+    `;
+  }
+
+  // Scroll to bottom
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 };
+
+// Envoyer un message depuis le Chat
+document.getElementById('chat-send-btn')?.addEventListener('click', async () => {
+  const input = document.getElementById('chat-input').value;
+  if (!input || !currentChatTicketId) return;
+
+  document.getElementById('chat-input').value = ''; // Vider l'input
+
+  let updateData = {};
+  if (currentChatIsAdmin) {
+    updateData = { reponse_staff: input, statut: 'Répondu' };
+  } else {
+    updateData = { reponse_joueur: input };
+  }
+
+  const { error } = await supabase.from('tickets').update(updateData).eq('id', currentChatTicketId);
+  
+  if (error) {
+    alert("Erreur lors de l'envoi : " + error.message);
+  } else {
+    // Recharger le chat
+    openTicketChat(currentChatTicketId, currentChatIsAdmin);
+    // Rafraichir la liste en arrière-plan
+    if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
+  }
+});
