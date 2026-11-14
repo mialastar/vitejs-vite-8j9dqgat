@@ -1497,3 +1497,20 @@ window.envoyerGuerre = async function() {
     document.getElementById('guerre-modal').classList.remove('active');
   }
 };
+
+// ==========================================
+// --- ACTIVATION DES NOTIFICATIONS PUSH ---
+// ==========================================
+window.demanderNotifications = async function() {
+  if (!("Notification" in window)) {
+    return alert("Ton navigateur ne supporte pas les notifications.");
+  }
+
+  const permission = await Notification.requestPermission();
+  
+  if (permission === "granted") {
+    alert("Super ! Tu recevras désormais les notifications du RP.");
+  } else if (permission === "denied") {
+    alert("Tu as refusé les notifications. Tu peux changer d'avis dans les paramètres de ton navigateur.");
+  }
+};

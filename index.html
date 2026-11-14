@@ -6,6 +6,25 @@
     <title>Les Terres du Crépuscule</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- OneSignal SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
+          allowLocalhostAsSecureOrigin: true,
+          notifyButton: {
+            enable: false // On utilise notre propre bouton dans le profil
+          },
+        });
+      });
+    </script>
+
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -18,7 +37,6 @@
           <h1 class="main-title">Les Terres<br /><span class="highlight">du Crépuscule</span></h1>
           <div class="intro-line"></div>
           <p class="subtitle">Un RP par Moonlight Studio</p>
-          <!-- ONCLICK SUPPRIMÉ ICI -->
           <button type="button" id="btn-start" class="btn-primary">Entrer</button>
         </div>
       </div>
@@ -45,7 +63,6 @@
               <p>Tous droits réservés.</p>
             </div>
           </div>
-          <!-- ONCLICK SUPPRIMÉ ICI -->
           <button type="button" id="btn-continue-credits" class="btn-primary">Entrer dans les Terres du Crépuscule</button>
         </div>
       </div>
@@ -86,13 +103,12 @@
             </div>
           </div>
 
-          <!-- VUE MONDE (LORE & CARTE) -->
+          <!-- VUE MONDE -->
           <div id="view-monde" class="view">
             <div class="main-tabs">
               <button type="button" class="monde-tab-btn active" data-monde="lore">Lore</button>
               <button type="button" class="monde-tab-btn" data-monde="carte">Carte</button>
             </div>
-
             <div id="monde-lore" class="monde-content active">
               <div class="sub-tabs">
                 <button type="button" class="lore-tab-btn active" data-lore="histoire">Histoire</button>
@@ -114,15 +130,11 @@
                 <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles.</p>
               </div>
             </div>
-
             <div id="monde-carte" class="monde-content">
-              <div class="map-hint" id="map-hint">
-                👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.
-              </div>
+              <div class="map-hint" id="map-hint">👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.</div>
               <div id="map-viewport" class="map-viewport">
                 <div id="map-content" class="map-content">
                   <img id="map-image" src="https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp" alt="Carte des Terres" />
-                  
                   <button type="button" class="map-pin" style="top: 18%; left: 48%;" data-lieu="foret"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 43%; left: 72%;" data-lieu="brume"><span class="pin-dot"></span></button>
                   <button type="button" class="map-pin" style="top: 73%; left: 75%;" data-lieu="zenith"><span class="pin-dot"></span></button>
@@ -150,23 +162,17 @@
               <button type="button" class="sub-tab-btn" data-sub="all">Voir</button>
               <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
             </div>
-
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
                 <div class="progress-bar-bg"><div id="progress-bar-fill" class="progress-bar-fill" style="width: 11%;"></div></div>
               </div>
-
               <div class="wizard-form">
                 <div class="wizard-step active" id="step-1">
                   <h3>1. Identité</h3>
                   <label>Nom du personnage</label><input type="text" placeholder="Ex: Étoile de Feu" />
                   <label>Clan / Tribu</label>
-                  <select>
-                    <option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option>
-                    <option disabled>Clan de la Lune (Coming Soon)</option><option disabled>Forêt des Ronces (Coming Soon)</option>
-                    <option>Solitaire / Chat de l'Extérieur</option><option>Domestique</option>
-                  </select>
+                  <select><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option><option disabled>Clan de la Lune (Coming Soon)</option><option disabled>Forêt des Ronces (Coming Soon)</option><option>Solitaire / Chat de l'Extérieur</option><option>Domestique</option></select>
                   <label>Rang</label>
                   <select><option>Guerrier</option><option>Apprenti</option><option>Chef</option><option>Lieutenant</option><option>Guérisseur</option><option>Ancien</option></select>
                 </div>
@@ -190,14 +196,10 @@
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
                   <div class="checkbox-grid">
-                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
@@ -231,33 +233,22 @@
                   <div class="stat-row"><label>Charisme <span id="val-charisme">5</span></label><input type="range" class="stat-slider" id="stat-charisme" min="1" max="10" value="5" /></div>
                 </div>
               </div>
-
               <div class="wizard-buttons">
                 <button type="button" id="btn-prev" class="btn-secondary" style="visibility: hidden;">Précédent</button>
                 <button type="button" id="btn-next" class="btn-primary">Suivant</button>
               </div>
             </div>
-
-            <div id="subview-mine" class="subview">
-              <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
-            </div>
-
+            <div id="subview-mine" class="subview"><div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div></div>
             <div id="subview-all" class="subview">
-              <div class="search-container">
-                <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
-                <button type="button" class="btn-filter" onclick="alert('Bientôt dispo !')">⚙️</button>
-              </div>
+              <div class="search-container"><input type="text" id="search-fiches" placeholder="Rechercher un nom..." /><button type="button" class="btn-filter" onclick="alert('Bientôt dispo !')">⚙️</button></div>
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
-
             <div id="subview-relations" class="subview">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
                 <button type="button" class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;" id="btn-new-relation">➕ Demander</button>
               </div>
-              <div id="my-relations-container">
-                <p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Chargement de tes relations...</p>
-              </div>
+              <div id="my-relations-container"><p style="color: gray; font-size: 0.9rem; text-align: center; margin-top: 20px;">Chargement de tes relations...</p></div>
             </div>
           </div>
 
@@ -266,18 +257,13 @@
             <button type="button" id="btn-back-fiches" class="btn-back">← Retour</button>
             <div class="detail-header">
               <div id="detail-image" class="detail-image"></div>
-              <div class="detail-titles">
-                <h2 id="detail-nom">Nom</h2>
-                <p><span id="detail-clan">Clan</span> • <span id="detail-rang">Rang</span></p>
-              </div>
+              <div class="detail-titles"><h2 id="detail-nom">Nom</h2><p><span id="detail-clan">Clan</span> • <span id="detail-rang">Rang</span></p></div>
             </div>
-            
             <div class="detail-tabs">
               <button type="button" class="detail-tab-btn active" data-dtab="histoire">Histoire</button>
               <button type="button" class="detail-tab-btn" data-dtab="perso">Caractère</button>
               <button type="button" class="detail-tab-btn" data-dtab="stats">Stats</button>
             </div>
-            
             <div class="detail-content">
               <div id="dtab-histoire" class="dtab active">
                 <h3>Apparence</h3><p><strong>Pelage :</strong> <span id="detail-pelage">Non renseigné</span></p><p><strong>Yeux :</strong> <span id="detail-yeux">Non renseigné</span></p>
@@ -307,13 +293,11 @@
             <div class="profile-header">
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
-              
               <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
                 <p id="profile-app-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #60a5fa;">APP: ...</p>
                 <p id="profile-rp-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #fbbf24;">RP: ...</p>
                 <p id="profile-clan-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #10b981;">Clan: ...</p>
               </div>
-              
               <p style="color: gray; font-size: 0.8rem; margin-top: 15px;">Membre depuis peu</p>
             </div>
 
@@ -326,9 +310,7 @@
               <div class="progress-bar-bg" style="margin-top: 10px; height: 8px;"><div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div></div>
               <p id="profile-rep-next" style="font-size: 0.8rem; color: gray; margin-top: 8px; text-align: right;">Prochain rang : 25 pts</p>
               <button type="button" class="btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 5px; margin-top: 10px;" onclick="toggleHistory()">Voir mon historique</button>
-              <div id="reputation-history-list" style="display: none; margin-top: 10px; text-align: left; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
-                <!-- L'historique s'affichera ici -->
-              </div>
+              <div id="reputation-history-list" style="display: none; margin-top: 10px; text-align: left; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;"></div>
             </div>
 
             <div class="profile-card">
@@ -356,6 +338,10 @@
               <button type="button" class="btn-secondary" onclick="alert('Boutique en cours de création...')">🛒 Boutique <span style="font-size: 0.6rem; color: var(--accent);">(Bientôt)</span></button>
               <button type="button" class="btn-secondary" id="btn-open-settings">⚙️ Paramètres</button>
               <button type="button" class="btn-secondary" id="btn-my-tickets">🎫 Mes Tickets en cours</button>
+              
+              <!-- NOUVEAU BOUTON PWA -->
+              <button type="button" class="btn-secondary" id="btn-notifications" onclick="demanderNotifications()">🔔 Activer les notifications</button>
+
               <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel Admin</button>
               <button type="button" class="btn-secondary" style="display: none;" id="btn-rp-panel">👑 Gérer mon Clan</button>
               <button type="button" class="btn-secondary" style="background: rgba(239,68,68,0.2); color: #ef4444; border-color: rgba(239,68,68,0.3);" id="btn-logout">Déconnexion</button>
@@ -409,22 +395,10 @@
             <div class="support-modal" style="max-width: 450px;">
               <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
-              <div class="form-group">
-                <label>Ton personnage (qui fait la demande)</label>
-                <select id="rel-source"><option value="">Chargement...</option></select>
-              </div>
-              <div class="form-group">
-                <label>Personnage ciblé</label>
-                <select id="rel-cible"><option value="">Chargement...</option></select>
-              </div>
-              <div class="form-group">
-                <label>Type de relation</label>
-                <select id="rel-type"><option>Famille</option><option>Compagnon</option><option>Ami</option><option>Rival</option><option>Ennemi</option><option>Mentor</option><option>Apprenti</option></select>
-              </div>
-              <div class="form-group">
-                <label>Message pour le staff</label>
-                <textarea id="rel-message" rows="3" placeholder="Explique brièvement..."></textarea>
-              </div>
+              <div class="form-group"><label>Ton personnage (qui fait la demande)</label><select id="rel-source"><option value="">Chargement...</option></select></div>
+              <div class="form-group"><label>Personnage ciblé</label><select id="rel-cible"><option value="">Chargement...</option></select></div>
+              <div class="form-group"><label>Type de relation</label><select id="rel-type"><option>Famille</option><option>Compagnon</option><option>Ami</option><option>Rival</option><option>Ennemi</option><option>Mentor</option><option>Apprenti</option></select></div>
+              <div class="form-group"><label>Message pour le staff</label><textarea id="rel-message" rows="3" placeholder="Explique brièvement..."></textarea></div>
               <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
             </div>
           </div>
@@ -443,7 +417,7 @@
             </div>
           </div>
 
-          <!-- AJOUT : MODAL MES TICKETS (JOUEUR) -->
+          <!-- MODAL MES TICKETS (JOUEUR) -->
           <div id="player-tickets-modal" class="support-modal-overlay">
             <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
               <button type="button" class="btn-close-support" onclick="document.getElementById('player-tickets-modal').classList.remove('active')">✕</button>
@@ -467,7 +441,6 @@
       <!-- ÉCRAN 4 : APPLICATION ADMIN -->
       <div id="screen-admin" class="screen app-layout admin-layout">
         <div class="app-content">
-          
           <div class="admin-header">
             <h2>Panneau d'Administration</h2>
             <span>Moonlight Studio</span>
@@ -475,98 +448,49 @@
 
           <!-- VUE ACCUEIL ADMIN -->
           <div id="admin-view-accueil" class="view active">
-            
-            <!-- GESTION DU TEMPS RP (MÉTÉO / SAISON) -->
             <h3 class="admin-title">Gestion du Temps RP</h3>
             <div class="profile-card" style="margin-bottom: 20px;">
               <label style="color: var(--text-dim);">Saison actuelle :</label>
-              <select id="admin-saison-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
-                <option>Printemps</option>
-                <option>Été</option>
-                <option>Automne</option>
-                <option>Hiver</option>
-              </select>
-              
+              <select id="admin-saison-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Printemps</option><option>Été</option><option>Automne</option><option>Hiver</option></select>
               <label style="color: var(--text-dim);">Nom de la Lune :</label>
               <input type="text" id="admin-lune-input" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-
               <label style="color: var(--text-dim);">Météo actuelle :</label>
-              <select id="admin-meteo-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
-                <option>☀️ Ensoleillé</option>
-                <option>🌤️ Nuageux</option>
-                <option>🌧️ Pluvieux</option>
-                <option>⛈️ Orageux</option>
-                <option>🌫️ Brumeux</option>
-                <option>❄️ Neige</option>
-                <option>🌬️ Venteux</option>
-              </select>
-
+              <select id="admin-meteo-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>☀️ Ensoleillé</option><option>🌤️ Nuageux</option><option>🌧️ Pluvieux</option><option>⛈️ Orageux</option><option>🌫️ Brumeux</option><option>❄️ Neige</option><option>🌬️ Venteux</option></select>
               <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #10b981;" onclick="updateTempsRP()">Mettre à jour le temps</button>
             </div>
 
-            <!-- GESTION DES ACTUS -->
             <h3 class="admin-title">Gestion de l'Accueil (Embed)</h3>
             <div class="profile-card">
-              <label style="color: var(--text-dim);">Couleur :</label>
-              <input type="color" id="admin-actu-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
-              
-              <label style="color: var(--text-dim);">Titre :</label>
-              <input type="text" id="admin-actu-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              
-              <label style="color: var(--text-dim);">Auteur :</label>
-              <input type="text" id="admin-actu-auteur" value="Moonlight Studio" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              
-              <label style="color: var(--text-dim);">Description :</label>
-              <textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-
-              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label>
-              <input type="text" id="admin-actu-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-
+              <label style="color: var(--text-dim);">Couleur :</label><input type="color" id="admin-actu-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              <label style="color: var(--text-dim);">Titre :</label><input type="text" id="admin-actu-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Auteur :</label><input type="text" id="admin-actu-auteur" value="Moonlight Studio" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Description :</label><textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label><input type="text" id="admin-actu-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
               <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierActu()">Publier l'Embed</button>
             </div>
           </div>
 
           <!-- VUE FICHES ADMIN -->
-          <div id="admin-view-fiches" class="view">
-            <h3 class="admin-title">Fiches en attente</h3>
-            <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
+          <div id="admin-view-fiches" class="view"><h3 class="admin-title">Fiches en attente</h3><div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div></div>
 
           <!-- VUE MEMBRES ADMIN -->
-          <div id="admin-view-membres" class="view">
-            <h3 class="admin-title">Gestion des Membres</h3>
-            <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
+          <div id="admin-view-membres" class="view"><h3 class="admin-title">Gestion des Membres</h3><div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div></div>
 
           <!-- VUE CHRONIQUES ADMIN -->
           <div id="admin-view-chroniques" class="view">
             <h3 class="admin-title">Gestion des Chroniques (Embed)</h3>
             <div class="profile-card">
-              <label style="color: var(--text-dim);">Couleur :</label>
-              <input type="color" id="admin-chro-couleur" value="#fbbf24" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
-              
-              <label style="color: var(--text-dim);">Titre :</label>
-              <input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              
-              <label style="color: var(--text-dim);">Auteur :</label>
-              <input type="text" id="admin-chro-auteur" value="Le Maître du Jeu" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              
-              <label style="color: var(--text-dim);">Description (Grand texte) :</label>
-              <textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-              
-              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label>
-              <input type="text" id="admin-chro-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-
+              <label style="color: var(--text-dim);">Couleur :</label><input type="color" id="admin-chro-couleur" value="#fbbf24" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              <label style="color: var(--text-dim);">Titre :</label><input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Auteur :</label><input type="text" id="admin-chro-auteur" value="Le Maître du Jeu" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Description :</label><textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+              <label style="color: var(--text-dim);">Sous-description :</label><input type="text" id="admin-chro-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
               <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierChronique()">Publier l'Embed</button>
             </div>
           </div>
 
           <!-- VUE TICKETS ADMIN -->
-          <div id="admin-view-tickets" class="view">
-            <h3 class="admin-title">Tickets & Support</h3>
-            <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
-
+          <div id="admin-view-tickets" class="view"><h3 class="admin-title">Tickets & Support</h3><div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div></div>
         </div>
 
         <!-- BARRE DE NAVIGATION ADMIN -->
@@ -580,41 +504,23 @@
         </nav>
       </div> <!-- FIN SCREEN-ADMIN -->
 
-      <!-- MODAL CHAT TICKET (UNIVERSELLE) -->
+      <!-- MODAL CHAT TICKET -->
       <div id="ticket-chat-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 500px; padding: 0; display: flex; flex-direction: column; height: 75vh; overflow: hidden;">
-          <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;">
-            <h3 id="chat-title" style="color: var(--accent); font-family: var(--font-title); margin: 0;">Discussion</h3>
-            <button class="btn-close-support" onclick="document.getElementById('ticket-chat-modal').classList.remove('active')">✕</button>
-          </div>
-          <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;">
-            <!-- Les messages s'afficheront ici -->
-          </div>
-          <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #151520;">
-            <input type="text" id="chat-input" placeholder="Écrire un message..." style="flex: 1; padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-            <button id="chat-send-btn" class="btn-primary" style="padding: 10px 20px; border-radius: 20px;">Envoyer</button>
-          </div>
+          <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;"><h3 id="chat-title" style="color: var(--accent); font-family: var(--font-title); margin: 0;">Discussion</h3><button class="btn-close-support" onclick="document.getElementById('ticket-chat-modal').classList.remove('active')">✕</button></div>
+          <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;"></div>
+          <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #151520;"><input type="text" id="chat-input" placeholder="Écrire un message..." style="flex: 1; padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /><button id="chat-send-btn" class="btn-primary" style="padding: 10px 20px; border-radius: 20px;">Envoyer</button></div>
         </div>
       </div>
 
-      <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
+      <!-- MODAL GESTION RÉPUTATION -->
       <div id="reputation-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 450px;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
           <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Gérer la Réputation</h2>
-          
-          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.2rem;">
-            <span>Points :</span>
-            <span id="rep-slider-value" style="color: var(--accent); font-weight: bold;">0</span>
-          </div>
-          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.2rem;"><span>Points :</span><span id="rep-slider-value" style="color: var(--accent); font-weight: bold;">0</span></div>
           <input type="range" id="reputation-slider" min="0" max="500" value="0" style="width: 100%; height: 8px; margin-bottom: 20px; accent-color: var(--accent);" />
-
-          <div class="form-group">
-            <label>Raison de la modification :</label>
-            <input type="text" id="reputation-reason" placeholder="Ex: A gagné un combat, Punition..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
-
+          <div class="form-group"><label>Raison de la modification :</label><input type="text" id="reputation-reason" placeholder="Ex: A gagné un combat, Punition..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
           <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="appliquerReputation()">Enregistrer</button>
         </div>
       </div>
@@ -624,31 +530,12 @@
         <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
           <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
-          
-          <div class="form-group">
-            <label>Couleur de l'embed :</label>
-            <input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
-          </div>
-          <div class="form-group">
-            <label>Motif de l'Assemblée :</label>
-            <input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
-          <div class="form-group">
-            <label>Convoqué par :</label>
-            <input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
-          <div class="form-group">
-            <label>Date et Heure :</label>
-            <input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
-          <div class="form-group">
-            <label>Description :</label>
-            <textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Sous-description :</label>
-            <input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
+          <div class="form-group"><label>Couleur de l'embed :</label><input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" /></div>
+          <div class="form-group"><label>Motif de l'Assemblée :</label><input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Convoqué par :</label><input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Date et Heure :</label><input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Description :</label><textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
+          <div class="form-group"><label>Sous-description :</label><input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
           <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
         </div>
       </div>
@@ -658,24 +545,9 @@
         <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
           <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
-          
-          <div class="form-group">
-            <label>Clan ciblé :</label>
-            <select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
-              <option>Clan de la Forêt</option>
-              <option>Clan de la Pluie</option>
-              <option>Clan du Zénith</option>
-              <option>Clan de la Brume</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Motif de la Guerre :</label>
-            <input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-          </div>
-          <div class="form-group">
-            <label>Description / Message pour le Staff :</label>
-            <textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-          </div>
+          <div class="form-group"><label>Clan ciblé :</label><select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option></select></div>
+          <div class="form-group"><label>Motif de la Guerre :</label><input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Description / Message pour le Staff :</label><textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
           <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
           <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
         </div>
@@ -683,10 +555,7 @@
       
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
-        <div class="toast-text">
-          <h4>Succès !</h4>
-          <p>Action réalisée avec succès.</p>
-        </div>
+        <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
       </div>
     </div>
 
