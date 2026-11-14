@@ -1,15 +1,22 @@
 {
-    "name": "Les Terres du Crépuscule",
-    "short_name": "Terres du Crép.",
+    "name": "Les Terres Du Crépuscule",
+    "short_name": "Lgdc Rp",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#05050a",
-    "theme_color": "#05050a",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
     "icons": [
       {
-        "src": "https://media.discordapp.net/attachments/1570828688734421046/1570828861288087613/4543017b-b9f5-423c-a192-f732bc4b8e67.webp?ex=6af883e1&is=6af73261&hm=4830ba2274f4dad8c89219e243b7ef3029498afc73a5a33c5f540dbed5e9874f&=&format=webp",
+        "src": "https://cdn.phototourl.com/anon/2026-11-14-dccd1323-be55-4645-b311-cac6b645bdfa.png",
         "sizes": "192x192",
-        "type": "image/webp"
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "https://cdn.phototourl.com/anon/2026-11-14-dccd1323-be55-4645-b311-cac6b645bdfa.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
       }
     ]
   }

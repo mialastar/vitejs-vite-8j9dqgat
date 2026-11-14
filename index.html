@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
+      // Chemin relatif (sans slash initial) vers le fichier du service worker
+      serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
+      // Portée du service worker (doit correspondre au dossier)
+      serviceWorkerParam: { scope: "/push/onesignal/" },
+    });
+  });
+</script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Les Terres du Crépuscule</title>
