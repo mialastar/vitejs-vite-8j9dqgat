@@ -942,16 +942,23 @@ async function loadAdminTickets() {
 }
 
 // ==========================================
-// --- ACTUALITÉS (ACCUEIL) ---
+// --- ACTUALITÉS (ACCUEIL EMBEDS) ---
 // ==========================================
 window.publierActu = async function() {
+  const titre = document.getElementById('admin-actu-titre').value;
+  const auteur = document.getElementById('admin-actu-auteur').value || 'Moonlight Studio';
   const contenu = document.getElementById('admin-actu-input').value;
-  if (!contenu) return alert("Écris un message.");
+  const sous = document.getElementById('admin-actu-sous').value;
+  const couleur = document.getElementById('admin-actu-couleur').value;
   
-  const { error } = await supabase.from('actualites').insert({ contenu });
+  if (!contenu) return alert("Écris une description.");
+  
+  const { error } = await supabase.from('actualites').insert({ titre, auteur, contenu, sous_description: sous, couleur });
   if (error) alert(error.message);
   else {
+    document.getElementById('admin-actu-titre').value = '';
     document.getElementById('admin-actu-input').value = '';
+    document.getElementById('admin-actu-sous').value = '';
     alert("Message publié !");
     loadActualites();
   }
@@ -965,27 +972,34 @@ async function loadActualites() {
   if (!data || data.length === 0) return;
 
   container.innerHTML = data.map(actu => `
-    <div class="embed-card">
-      <div class="embed-header">📢 Moonlight Studio</div>
+    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'};">
+      <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
+      ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
       <div class="embed-desc">${actu.contenu}</div>
+      ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
     </div>
   `).join('');
 }
 loadActualites();
 
 // ==========================================
-// --- CHRONIQUES (MJ) ---
+// --- CHRONIQUES (MJ EMBEDS) ---
 // ==========================================
 window.publierChronique = async function() {
   const titre = document.getElementById('admin-chro-titre').value;
+  const auteur = document.getElementById('admin-chro-auteur').value || 'Maître du Jeu';
   const contenu = document.getElementById('admin-chro-contenu').value;
-  if (!titre || !contenu) return alert("Remplis le titre et le contenu.");
+  const sous = document.getElementById('admin-chro-sous').value;
+  const couleur = document.getElementById('admin-chro-couleur').value;
   
-  const { error } = await supabase.from('chroniques').insert({ titre, contenu });
+  if (!titre || !contenu) return alert("Remplis le titre et la description.");
+  
+  const { error } = await supabase.from('chroniques').insert({ titre, auteur, contenu, sous_description: sous, couleur });
   if (error) alert(error.message);
   else {
     document.getElementById('admin-chro-titre').value = '';
     document.getElementById('admin-chro-contenu').value = '';
+    document.getElementById('admin-chro-sous').value = '';
     alert("Chronique publiée !");
     loadChroniques();
   }
@@ -1002,10 +1016,11 @@ async function loadChroniques() {
   }
 
   container.innerHTML = data.map(chro => `
-    <div class="embed-card">
-      <div class="embed-header">📜 ${chro.auteur || 'Maître du Jeu'}</div>
-      <div class="embed-title">${chro.titre}</div>
+    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'};">
+      <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
+      <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
       <div class="embed-desc">${chro.contenu}</div>
+      ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
     </div>
   `).join('');
 }
@@ -1113,10 +1128,18 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
   
   if (error) {
     alert("Erreur lors de l'envoi : " + error.message);
+    document.getElementById('chat-input').value = input; // Remettre le texte si erreur
   } else {
     // Recharger le chat
     openTicketChat(currentChatTicketId, currentChatIsAdmin);
     // Rafraichir la liste en arrière-plan
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
+  }
+});
+
+// Permettre d'envoyer avec la touche "Entrée"
+document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') {
+    document.getElementById('chat-send-btn').click();
   }
 });

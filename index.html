@@ -454,6 +454,23 @@
             </div>
           </div>
 
+          <!-- MODAL CHAT TICKET (UNIVERSELLE) -->
+          <div id="ticket-chat-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 500px; padding: 0; display: flex; flex-direction: column; height: 75vh; overflow: hidden;">
+              <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;">
+                <h3 id="chat-title" style="color: var(--accent); font-family: var(--font-title); margin: 0;">Discussion</h3>
+                <button class="btn-close-support" onclick="document.getElementById('ticket-chat-modal').classList.remove('active')">✕</button>
+              </div>
+              <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;">
+                <!-- Les messages s'afficheront ici -->
+              </div>
+              <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #151520;">
+                <input type="text" id="chat-input" placeholder="Écrire un message..." style="flex: 1; padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+                <button id="chat-send-btn" class="btn-primary" style="padding: 10px 20px; border-radius: 20px;">Envoyer</button>
+              </div>
+            </div>
+          </div>
+
         </div> <!-- FIN APP-CONTENT JOUEUR -->
 
         <!-- BARRE DE NAVIGATION JOUEUR -->
@@ -464,24 +481,6 @@
           <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
-
-                  <!-- MODAL CHAT TICKET (UNIVERSELLE) -->
-                  <div id="ticket-chat-modal" class="support-modal-overlay">
-                    <div class="support-modal" style="max-width: 500px; padding: 0; display: flex; flex-direction: column; height: 75vh; overflow: hidden;">
-                      <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;">
-                        <h3 id="chat-title" style="color: var(--accent); font-family: var(--font-title); margin: 0;">Discussion</h3>
-                        <button class="btn-close-support" onclick="document.getElementById('ticket-chat-modal').classList.remove('active')">✕</button>
-                      </div>
-                      <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;">
-                        <!-- Les messages s'afficheront ici -->
-                      </div>
-                      <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #151520;">
-                        <input type="text" id="chat-input" placeholder="Écrire un message..." style="flex: 1; padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                        <button id="chat-send-btn" class="btn-primary" style="padding: 10px 20px; border-radius: 20px;">Envoyer</button>
-                      </div>
-                    </div>
-                  </div>
-                  
       </div> <!-- FIN SCREEN-APP JOUEUR -->
 
       <!-- ÉCRAN 4 : APPLICATION ADMIN -->
@@ -495,11 +494,24 @@
 
           <!-- VUE ACCUEIL ADMIN -->
           <div id="admin-view-accueil" class="view active">
-            <h3 class="admin-title">Gestion de l'Accueil</h3>
+            <h3 class="admin-title">Gestion de l'Accueil (Embed)</h3>
             <div class="profile-card">
-              <label style="color: var(--text-dim);">Nouveau message d'actualité :</label>
+              <label style="color: var(--text-dim);">Couleur :</label>
+              <input type="color" id="admin-actu-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              
+              <label style="color: var(--text-dim);">Titre :</label>
+              <input type="text" id="admin-actu-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              
+              <label style="color: var(--text-dim);">Auteur :</label>
+              <input type="text" id="admin-actu-auteur" value="Moonlight Studio" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              
+              <label style="color: var(--text-dim);">Description :</label>
               <textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-              <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierActu()">Publier sur l'Accueil</button>
+
+              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label>
+              <input type="text" id="admin-actu-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierActu()">Publier l'Embed</button>
             </div>
           </div>
 
@@ -517,13 +529,24 @@
 
           <!-- VUE CHRONIQUES ADMIN -->
           <div id="admin-view-chroniques" class="view">
-            <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
+            <h3 class="admin-title">Gestion des Chroniques (Embed)</h3>
             <div class="profile-card">
-              <label style="color: var(--text-dim);">Titre de la chronique :</label>
+              <label style="color: var(--text-dim);">Couleur :</label>
+              <input type="color" id="admin-chro-couleur" value="#fbbf24" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              
+              <label style="color: var(--text-dim);">Titre :</label>
               <input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              <label style="color: var(--text-dim);">Contenu :</label>
+              
+              <label style="color: var(--text-dim);">Auteur :</label>
+              <input type="text" id="admin-chro-auteur" value="Le Maître du Jeu" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              
+              <label style="color: var(--text-dim);">Description (Grand texte) :</label>
               <textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-              <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierChronique()">Publier la Chronique</button>
+              
+              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label>
+              <input type="text" id="admin-chro-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierChronique()">Publier l'Embed</button>
             </div>
           </div>
 
