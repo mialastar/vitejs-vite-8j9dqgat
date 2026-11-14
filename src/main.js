@@ -69,7 +69,7 @@ navBtns.forEach(btn => {
     if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
     if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
     if(target === 'monde') document.getElementById('view-monde').classList.add('active');
-    if(target === 'chroniques') document.getElementById('view-chroniques').classList.add('active'); // LIGNE AJOUTÉE
+    if(target === 'chroniques') document.getElementById('view-chroniques').classList.add('active');
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
       loadProfil(); 
@@ -884,6 +884,7 @@ window.changerClan = async function(id) {
   const newClan = prompt("Nouveau Clan (Forêt, Pluie, Zénith, Brume, Solitaire...) :");
   if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
 };
+
 window.changerRoleApp = async function(id) {
   const newRole = prompt("Nouveau rôle APP (ADMIN, MJ, JOUEUR) :");
   if (newRole) { await supabase.from('profiles').update({ role_app: newRole.toUpperCase() }).eq('id', id); loadAdminMembres(); }
@@ -893,21 +894,43 @@ async function loadAdminTickets() {
   const container = document.getElementById('admin-tickets-list');
   if(!container) return;
   const { data: tickets } = await supabase.from('tickets').select('*').order('date_creation', { ascending: false });
-  if (!tickets || tickets.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun ticket.</p>'; return; }
+  
+  if (!tickets || tickets.length === 0) { 
+    container.innerHTML = '<p style="color: gray;">Aucun ticket.</p>'; 
+    return; 
+  }
   
   container.innerHTML = '';
-  tickets.forEach(ticket => {
+  tickets.forEach(t => {
     container.innerHTML += `
-      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent); cursor: pointer;" onclick="alert('Ticket de: ${ticket.sujet}\\n\\n${ticket.description}')">
-        <h4 style="font-size: 1rem; color: #fff;">${ticket.sujet}</h4>
-        <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">Type: ${ticket.type_ticket}</p>
-        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 10px; font-weight: bold;">👉 Clique pour lire</p>
+      <div class="profile-card" style="margin-bottom: 15px; border-left: 3px solid var(--accent);">
+        <h4 style="font-size: 1rem; color: #fff;">${t.sujet} <span style="font-size: 0.7rem; color: gray;">[${t.statut || 'Ouvert'}]</span></h4>
+        <p style="font-size: 0.75rem; color: gray; margin-bottom: 8px;">Type: ${t.type_ticket} | ID Joueur: ${t.user_id.substring(0, 6)}</p>
+        <p style="font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap;">${t.description}</p>
+        
+        ${t.reponse_joueur ? `<div style="background: rgba(96,165,250,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #60a5fa;"><p style="font-size: 0.85rem; color: #60a5fa; font-weight: bold; margin-bottom: 2px;">Message du Joueur :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_joueur}</p></div>` : ''}
+        ${t.reponse_staff ? `<div style="background: rgba(16,185,129,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #10b981;"><p style="font-size: 0.85rem; color: #10b981; font-weight: bold; margin-bottom: 2px;">Votre Réponse :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_staff}</p></div>` : ''}
+        
+        <div style="margin-top: 15px; display: flex; gap: 5px;">
+          <input type="text" id="admin-reply-${t.id}" placeholder="Répondre au joueur..." style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          <button class="btn-action btn-modifier" style="padding: 10px; width: auto; background: rgba(16,185,129,0.2); color: #10b981;" onclick="replyAdminTicket('${t.id}')">Répondre</button>
+        </div>
       </div>
     `;
   });
 }
 
+window.replyAdminTicket = async function(id) {
+  const input = document.getElementById(`admin-reply-${id}`).value;
+  if(!input) return;
+  const { error } = await supabase.from('tickets').update({ reponse_staff: input, statut: 'Répondu' }).eq('id', id);
+  if(error) alert("Erreur : " + error.message);
+  else { alert("Réponse envoyée au joueur !"); loadAdminTickets(); }
+};
+
+// ==========================================
 // --- ACTUALITÉS (ACCUEIL) ---
+// ==========================================
 window.publierActu = async function() {
   const contenu = document.getElementById('admin-actu-input').value;
   if (!contenu) return alert("Écris un message.");
@@ -934,9 +957,11 @@ async function loadActualites() {
     </div>
   `).join('');
 }
-loadActualites(); // Charge les actus au démarrage
+loadActualites();
 
+// ==========================================
 // --- CHRONIQUES (MJ) ---
+// ==========================================
 window.publierChronique = async function() {
   const titre = document.getElementById('admin-chro-titre').value;
   const contenu = document.getElementById('admin-chro-contenu').value;
@@ -971,3 +996,51 @@ async function loadChroniques() {
   `).join('');
 }
 loadChroniques();
+
+// ==========================================
+// --- MES TICKETS (JOUEUR) ---
+// ==========================================
+document.getElementById('btn-my-tickets')?.addEventListener('click', () => {
+  document.getElementById('player-tickets-modal').classList.add('active');
+  loadPlayerTickets();
+});
+
+async function loadPlayerTickets() {
+  const container = document.getElementById('player-tickets-list');
+  if(!container) return;
+  container.innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: tickets } = await supabase.from('tickets').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
+
+  if (!tickets || tickets.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Tu n\'as aucun ticket pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  tickets.forEach(t => {
+    container.innerHTML += `
+      <div class="profile-card" style="margin-bottom: 15px; border-left: 3px solid var(--accent);">
+        <h4 style="color: var(--accent); margin-bottom: 5px;">${t.sujet} <span style="font-size: 0.7rem; color: gray;">[${t.statut || 'Ouvert'}]</span></h4>
+        <p style="font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap;">${t.description}</p>
+        
+        ${t.reponse_staff ? `<div style="background: rgba(16,185,129,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #10b981;"><p style="font-size: 0.85rem; color: #10b981; font-weight: bold; margin-bottom: 2px;">Réponse du Staff :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_staff}</p></div>` : ''}
+        ${t.reponse_joueur ? `<div style="background: rgba(96,165,250,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 2px solid #60a5fa;"><p style="font-size: 0.85rem; color: #60a5fa; font-weight: bold; margin-bottom: 2px;">Ton message :</p><p style="font-size: 0.9rem; color: #fff;">${t.reponse_joueur}</p></div>` : ''}
+        
+        <div style="margin-top: 15px; display: flex; gap: 5px;">
+          <input type="text" id="reply-${t.id}" placeholder="Répondre au staff..." style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          <button class="btn-action btn-modifier" style="padding: 10px; width: auto;" onclick="replyTicket('${t.id}')">Envoyer</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+window.replyTicket = async function(id) {
+  const input = document.getElementById(`reply-${id}`).value;
+  if(!input) return;
+  const { error } = await supabase.from('tickets').update({ reponse_joueur: input }).eq('id', id);
+  if(error) alert("Erreur : " + error.message);
+  else { alert("Message envoyé au staff !"); loadPlayerTickets(); }
+};
