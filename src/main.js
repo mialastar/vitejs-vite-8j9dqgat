@@ -51,9 +51,16 @@ async function checkUser() {
     screenCredits.classList.remove('active');
     screenAuth.classList.remove('active');
     screenApp.classList.add('active');
+    
+    // 🟢 C'EST ICI QU'ON CHARGE LES DONNÉES, UNE FOIS CONNECTÉ !
+    loadActualites();
+    loadChroniques();
+    loadTempsRP();
+  } else {
+    // Si pas connecté, on met juste l'intro
+    screenIntro.classList.add('active');
   }
 }
-checkUser();
 
 // ==========================================
 // --- NAVIGATION JOUEUR ---
@@ -1418,7 +1425,7 @@ async function loadActualites() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   
-  // On utilise maybeSingle pour ne pas faire planter le code si le profil n'existe pas
+  // maybeSingle() empêche le site de planter si le profil n'existe pas encore
   const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).maybeSingle();
   const monClan = profile ? profile.clan : 'Aucun';
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
@@ -1430,9 +1437,10 @@ async function loadActualites() {
     return;
   }
 
-  // Filtre
   const actusVisibles = data.filter(actu => {
-    if (!actu.clan_cible) return true; 
+    // Si l'actu n'a pas de clan cible, tout le monde la voit
+    if (!actu.clan_cible || actu.clan_cible === 'null' || actu.clan_cible === '') return true; 
+    // Sinon, seulement si c'est mon clan
     return actu.clan_cible === monClan; 
   });
 
