@@ -1418,7 +1418,8 @@ async function loadActualites() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   
-  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).single();
+  // On utilise maybeSingle pour ne pas faire planter le code si le profil n'existe pas
+  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).maybeSingle();
   const monClan = profile ? profile.clan : 'Aucun';
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
@@ -1429,6 +1430,7 @@ async function loadActualites() {
     return;
   }
 
+  // Filtre
   const actusVisibles = data.filter(actu => {
     if (!actu.clan_cible) return true; 
     return actu.clan_cible === monClan; 
@@ -1463,10 +1465,13 @@ async function loadChroniques() {
   if (!container) return;
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
+  if (!user) return;
+
+  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).maybeSingle();
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
   const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
+  
   if (!data || data.length === 0) {
     container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
     return;
