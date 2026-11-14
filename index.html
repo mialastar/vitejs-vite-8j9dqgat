@@ -324,6 +324,10 @@
               </div>
               <div class="progress-bar-bg" style="margin-top: 10px; height: 8px;"><div id="profile-rep-fill" class="progress-bar-fill" style="width: 0%;"></div></div>
               <p id="profile-rep-next" style="font-size: 0.8rem; color: gray; margin-top: 8px; text-align: right;">Prochain rang : 25 pts</p>
+              <button type="button" class="btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 5px; margin-top: 10px;" onclick="toggleHistory()">Voir mon historique</button>
+              <div id="reputation-history-list" style="display: none; margin-top: 10px; text-align: left; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
+                <!-- L'historique s'affichera ici -->
+              </div>
             </div>
 
             <div class="profile-card">
@@ -591,6 +595,23 @@
           </div>
         </div>
       </div>
+
+            <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
+            <div id="reputation-modal" class="support-modal-overlay">
+              <div class="support-modal" style="max-width: 450px;">
+                <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
+                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Gérer la Réputation</h2>
+                
+                <div class="form-group">
+                  <label>Choisir l'action :</label>
+                  <select id="reputation-action-select" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+                    <!-- Les options seront injectées par le JS -->
+                  </select>
+                </div>
+      
+                <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="appliquerReputation()">Appliquer</button>
+              </div>
+            </div>
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
