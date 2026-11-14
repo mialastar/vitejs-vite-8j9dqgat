@@ -103,10 +103,20 @@ navBtns.forEach(btn => {
     
     const target = e.currentTarget.getAttribute('data-target');
     
-    if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
-    if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
-    if(target === 'monde') document.getElementById('view-monde').classList.add('active');
-    if(target === 'chroniques') document.getElementById('view-chroniques').classList.add('active');
+    if(target === 'accueil') {
+      document.getElementById('view-accueil').classList.add('active');
+      loadActualites(); // <--- ON RECHARGE LES ACTUS À CHAQUE CLIC
+    }
+    if(target === 'fiches') {
+      document.getElementById('view-fiches').classList.add('active');
+    }
+    if(target === 'monde') {
+      document.getElementById('view-monde').classList.add('active');
+    }
+    if(target === 'chroniques') {
+      document.getElementById('view-chroniques').classList.add('active');
+      loadChroniques(); // <--- ON RECHARGE LES CHRONIQUES À CHAQUE CLIC
+    }
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
       loadProfil(); 
@@ -887,6 +897,11 @@ document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
 document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
   document.getElementById('screen-admin').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
+  
+  // On recharge les données immédiatement quand on quitte l'admin
+  loadActualites();
+  loadChroniques();
+  loadTempsRP();
 });
 
 document.querySelectorAll('[data-admin-target]').forEach(btn => {
