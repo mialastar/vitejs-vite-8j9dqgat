@@ -15,7 +15,7 @@ let currentChatIsAdmin = false;
 let currentChatUserName = "";
 
 // ==========================================
-// --- GESTION DES ÉCRANS ---
+// --- GESTION DES ÉCRANS & AUTH ---
 // ==========================================
 const screenIntro = document.getElementById('screen-intro');
 const screenCredits = document.getElementById('screen-credits');
@@ -33,34 +33,61 @@ function switchScreen(current, next) {
   setTimeout(() => next.classList.add('active'), 800); 
 }
 
-btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
-btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
+if(btnStart) btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
+if(btnContinueCredits) btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
 
-btnDiscordLogin.addEventListener('click', async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'discord',
-    options: { redirectTo: 'https://lgdc-rp.vercel.app' }
+if(btnDiscordLogin) {
+  btnDiscordLogin.addEventListener('click', async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: { redirectTo: 'https://lgdc-rp.vercel.app' }
+    });
+    if (error) alert("Erreur de connexion.");
   });
-  if (error) alert("Erreur de connexion.");
-});
+}
 
+// Fonction pour afficher l'App
+function showApp() {
+  screenIntro.classList.remove('active');
+  screenCredits.classList.remove('active');
+  screenAuth.classList.remove('active');
+  screenAdmin.classList.remove('active');
+  screenApp.classList.add('active');
+  
+  // Charger les données de la page d'accueil
+  loadActualites();
+  loadChroniques();
+  loadTempsRP();
+}
+
+// Fonction pour afficher l'intro (si déconnecté)
+function showIntro() {
+  screenApp.classList.remove('active');
+  screenAdmin.classList.remove('active');
+  screenCredits.classList.remove('active');
+  screenAuth.classList.remove('active');
+  screenIntro.classList.add('active');
+}
+
+// Vérification au démarrage
 async function checkUser() {
   const { data } = await supabase.auth.getSession();
   if (data && data.session) {
-    screenIntro.classList.remove('active');
-    screenCredits.classList.remove('active');
-    screenAuth.classList.remove('active');
-    screenApp.classList.add('active');
-    
-    // 🟢 C'EST ICI QU'ON CHARGE LES DONNÉES, UNE FOIS CONNECTÉ !
-    loadActualites();
-    loadChroniques();
-    loadTempsRP();
+    showApp();
   } else {
-    // Si pas connecté, on met juste l'intro
-    screenIntro.classList.add('active');
+    showIntro();
   }
 }
+checkUser(); // <--- ON LANCE LA VÉRIFICATION ICI
+
+// ÉCOUTEUR DE CONNEXION (Règle le retour de Discord)
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') {
+    showApp();
+  } else if (event === 'SIGNED_OUT') {
+    showIntro();
+  }
+});
 
 // ==========================================
 // --- NAVIGATION JOUEUR ---
@@ -913,7 +940,7 @@ async function loadAdminMembres() {
           <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Modif RP</button>
           <button class="btn-action btn-modifier" onclick="changerClan('${profil.id}')">Modif Clan</button>
           <button class="btn-action btn-modifier" onclick="openReputationModal('${profil.id}')" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24;">⚖️ Réputation</button>
-          </div>
+        </div>
       </div>
     `;
   });
@@ -984,7 +1011,6 @@ async function loadTempsRP() {
   if (adminLune) adminLune.value = lune;
   if (adminMeteo) adminMeteo.value = meteo;
 }
-loadTempsRP();
 
 window.updateTempsRP = async function() {
   const newSaison = document.getElementById('admin-saison-select').value;
@@ -1029,6 +1055,53 @@ window.publierActu = async function() {
   }
 };
 
+async function loadActualites() {
+  const container = document.getElementById('actualites-container');
+  if (!container) return;
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  
+  // maybeSingle() empêche le site de planter si le profil n'existe pas encore
+  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).maybeSingle();
+  const monClan = profile ? profile.clan : 'Aucun';
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
+
+  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
+  
+  if (!data || data.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const actusVisibles = data.filter(actu => {
+    // Si l'actu n'a pas de clan cible, tout le monde la voit
+    if (!actu.clan_cible || actu.clan_cible === 'null' || actu.clan_cible === '') return true; 
+    // Sinon, seulement si c'est mon clan
+    return actu.clan_cible === monClan; 
+  });
+
+  if (actusVisibles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = actusVisibles.map(actu => `
+    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
+      <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
+      ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
+      <div class="embed-desc">${actu.contenu}</div>
+      ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
+      
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${actu.id}" onclick="supprimerElement(this, 'actualites')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
 // ==========================================
 // --- CHRONIQUES (MJ EMBEDS) ---
 // ==========================================
@@ -1049,6 +1122,65 @@ window.publierChronique = async function() {
     document.getElementById('admin-chro-sous').value = '';
     alert("Chronique publiée !");
     loadChroniques();
+  }
+};
+
+async function loadChroniques() {
+  const container = document.getElementById('chroniques-container');
+  if (!container) return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).maybeSingle();
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
+
+  const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
+  
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = data.map(chro => `
+    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
+      <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
+      <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
+      <div class="embed-desc">${chro.contenu}</div>
+      ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
+      
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${chro.id}" onclick="supprimerElement(this, 'chroniques')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// --- FONCTION DE SUPPRESSION UNIVERSELLE ---
+// ==========================================
+window.supprimerElement = async function(btn, table) {
+  const id = btn.getAttribute('data-id');
+  if (!id) return alert("Erreur: Impossible de trouver l'ID.");
+
+  if (!confirm("⚠️ Es-tu sûr de vouloir supprimer ce message ? Il sera effacé de la base de données.")) return;
+
+  // On désactive le bouton le temps de la suppression
+  btn.textContent = "Suppression...";
+  btn.disabled = true;
+
+  const { error } = await supabase.from(table).delete().eq('id', id);
+
+  if (error) {
+    alert("Erreur de suppression : " + error.message);
+    btn.textContent = "🗑️ Supprimer";
+    btn.disabled = false;
+  } else {
+    // Si ça marche, on rafraîchit la liste sans recharger la page
+    if (table === 'actualites') loadActualites();
+    if (table === 'chroniques') loadChroniques();
   }
 };
 
@@ -1271,68 +1403,7 @@ window.toggleHistory = async function() {
 };
 
 // ==========================================
-// --- GUERRE & ASSEMBLÉE (PANEL CHEF) ---
-// ==========================================
-window.convoquerAssemblee = async function() {
-  const { data: { user } } = await supabase.auth.getUser();
-  // On récupère le clan du chef
-  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
-  
-  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
-
-  const sujet = prompt("Quel est le sujet de l'assemblée ? (ex: Réunion d'urgence, Cérémonie, Annonce...)");
-  if (!sujet) return; // Si le chef annule
-
-  const titre = `📢 Assemblée du ${profile.clan}`;
-  const contenu = `Le chef du ${profile.clan} convoque une assemblée.\n\nSujet : ${sujet}`;
-
-  // On publie dans le fil d'actualité
-  const { error } = await supabase.from('actualites').insert({
-    titre: titre,
-    auteur: `Chef du ${profile.clan}`,
-    contenu: contenu,
-    couleur: '#60a5fa' // Bleu clair
-  });
-
-  if (error) alert("Erreur : " + error.message);
-  else {
-    alert("L'assemblée a été annoncée sur le fil d'actualité !");
-    loadActualites(); // Rafraîchir l'accueil
-  }
-};
-
-window.declarerGuerre = async function() {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
-  
-  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
-
-  const cible = prompt("Contre quel clan veux-tu déclarer la guerre ? (ex: Clan de la Pluie)");
-  if (!cible) return;
-
-  const raison = prompt("Quelle est la raison de cette déclaration de guerre ?");
-  if (!raison) return;
-
-  const titre = `⚔️ Déclaration de Guerre !`;
-  const contenu = `Le ${profile.clan} déclare la guerre au ${cible}.\n\nRaison : ${raison}`;
-
-  // On publie dans le fil d'actualité
-  const { error } = await supabase.from('actualites').insert({
-    titre: titre,
-    auteur: `Chef du ${profile.clan}`,
-    contenu: contenu,
-    couleur: '#ef4444' // Rouge sang
-  });
-
-  if (error) alert("Erreur : " + error.message);
-  else {
-    alert("La déclaration de guerre a été publiée sur le fil d'actualité !");
-    loadActualites(); // Rafraîchir l'accueil
-  }
-};
-
-// ==========================================
-// --- SYSTÈME D'ASSEMBLÉE (CHEF) ---
+// --- ASSEMBLÉE & GUERRE (PANEL CHEF) ---
 // ==========================================
 window.convoquerAssemblee = function() {
   document.getElementById('assemblee-modal').classList.add('active');
@@ -1378,9 +1449,6 @@ window.envoyerAssemblee = async function() {
   }
 };
 
-// ==========================================
-// --- SYSTÈME DE GUERRE (CHEF) ---
-// ==========================================
 window.declarerGuerre = function() {
   document.getElementById('guerre-modal').classList.add('active');
 };
@@ -1412,117 +1480,5 @@ window.envoyerGuerre = async function() {
   else {
     alert("Ta demande de guerre a été envoyée au Staff !");
     document.getElementById('guerre-modal').classList.remove('active');
-  }
-};
-
-// ==========================================
-// --- ACTUALITÉS (ACCUEIL EMBEDS) ---
-// ==========================================
-async function loadActualites() {
-  const container = document.getElementById('actualites-container');
-  if (!container) return;
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  
-  // maybeSingle() empêche le site de planter si le profil n'existe pas encore
-  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).maybeSingle();
-  const monClan = profile ? profile.clan : 'Aucun';
-  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
-
-  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
-  
-  if (!data || data.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  const actusVisibles = data.filter(actu => {
-    // Si l'actu n'a pas de clan cible, tout le monde la voit
-    if (!actu.clan_cible || actu.clan_cible === 'null' || actu.clan_cible === '') return true; 
-    // Sinon, seulement si c'est mon clan
-    return actu.clan_cible === monClan; 
-  });
-
-  if (actusVisibles.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  container.innerHTML = actusVisibles.map(actu => `
-    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
-      <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
-      ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
-      <div class="embed-desc">${actu.contenu}</div>
-      ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
-      
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${actu.id}" onclick="supprimerElement(this, 'actualites')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-// ==========================================
-// --- CHRONIQUES (MJ EMBEDS) ---
-// ==========================================
-async function loadChroniques() {
-  const container = document.getElementById('chroniques-container');
-  if (!container) return;
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).maybeSingle();
-  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
-
-  const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
-  
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
-    return;
-  }
-
-  container.innerHTML = data.map(chro => `
-    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
-      <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
-      <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
-      <div class="embed-desc">${chro.contenu}</div>
-      ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
-      
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${chro.id}" onclick="supprimerElement(this, 'chroniques')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-// ==========================================
-// --- FONCTION DE SUPPRESSION UNIVERSELLE ---
-// ==========================================
-window.supprimerElement = async function(btn, table) {
-  const id = btn.getAttribute('data-id');
-  if (!id) return alert("Erreur: Impossible de trouver l'ID.");
-
-  if (!confirm("⚠️ Es-tu sûr de vouloir supprimer ce message ? Il sera effacé de la base de données.")) return;
-
-  // On désactive le bouton le temps de la suppression
-  btn.textContent = "Suppression...";
-  btn.disabled = true;
-
-  const { error } = await supabase.from(table).delete().eq('id', id);
-
-  if (error) {
-    alert("Erreur de suppression : " + error.message);
-    btn.textContent = "🗑️ Supprimer";
-    btn.disabled = false;
-  } else {
-    // Si ça marche, on rafraîchit la liste sans recharger la page
-    if (table === 'actualites') loadActualites();
-    if (table === 'chroniques') loadChroniques();
   }
 };

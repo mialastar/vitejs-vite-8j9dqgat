@@ -18,7 +18,8 @@
           <h1 class="main-title">Les Terres<br /><span class="highlight">du Crépuscule</span></h1>
           <div class="intro-line"></div>
           <p class="subtitle">Un RP par Moonlight Studio</p>
-          <button type="button" id="btn-start" class="btn-primary" onclick="document.getElementById('screen-intro').classList.remove('active'); document.getElementById('screen-credits').classList.add('active');">Entrer</button>
+          <!-- ONCLICK SUPPRIMÉ ICI -->
+          <button type="button" id="btn-start" class="btn-primary">Entrer</button>
         </div>
       </div>
 
@@ -44,7 +45,8 @@
               <p>Tous droits réservés.</p>
             </div>
           </div>
-          <button type="button" id="btn-continue-credits" class="btn-primary" onclick="document.getElementById('screen-credits').classList.remove('active'); document.getElementById('screen-auth').classList.add('active');">Entrer dans les Terres du Crépuscule</button>
+          <!-- ONCLICK SUPPRIMÉ ICI -->
+          <button type="button" id="btn-continue-credits" class="btn-primary">Entrer dans les Terres du Crépuscule</button>
         </div>
       </div>
 
@@ -66,7 +68,6 @@
           
           <!-- VUE ACCUEIL -->
           <div id="view-accueil" class="view active">
-            <!-- BANNIÈRE MISE À JOUR DYNAMIQUEMENT -->
             <div class="season-banner">
               <h2 id="display-saison">Automne</h2>
               <p id="display-lune">Lune des Feuilles Mortes</p>
@@ -434,10 +435,8 @@
               <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
               <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                   <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="convoquerAssemblee()">📢 Convoquer Assemblée</button>
                   <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="declarerGuerre()">⚔️ Déclarer Guerre</button>
-                </div>
               </div>
               <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
               <div id="rp-members-list"><p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement...</p></div>
@@ -598,7 +597,7 @@
         </div>
       </div>
 
-                  <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
+      <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
       <div id="reputation-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 450px;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
@@ -620,68 +619,68 @@
         </div>
       </div>
 
-            <!-- MODAL ASSEMBLÉE (CHEF) -->
-            <div id="assemblee-modal" class="support-modal-overlay">
-              <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
-                <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
-                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
-                
-                <div class="form-group">
-                  <label>Couleur de l'embed :</label>
-                  <input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
-                </div>
-                <div class="form-group">
-                  <label>Motif de l'Assemblée :</label>
-                  <input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                </div>
-                <div class="form-group">
-                  <label>Convoqué par :</label>
-                  <input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                </div>
-                <div class="form-group">
-                  <label>Date et Heure :</label>
-                  <input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                </div>
-                <div class="form-group">
-                  <label>Description :</label>
-                  <textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-                </div>
-                <div class="form-group">
-                  <label>Sous-description :</label>
-                  <input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                </div>
-                <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
-              </div>
-            </div>
+      <!-- MODAL ASSEMBLÉE (CHEF) -->
+      <div id="assemblee-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
+          
+          <div class="form-group">
+            <label>Couleur de l'embed :</label>
+            <input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+          </div>
+          <div class="form-group">
+            <label>Motif de l'Assemblée :</label>
+            <input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          <div class="form-group">
+            <label>Convoqué par :</label>
+            <input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          <div class="form-group">
+            <label>Date et Heure :</label>
+            <input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          <div class="form-group">
+            <label>Description :</label>
+            <textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Sous-description :</label>
+            <input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
+        </div>
+      </div>
+
+      <!-- MODAL GUERRE (CHEF) -->
+      <div id="guerre-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
+          
+          <div class="form-group">
+            <label>Clan ciblé :</label>
+            <select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+              <option>Clan de la Forêt</option>
+              <option>Clan de la Pluie</option>
+              <option>Clan du Zénith</option>
+              <option>Clan de la Brume</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Motif de la Guerre :</label>
+            <input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          <div class="form-group">
+            <label>Description / Message pour le Staff :</label>
+            <textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+          </div>
+          <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
+          <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
+        </div>
+      </div>
       
-            <!-- MODAL GUERRE (CHEF) -->
-            <div id="guerre-modal" class="support-modal-overlay">
-              <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
-                <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
-                <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
-                
-                <div class="form-group">
-                  <label>Clan ciblé :</label>
-                  <select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
-                    <option>Clan de la Forêt</option>
-                    <option>Clan de la Pluie</option>
-                    <option>Clan du Zénith</option>
-                    <option>Clan de la Brume</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Motif de la Guerre :</label>
-                  <input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-                </div>
-                <div class="form-group">
-                  <label>Description / Message pour le Staff :</label>
-                  <textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-                </div>
-                <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
-                <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
-              </div>
-            </div>
-            
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
         <div class="toast-text">
