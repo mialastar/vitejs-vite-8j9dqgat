@@ -524,30 +524,52 @@ async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  document.getElementById('profile-username').textContent = user.user_metadata.full_name || "Joueur";
-  document.getElementById('profile-avatar').src = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+  const userEl = document.getElementById('profile-username');
+  if(userEl) userEl.textContent = user.user_metadata.full_name || "Joueur";
+  const avatarEl = document.getElementById('profile-avatar');
+  if(avatarEl) avatarEl.src = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
 
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-  if (!profile) { const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); profile = newProfile; }
-
-  const roleBrut = profile.role_rp || profile.title || 'Aucun rôle';
-  const clanBadge = document.getElementById('profile-clan-badge');
-  if (clanBadge) {
-    clanBadge.textContent = `Clan : ${profile.clan || 'Aucun'}`;
+  if (!profile) { 
+    const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); 
+    profile = newProfile; 
   }
-  document.getElementById('profile-title-badge').textContent = roleBrut;
 
+  // --- 1. AFFICHAGE DES 3 BADGES ---
+  const roleApp = profile?.role_app || 'JOUEUR';
+  const roleRp = profile?.role_rp || 'Aucun';
+  const clan = profile?.clan || 'Aucun';
+
+  const appBadge = document.getElementById('profile-app-badge');
+  if (appBadge) appBadge.textContent = `APP: ${roleApp}`;
+
+  const rpBadge = document.getElementById('profile-rp-badge');
+  if (rpBadge) rpBadge.textContent = `RP: ${roleRp}`;
+
+  const clanBadge = document.getElementById('profile-clan-badge');
+  if (clanBadge) clanBadge.textContent = `Clan: ${clan}`;
+
+  // --- 2. AFFICHAGE DES BOUTONS ---
   const btnRpPanel = document.getElementById('btn-rp-panel');
-  if (roleBrut.toLowerCase().includes('chef')) {
-    btnRpPanel.style.display = 'flex';
-    btnRpPanel.onclick = () => openRpPanel();
-  } else { btnRpPanel.style.display = 'none'; }
+  if (btnRpPanel) {
+    if (roleRp.toLowerCase().includes('chef')) {
+      btnRpPanel.style.display = 'flex';
+      btnRpPanel.onclick = () => openRpPanel();
+    } else { 
+      btnRpPanel.style.display = 'none'; 
+    }
+  }
 
   const btnAdmin = document.getElementById('btn-admin-panel');
-  if (profile.role_app === 'ADMIN' || profile.role_app === 'MJ') {
-    btnAdmin.style.display = 'flex';
-  } else { btnAdmin.style.display = 'none'; }
+  if (btnAdmin) {
+    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ') {
+      btnAdmin.style.display = 'flex';
+    } else { 
+      btnAdmin.style.display = 'none'; 
+    }
+  }
 
+  // --- 3. RÉPUTATION ---
   const pts = profile ? profile.reputation_points : 0;
   let title = "Inconnu", nextThreshold = 25;
   if (pts >= 25 && pts < 50) { title = "Loyal"; nextThreshold = 50; }
@@ -560,26 +582,34 @@ async function loadProfil() {
   else if (pts >= 400 && pts < 500) { title = "Immortel"; nextThreshold = 500; }
   else if (pts >= 500) { title = "Au-delà des Lunes"; nextThreshold = 500; }
 
-  document.getElementById('profile-rep-points').textContent = `${pts} pts`;
-  document.getElementById('profile-rep-title').textContent = title;
-  document.getElementById('profile-rep-fill').style.width = `${Math.min((pts / nextThreshold) * 100, 100)}%`;
-  document.getElementById('profile-rep-next').textContent = `Prochain rang : ${nextThreshold} pts`;
+  const ptsEl = document.getElementById('profile-rep-points');
+  if(ptsEl) ptsEl.textContent = `${pts} pts`;
+  const repTitleEl = document.getElementById('profile-rep-title');
+  if(repTitleEl) repTitleEl.textContent = title;
+  const repFillEl = document.getElementById('profile-rep-fill');
+  if(repFillEl) repFillEl.style.width = `${Math.min((pts / nextThreshold) * 100, 100)}%`;
+  const repNextEl = document.getElementById('profile-rep-next');
+  if(repNextEl) repNextEl.textContent = `Prochain rang : ${nextThreshold} pts`;
 
   const banner = document.getElementById('profile-banner');
-  if (profile && profile.banner_url) { banner.style.backgroundImage = `url('${profile.banner_url}')`; } 
-  else { banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; }
+  if (banner) {
+    if (profile && profile.banner_url) { banner.style.backgroundImage = `url('${profile.banner_url}')`; } 
+    else { banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; }
+  }
 
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
   const ocContainer = document.getElementById('profile-oc-preview');
-  ocContainer.innerHTML = ''; 
-  document.getElementById('profile-oc-count').textContent = `${fiches ? fiches.length : 0} / 5`;
+  if(ocContainer) {
+    ocContainer.innerHTML = ''; 
+    document.getElementById('profile-oc-count').textContent = `${fiches ? fiches.length : 0} / 5`;
 
-  if (fiches && fiches.length > 0) {
-    fiches.forEach(fiche => {
-      const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
-      ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
-    });
-  } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
+    if (fiches && fiches.length > 0) {
+      fiches.forEach(fiche => {
+        const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
+        ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
+      });
+    } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
+  }
 }
 
 document.getElementById('btn-logout').addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
@@ -818,18 +848,32 @@ async function loadAdminMembres() {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px;">
         <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
-        <p style="margin-bottom: 5px;"><strong>Rôle APP :</strong> ${profil.role_app || 'JOUEUR'}</p>
-        <p style="margin-bottom: 5px;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
-        <p style="margin-bottom: 10px;"><strong>Clan :</strong> ${profil.clan || 'Aucun'}</p>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle APP :</strong> ${profil.role_app || 'JOUEUR'}</p>
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Clan :</strong> ${profil.clan || 'Aucun'}</p>
+        </div>
+        
         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-          <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')">Rôle APP</button>
-          <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Rôle RP</button>
-          <button class="btn-action btn-modifier" onclick="changerClan('${profil.id}')">Clan</button>
+          <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')">Modif APP</button>
+          <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Modif RP</button>
+          <button class="btn-action btn-modifier" onclick="changerClan('${profil.id}')">Modif Clan</button>
         </div>
       </div>
     `;
   });
 }
+
+window.changerRoleRP = async function(id) {
+  const newRole = prompt("Nouveau rôle RP (Chef, Guérisseur, Guerrier...) :");
+  if (newRole) { await supabase.from('profiles').update({ role_rp: newRole }).eq('id', id); loadAdminMembres(); }
+};
+
+window.changerClan = async function(id) {
+  const newClan = prompt("Nouveau Clan (Forêt, Pluie, Zénith, Brume, Solitaire...) :");
+  if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
+};
 
 window.changerRoleRP = async function(id) {
   const newRole = prompt("Nouveau rôle RP (Chef, Guérisseur, Guerrier...) :");

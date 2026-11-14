@@ -311,8 +311,15 @@
             <div class="profile-header">
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
-              <p id="profile-clan-badge" class="profile-title-badge" style="margin-top: 5px; background: rgba(251, 191, 36, 0.1); border-color: var(--accent); color: var(--accent);">Clan : Aucun</p>
-              <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
+              
+              <!-- Les 3 badges distincts -->
+              <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+                <p id="profile-app-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #60a5fa;">APP: ...</p>
+                <p id="profile-rp-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #fbbf24;">RP: ...</p>
+                <p id="profile-clan-badge" class="profile-title-badge" style="margin: 0; font-size: 0.75rem; color: #10b981;">Clan: ...</p>
+              </div>
+              
+              <p style="color: gray; font-size: 0.8rem; margin-top: 15px;">Membre depuis peu</p>
             </div>
 
             <div class="profile-card">
