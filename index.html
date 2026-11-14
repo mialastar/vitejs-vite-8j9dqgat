@@ -78,6 +78,7 @@
               <p>Lune des Feuilles Mortes</p>
             </div>
             <div class="feed-container">
+              <div id="actualites-container" style="margin-bottom: 20px;"></div>
               <div class="feed-card">
                 <div class="feed-header">
                   <span class="author">Moonlight Studio</span>
@@ -142,14 +143,7 @@
           <!-- VUE CHRONIQUES -->
           <div id="view-chroniques" class="view">
             <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.8rem; margin-bottom: 20px; text-align: center;">Chroniques du Crépuscule</h3>
-            <div class="feed-card">
-              <div class="feed-header">
-                <span class="author">Le Maître du Jeu</span>
-                <span class="date">Aujourd'hui</span>
-              </div>
-              <h3>Le début de l'Automne</h3>
-              <p>Les feuilles commencent à tomber sur les Terres du Crépuscule. Les prophéties s'éveillent...</p>
-            </div>
+            <div id="chroniques-container"><p style="color: gray; text-align: center;">Chargement...</p></div>
           </div>
 
           <!-- VUE FICHES OC -->
@@ -317,7 +311,7 @@
             <div class="profile-header">
               <img id="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="profile-avatar" />
               <h2 id="profile-username">Chargement...</h2>
-              <p id="profile-title-badge" class="profile-title-badge">Aucun rôle</p>
+              <p id="profile-clan-badge" class="profile-title-badge" style="margin-top: 5px; background: rgba(251, 191, 36, 0.1); border-color: var(--accent); color: var(--accent);">Clan : Aucun</p>
               <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">Membre depuis peu</p>
             </div>
 
@@ -463,9 +457,11 @@
             <span>Moonlight Studio</span>
           </div>
 
-          <div id="admin-view-accueil" class="view active">
-            <h3 class="admin-title">Gestion de l'Accueil</h3>
-            <div class="profile-card"><p style="color: gray;">Publier des messages, changer la saison...</p></div>
+          <h3 class="admin-title">Gestion de l'Accueil</h3>
+          <div class="profile-card">
+            <label style="color: var(--text-dim);">Nouveau message d'actualité :</label>
+            <textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+            <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierActu()">Publier sur l'Accueil</button>
           </div>
 
           <div id="admin-view-fiches" class="view">
@@ -478,9 +474,13 @@
             <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
           </div>
 
-          <div id="admin-view-chroniques" class="view">
-            <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
-            <div class="profile-card"><p style="color: gray;">Écrire les chroniques, gérer le temps RP...</p></div>
+          <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
+          <div class="profile-card">
+            <label style="color: var(--text-dim);">Titre de la chronique :</label>
+            <input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+            <label style="color: var(--text-dim);">Contenu :</label>
+            <textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+            <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierChronique()">Publier la Chronique</button>
           </div>
 
           <div id="admin-view-tickets" class="view">

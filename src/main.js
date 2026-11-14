@@ -531,6 +531,10 @@ async function loadProfil() {
   if (!profile) { const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); profile = newProfile; }
 
   const roleBrut = profile.role_rp || profile.title || 'Aucun rôle';
+  const clanBadge = document.getElementById('profile-clan-badge');
+  if (clanBadge) {
+    clanBadge.textContent = `Clan : ${profile.clan || 'Aucun'}`;
+  }
   document.getElementById('profile-title-badge').textContent = roleBrut;
 
   const btnRpPanel = document.getElementById('btn-rp-panel');
@@ -805,20 +809,37 @@ window.refuserFicheAdmin = async function(id) { await supabase.from('fiches_oc')
 
 async function loadAdminMembres() {
   const container = document.getElementById('admin-membres-list');
+  if(!container) return;
   const { data: profils } = await supabase.from('profiles').select('*');
   if (!profils || profils.length === 0) return;
   container.innerHTML = '';
+  
   profils.forEach(profil => {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px;">
         <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
-        <p style="margin-bottom: 5px;"><strong>Rôle App :</strong> ${profil.role_app || 'JOUEUR'}</p>
-        <p style="margin-bottom: 10px;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
-        <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')">Changer Rôle APP</button>
+        <p style="margin-bottom: 5px;"><strong>Rôle APP :</strong> ${profil.role_app || 'JOUEUR'}</p>
+        <p style="margin-bottom: 5px;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
+        <p style="margin-bottom: 10px;"><strong>Clan :</strong> ${profil.clan || 'Aucun'}</p>
+        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+          <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')">Rôle APP</button>
+          <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Rôle RP</button>
+          <button class="btn-action btn-modifier" onclick="changerClan('${profil.id}')">Clan</button>
+        </div>
       </div>
     `;
   });
 }
+
+window.changerRoleRP = async function(id) {
+  const newRole = prompt("Nouveau rôle RP (Chef, Guérisseur, Guerrier...) :");
+  if (newRole) { await supabase.from('profiles').update({ role_rp: newRole }).eq('id', id); loadAdminMembres(); }
+};
+
+window.changerClan = async function(id) {
+  const newClan = prompt("Nouveau Clan (Forêt, Pluie, Zénith, Brume, Solitaire...) :");
+  if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
+};
 window.changerRoleApp = async function(id) {
   const newRole = prompt("Nouveau rôle APP (ADMIN, MJ, JOUEUR) :");
   if (newRole) { await supabase.from('profiles').update({ role_app: newRole.toUpperCase() }).eq('id', id); loadAdminMembres(); }
@@ -826,16 +847,83 @@ window.changerRoleApp = async function(id) {
 
 async function loadAdminTickets() {
   const container = document.getElementById('admin-tickets-list');
+  if(!container) return;
   const { data: tickets } = await supabase.from('tickets').select('*').order('date_creation', { ascending: false });
   if (!tickets || tickets.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun ticket.</p>'; return; }
+  
   container.innerHTML = '';
   tickets.forEach(ticket => {
     container.innerHTML += `
-      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
+      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent); cursor: pointer;" onclick="alert('Ticket de: ${ticket.sujet}\\n\\n${ticket.description}')">
         <h4 style="font-size: 1rem; color: #fff;">${ticket.sujet}</h4>
         <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">Type: ${ticket.type_ticket}</p>
-        <p style="font-size: 0.9rem; margin-top: 10px;">${ticket.description}</p>
+        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 10px; font-weight: bold;">👉 Clique pour lire</p>
       </div>
     `;
   });
 }
+
+// --- ACTUALITÉS (ACCUEIL) ---
+window.publierActu = async function() {
+  const contenu = document.getElementById('admin-actu-input').value;
+  if (!contenu) return alert("Écris un message.");
+  
+  const { error } = await supabase.from('actualites').insert({ contenu });
+  if (error) alert(error.message);
+  else {
+    document.getElementById('admin-actu-input').value = '';
+    alert("Message publié !");
+    loadActualites();
+  }
+};
+
+async function loadActualites() {
+  const container = document.getElementById('actualites-container');
+  if (!container) return;
+  
+  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(5);
+  if (!data || data.length === 0) return;
+
+  container.innerHTML = data.map(actu => `
+    <div class="feed-card" style="border-left: 4px solid var(--accent); margin-bottom: 10px;">
+      <p style="font-size: 0.95rem; color: #fff;">${actu.contenu}</p>
+    </div>
+  `).join('');
+}
+loadActualites(); // Charge les actus au démarrage
+
+// --- CHRONIQUES (MJ) ---
+window.publierChronique = async function() {
+  const titre = document.getElementById('admin-chro-titre').value;
+  const contenu = document.getElementById('admin-chro-contenu').value;
+  if (!titre || !contenu) return alert("Remplis le titre et le contenu.");
+  
+  const { error } = await supabase.from('chroniques').insert({ titre, contenu });
+  if (error) alert(error.message);
+  else {
+    document.getElementById('admin-chro-titre').value = '';
+    document.getElementById('admin-chro-contenu').value = '';
+    alert("Chronique publiée !");
+    loadChroniques();
+  }
+};
+
+async function loadChroniques() {
+  const container = document.getElementById('chroniques-container');
+  if (!container) return;
+
+  const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = data.map(chro => `
+    <div class="feed-card" style="margin-bottom: 15px;">
+      <div class="feed-header"><span class="author">${chro.auteur}</span></div>
+      <h3>${chro.titre}</h3>
+      <p>${chro.contenu}</p>
+    </div>
+  `).join('');
+}
+loadChroniques();
