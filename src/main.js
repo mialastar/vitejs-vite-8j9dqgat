@@ -1062,6 +1062,8 @@ async function loadPlayerTickets() {
 // ==========================================
 // --- SYSTEME DE CHAT (TICKETS) ---
 // ==========================================
+let currentChatUserName = "";
+
 window.openTicketChat = async function(ticketId, isAdmin) {
   currentChatTicketId = ticketId;
   currentChatIsAdmin = isAdmin;
@@ -1070,69 +1072,77 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   document.getElementById('chat-messages').innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
   
   const { data: t, error } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
-  if (error) {
-    document.getElementById('chat-messages').innerHTML = '<p style="color: red; text-align: center;">Erreur de chargement.</p>';
-    return;
-  }
+  if (error) return;
 
   document.getElementById('chat-title').textContent = t.sujet;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  currentChatUserName = user.user_metadata.full_name || "Joueur";
+
+  // On récupère l'historique des messages
+  const { data: messages } = await supabase
+    .from('ticket_messages')
+    .select('*')
+    .eq('ticket_id', ticketId)
+    .order('created_at', { ascending: true });
 
   const messagesContainer = document.getElementById('chat-messages');
   messagesContainer.innerHTML = '';
 
-  // Message initial (Joueur)
+  // Message initial
   messagesContainer.innerHTML += `
-    <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.1); border-color: gray;">
-      <span class="chat-sender">Joueur (Message initial)</span>
+    <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.05); border-color: gray; margin-bottom: 20px;">
+      <span class="chat-sender">Demande initiale</span>
       ${t.description}
     </div>
   `;
 
-  if (t.reponse_staff) {
-    messagesContainer.innerHTML += `
-      <div class="chat-bubble staff">
-        <span class="chat-sender">Staff</span>
-        ${t.reponse_staff}
-      </div>
-    `;
+  // Affichage de tous les messages
+  if (messages && messages.length > 0) {
+    messages.forEach(msg => {
+      const isMe = msg.sender_id === user.id;
+      const bubbleClass = isMe ? 'staff' : 'player'; // On utilise 'staff' pour la couleur de droite (soi-même) et 'player' pour l'autre
+      const align = isMe ? 'flex-end' : 'flex-start';
+
+      messagesContainer.innerHTML += `
+        <div class="chat-bubble ${bubbleClass}" style="align-self: ${align};">
+          <span class="chat-sender">${msg.sender_name}</span>
+          ${msg.message}
+        </div>
+      `;
+    });
   }
 
-  if (t.reponse_joueur) {
-    messagesContainer.innerHTML += `
-      <div class="chat-bubble player">
-        <span class="chat-sender">Joueur</span>
-        ${t.reponse_joueur}
-      </div>
-    `;
-  }
-
-  // Scroll to bottom
+  // Scroll tout en bas
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 };
 
-// Envoyer un message depuis le Chat
+// Envoyer un nouveau message
 document.getElementById('chat-send-btn')?.addEventListener('click', async () => {
   const input = document.getElementById('chat-input').value;
   if (!input || !currentChatTicketId) return;
 
-  document.getElementById('chat-input').value = ''; // Vider l'input
+  document.getElementById('chat-input').value = ''; 
 
-  let updateData = {};
-  if (currentChatIsAdmin) {
-    updateData = { reponse_staff: input, statut: 'Répondu' };
-  } else {
-    updateData = { reponse_joueur: input };
-  }
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const { error } = await supabase.from('tickets').update(updateData).eq('id', currentChatTicketId);
+  // On enregistre le message dans la NOUVELLE table
+  const { error } = await supabase.from('ticket_messages').insert({
+    ticket_id: currentChatTicketId,
+    sender_id: user.id,
+    sender_name: currentChatUserName,
+    message: input
+  });
   
   if (error) {
     alert("Erreur lors de l'envoi : " + error.message);
-    document.getElementById('chat-input').value = input; // Remettre le texte si erreur
   } else {
-    // Recharger le chat
+    // On change le statut du ticket en "Répondu"
+    await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
+    
+    // On rafraichit le chat
     openTicketChat(currentChatTicketId, currentChatIsAdmin);
-    // Rafraichir la liste en arrière-plan
+    // On rafraichit la liste en arrière-plan
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
 });
