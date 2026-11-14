@@ -139,6 +139,19 @@
             </div>
           </div>
 
+          <!-- VUE CHRONIQUES -->
+          <div id="view-chroniques" class="view">
+            <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.8rem; margin-bottom: 20px; text-align: center;">Chroniques du Crépuscule</h3>
+            <div class="feed-card">
+              <div class="feed-header">
+                <span class="author">Le Maître du Jeu</span>
+                <span class="date">Aujourd'hui</span>
+              </div>
+              <h3>Le début de l'Automne</h3>
+              <p>Les feuilles commencent à tomber sur les Terres du Crépuscule. Les prophéties s'éveillent...</p>
+            </div>
+          </div>
+
           <!-- VUE FICHES OC -->
           <div id="view-fiches" class="view">
             <div class="sub-tabs">
@@ -148,6 +161,7 @@
               <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
             </div>
 
+            <!-- 1. CRÉER -->
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
@@ -187,14 +201,10 @@
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
                   <div class="checkbox-grid">
-                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
@@ -235,10 +245,12 @@
               </div>
             </div>
 
+            <!-- 2. MES FICHES -->
             <div id="subview-mine" class="subview">
               <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
+            <!-- 3. VOIR LES FICHES -->
             <div id="subview-all" class="subview">
               <div class="search-container">
                 <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
@@ -247,6 +259,7 @@
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
+            <!-- 4. RELATIONS -->
             <div id="subview-relations" class="subview">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
@@ -420,12 +433,10 @@
             <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
               <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
-              
               <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                 <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Assemblée bientôt disponible !')">📢 Convoquer Assemblée</button>
                 <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="alert('Fonction Guerre bientôt disponible !')">⚔️ Déclarer Guerre</button>
               </div>
-
               <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
               <div id="rp-members-list"><p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement...</p></div>
             </div>
@@ -438,56 +449,39 @@
           <button type="button" class="nav-btn active" data-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
           <button type="button" class="nav-btn" data-target="monde"><span class="icon">🗺️</span><span class="label">Monde</span></button>
+          <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
       </div> <!-- FIN SCREEN-APP JOUEUR -->
 
-      <!-- ÉCRAN 4 : APPLICATION ADMIN (LE NOUVEL UNIVERS) -->
+      <!-- ÉCRAN 4 : APPLICATION ADMIN -->
       <div id="screen-admin" class="screen app-layout admin-layout">
         <div class="app-content">
-          
           <div class="admin-header">
             <h2>Panneau d'Administration</h2>
             <span>Moonlight Studio</span>
           </div>
-
-          <!-- ADMIN : ACCUEIL -->
           <div id="admin-view-accueil" class="view active">
             <h3 class="admin-title">Gestion de l'Accueil</h3>
-            <div class="profile-card">
-              <p style="color: gray;">Publier des messages, changer la saison...</p>
-            </div>
+            <div class="profile-card"><p style="color: gray;">Publier des messages, changer la saison...</p></div>
           </div>
-
-          <!-- ADMIN : FICHES -->
           <div id="admin-view-fiches" class="view">
             <h3 class="admin-title">Fiches en attente</h3>
             <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
           </div>
-
-          <!-- ADMIN : MEMBRES -->
           <div id="admin-view-membres" class="view">
             <h3 class="admin-title">Gestion des Membres</h3>
             <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
           </div>
-
-          <!-- ADMIN : CHRONIQUES -->
           <div id="admin-view-chroniques" class="view">
             <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
-            <div class="profile-card">
-              <p style="color: gray;">Écrire les chroniques, gérer le temps RP...</p>
-            </div>
+            <div class="profile-card"><p style="color: gray;">Écrire les chroniques, gérer le temps RP...</p></div>
           </div>
-
-          <!-- ADMIN : TICKETS -->
           <div id="admin-view-tickets" class="view">
             <h3 class="admin-title">Tickets & Support</h3>
             <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
           </div>
-
         </div>
-
-        <!-- BARRE DE NAVIGATION ADMIN -->
         <nav class="bottom-nav admin-nav">
           <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
@@ -500,10 +494,7 @@
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
-        <div class="toast-text">
-          <h4>Succès !</h4>
-          <p>Action réalisée avec succès.</p>
-        </div>
+        <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
       </div>
     </div>
 

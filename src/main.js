@@ -1,7 +1,6 @@
 import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ TES CLÉS SUPABASE
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
@@ -70,6 +69,7 @@ navBtns.forEach(btn => {
     if(target === 'accueil') document.getElementById('view-accueil').classList.add('active');
     if(target === 'fiches') document.getElementById('view-fiches').classList.add('active');
     if(target === 'monde') document.getElementById('view-monde').classList.add('active');
+    if(target === 'chroniques') document.getElementById('view-chroniques').classList.add('active'); // LIGNE AJOUTÉE
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
       loadProfil(); 
