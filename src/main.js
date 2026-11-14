@@ -193,7 +193,7 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     updateWizard();
   } else {
     const nom = document.querySelector('#step-1 input').value;
-    const clan = document.querySelector('#step-1 select').value; 
+    const clan = document.getElementById('oc-clan').value; // <-- MODIFIÉ ICI
     const rang = document.querySelectorAll('#step-1 select')[1].value; 
     const pelage = document.querySelectorAll('#step-2 input')[0].value;
     const yeux = document.querySelectorAll('#step-2 input')[1].value;
@@ -364,7 +364,7 @@ window.editFiche = async function(id) {
   currentEditingImage = fiche.image_url || "";
   
   document.querySelector('#step-1 input').value = fiche.nom || '';
-  document.querySelectorAll('#step-1 select')[0].value = fiche.clan || 'Clan de la Forêt';
+  document.getElementById('oc-clan').value = fiche.clan || 'Clan de la Forêt'; // <-- MODIFIÉ ICI
   document.querySelectorAll('#step-1 select')[1].value = fiche.rang || 'Guerrier';
   document.querySelectorAll('#step-2 input')[0].value = fiche.pelage || '';
   document.querySelectorAll('#step-2 input')[1].value = fiche.yeux || '';

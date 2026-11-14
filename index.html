@@ -186,10 +186,35 @@
                 <div class="wizard-step active" id="step-1">
                   <h3>1. Identité</h3>
                   <label>Nom du personnage</label><input type="text" placeholder="Ex: Étoile de Feu" />
-                  <label>Clan / Tribu</label>
-                  <select><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option><option disabled>Clan de la Lune (Coming Soon)</option><option disabled>Forêt des Ronces (Coming Soon)</option><option>Solitaire / Chat de l'Extérieur</option><option>Domestique</option></select>
+                  <label>Clan / Tribu / Origine</label>
+                  <select id="oc-clan">
+                    <optgroup label="Les 4 Clans">
+                      <option value="Clan de la Forêt">Clan de la Forêt</option>
+                      <option value="Clan de la Pluie">Clan de la Pluie</option>
+                      <option value="Clan du Zénith">Clan du Zénith</option>
+                      <option value="Clan de la Brume">Clan de la Brume</option>
+                    </optgroup>
+                    <optgroup label="Les Esprits">
+                      <option value="Clan de la Lune" disabled>Clan de la Lune (Bientôt)</option>
+                      <option value="Forêt des Ronces" disabled>Forêt des Ronces (Bientôt)</option>
+                    </optgroup>
+                    <optgroup label="Les Sans-Clans">
+                      <option value="Solitaire">Solitaire</option>
+                      <option value="Domestique">Domestique (Chat de maison)</option>
+                      <option value="Sans Clan">Sans Clan / Inconnu</option>
+                    </optgroup>
+                  </select>
                   <label>Rang</label>
-                  <select><option>Guerrier</option><option>Apprenti</option><option>Chef</option><option>Lieutenant</option><option>Guérisseur</option><option>Ancien</option></select>
+                  <select>
+                    <option>Guerrier</option>
+                    <option>Apprenti</option>
+                    <option>Chef</option>
+                    <option>Lieutenant</option>
+                    <option>Guérisseur</option>
+                    <option>Ancien</option>
+                    <option>Solitaire</option>
+                    <option>Domestique</option>
+                  </select>
                 </div>
                 <div class="wizard-step" id="step-2">
                   <h3>2. Apparence</h3>
