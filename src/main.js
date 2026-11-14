@@ -1029,15 +1029,16 @@ async function loadActualites() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   
-  // On vérifie si le joueur est Admin ou MJ
   const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).single();
   const monClan = profile ? profile.clan : 'Aucun';
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
   const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
-  if (!data || data.length === 0) return;
+  if (!data || data.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
 
-  // On filtre les actus (globales ou pour mon clan)
   const actusVisibles = data.filter(actu => {
     if (!actu.clan_cible) return true; 
     return actu.clan_cible === monClan; 
@@ -1050,14 +1051,17 @@ async function loadActualites() {
 
   container.innerHTML = actusVisibles.map(actu => `
     <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
-      
-      <!-- BOUTON SUPPRIMER (Visible que par les Admins/MJ) -->
-      ${isAdmin ? `<button onclick="supprimerActu(${actu.id})" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;">❌</button>` : ''}
-      
       <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
       ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
       <div class="embed-desc">${actu.contenu}</div>
       ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
+      
+      <!-- BOUTON SUPPRIMER CLAIR -->
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" onclick="supprimerActu('${actu.id}')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 }
@@ -1101,14 +1105,17 @@ async function loadChroniques() {
 
   container.innerHTML = data.map(chro => `
     <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
-      
-      <!-- BOUTON SUPPRIMER (Visible que par les Admins/MJ) -->
-      ${isAdmin ? `<button onclick="supprimerChronique(${chro.id})" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;">❌</button>` : ''}
-      
       <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
       <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
       <div class="embed-desc">${chro.contenu}</div>
       ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
+      
+      <!-- BOUTON SUPPRIMER CLAIR -->
+      ${isAdmin ? `
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" onclick="supprimerChronique('${chro.id}')">🗑️ Supprimer</button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 }
@@ -1480,7 +1487,10 @@ window.supprimerActu = async function(id) {
   if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette actualité ?")) {
     const { error } = await supabase.from('actualites').delete().eq('id', id);
     if (error) alert("Erreur : " + error.message);
-    else loadActualites(); // On rafraîchit
+    else {
+      // On rafraîchit la liste immédiatement sans recharger la page
+      loadActualites(); 
+    }
   }
 };
 
@@ -1488,6 +1498,9 @@ window.supprimerChronique = async function(id) {
   if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette chronique ?")) {
     const { error } = await supabase.from('chroniques').delete().eq('id', id);
     if (error) alert("Erreur : " + error.message);
-    else loadChroniques(); // On rafraîchit
+    else {
+      // On rafraîchit la liste immédiatement sans recharger la page
+      loadChroniques(); 
+    }
   }
 };
