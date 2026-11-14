@@ -1026,10 +1026,27 @@ async function loadActualites() {
   const container = document.getElementById('actualites-container');
   if (!container) return;
   
-  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(5);
+  // On récupère le profil du joueur pour connaître son clan
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  const monClan = profile ? profile.clan : 'Aucun';
+
+  // On récupère TOUTES les actus
+  const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
   if (!data || data.length === 0) return;
 
-  container.innerHTML = data.map(actu => `
+  // On filtre : soit l'actu est pour tout le monde (clan_cible est null), soit c'est pour MON clan
+  const actusVisibles = data.filter(actu => {
+    if (!actu.clan_cible) return true; // Actu globale
+    return actu.clan_cible === monClan; // Actu pour mon clan
+  });
+
+  if (actusVisibles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = actusVisibles.map(actu => `
     <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'};">
       <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
       ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
@@ -1038,7 +1055,6 @@ async function loadActualites() {
     </div>
   `).join('');
 }
-loadActualites();
 
 // ==========================================
 // --- CHRONIQUES (MJ EMBEDS) ---
@@ -1360,5 +1376,89 @@ window.declarerGuerre = async function() {
   else {
     alert("La déclaration de guerre a été publiée sur le fil d'actualité !");
     loadActualites(); // Rafraîchir l'accueil
+  }
+};
+
+// ==========================================
+// --- SYSTÈME D'ASSEMBLÉE (CHEF) ---
+// ==========================================
+window.convoquerAssemblee = function() {
+  document.getElementById('assemblee-modal').classList.add('active');
+};
+
+window.envoyerAssemblee = async function() {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  
+  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
+  const monClan = profile.clan;
+
+  const motif = document.getElementById('assemblee-motif').value;
+  const auteur = document.getElementById('assemblee-auteur').value || `Chef du ${monClan}`;
+  const dateHeure = document.getElementById('assemblee-date').value;
+  const desc = document.getElementById('assemblee-desc').value;
+  const sous = document.getElementById('assemblee-sous').value;
+  const couleur = document.getElementById('assemblee-couleur').value;
+
+  if (!motif || !dateHeure || !desc) return alert("Remplis le motif, la date et la description.");
+
+  // Formatage de la date en français (ex: 15/11/2026 à 21:00)
+  const dateObj = new Date(dateHeure);
+  const dateFormatee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  const titre = `📢 Assemblée du ${monClan} : ${motif}`;
+  const contenu = `Une assemblée a été convoquée le ${dateFormatee}.\n\n${desc}`;
+
+  const { error } = await supabase.from('actualites').insert({
+    titre: titre,
+    auteur: auteur,
+    contenu: contenu,
+    sous_description: sous,
+    couleur: couleur,
+    clan_cible: monClan // <--- La clé pour cibler uniquement le clan
+  });
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    alert("L'assemblée a été envoyée aux membres de ton clan !");
+    document.getElementById('assemblee-modal').classList.remove('active');
+    loadActualites(); 
+  }
+};
+
+// ==========================================
+// --- SYSTÈME DE GUERRE (CHEF) ---
+// ==========================================
+window.declarerGuerre = function() {
+  document.getElementById('guerre-modal').classList.add('active');
+};
+
+window.envoyerGuerre = async function() {
+  const cible = document.getElementById('guerre-cible').value;
+  const motif = document.getElementById('guerre-motif').value;
+  const desc = document.getElementById('guerre-desc').value;
+
+  if (!motif || !desc) return alert("Remplis le motif et la description.");
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  
+  if (!profile || profile.clan === 'Aucun') return alert("Tu n'as pas de clan attribué.");
+
+  const sujet = `⚔️ Demande de Guerre : ${profile.clan} vs ${cible}`;
+  const description = `Le clan ${profile.clan} souhaite déclarer la guerre au ${cible}.\n\nMotif : ${motif}\n\nDescription : ${desc}`;
+
+  // Création du ticket pour le staff
+  const { error } = await supabase.from('tickets').insert({
+    user_id: user.id, 
+    type_ticket: 'guerre', 
+    sujet: sujet, 
+    description: description
+  });
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    alert("Ta demande de guerre a été envoyée au Staff !");
+    document.getElementById('guerre-modal').classList.remove('active');
   }
 };
