@@ -1214,81 +1214,59 @@ document.getElementById('chat-input')?.addEventListener('keypress', function (e)
 // ==========================================
 let currentRepTargetUser = null;
 
-// La liste exacte des actions (Gains et Pertes)
-const repActions = {
-  "Gagner un combat": 5,
-  "Participer à un rassemblement": 2,
-  "Découvrir un territoire inconnu": 4,
-  "Ramener une proie": 3,
-  "Guérir un blessé": 5,
-  "Obéir à un ordre difficile": 5,
-  "Résoudre un conflit sans violence": 5,
-  "Survivre à une épreuve mortelle": 10,
-  "Honorer un ancien": 4,
-  "Sauver la vie d'un membre de son clan": 20,
-  "Accomplir une prophétie": 50,
-  "Acte de bravoure mineur": 4,
-  "Acte de bravoure majeur": 10,
-  "Former un apprenti": 6,
-  "Trahir son clan": -15,
-  "Attaquer sans raison": -10,
-  "Mentir à un chef": -8,
-  "Voler une proie": -5,
-  "Désobéir à un ordre direct": -6,
-  "Tuer sans raison": -20,
-  "Manquer de respect à un ancien": -4,
-  "Abandonner un allié": -12,
-  "Déclencher une guerre sans raison": -15,
-  "Transgresser le Code du Guerrier": -3,
-  "Voler des plantes médicinales": -10,
-  "Forcer un apprenti à une tâche dangereuse": -10,
-  "Manipuler un clan": -12,
-  "Déshonorer un mort": -8
-};
-
-// Fonction appelée depuis le Panel Admin
-window.openReputationModal = function(userId) {
+window.openReputationModal = async function(userId) {
   currentRepTargetUser = userId;
-  const select = document.getElementById('reputation-action-select');
-  select.innerHTML = '';
   
-  // On remplit le menu déroulant avec les actions et leurs points
-  for (const [action, points] of Object.entries(repActions)) {
-    const signe = points > 0 ? "+" : "";
-    select.innerHTML += `<option value="${points}|${action}">${action} (${signe}${points})</option>`;
-  }
-  
+  // On récupère les points actuels du joueur
+  const { data: profile } = await supabase.from('profiles').select('reputation_points').eq('id', userId).single();
+  const currentPts = profile ? profile.reputation_points : 0;
+
+  const slider = document.getElementById('reputation-slider');
+  const sliderVal = document.getElementById('rep-slider-value');
+  const reasonInput = document.getElementById('reputation-reason');
+
+  // On initialise le slider avec les points actuels
+  slider.value = currentPts;
+  sliderVal.textContent = currentPts;
+  reasonInput.value = '';
+
+  // On met à jour l'affichage du chiffre quand on fait glisser
+  slider.oninput = function() {
+    sliderVal.textContent = this.value;
+  };
+
   document.getElementById('reputation-modal').classList.add('active');
 };
 
-// Fonction pour appliquer les points
 window.appliquerReputation = async function() {
   if (!currentRepTargetUser) return;
-  
-  const selectedValue = document.getElementById('reputation-action-select').value;
-  const [pointsStr, actionName] = selectedValue.split('|');
-  const pointsToAdd = parseInt(pointsStr);
 
-  // 1. On récupère les points actuels du joueur
+  const newPts = parseInt(document.getElementById('reputation-slider').value);
+  const reason = document.getElementById('reputation-reason').value || 'Ajustement manuel du staff';
+
+  // On récupère les anciens points pour calculer la différence
   const { data: profile } = await supabase.from('profiles').select('reputation_points').eq('id', currentRepTargetUser).single();
-  if (!profile) return alert("Erreur: Joueur introuvable.");
+  const oldPts = profile ? profile.reputation_points : 0;
+  const difference = newPts - oldPts;
 
-  const newTotal = profile.reputation_points + pointsToAdd;
+  // 1. Mise à jour du profil
+  const { error } = await supabase.from('profiles').update({ reputation_points: newPts }).eq('id', currentRepTargetUser);
+  if (error) return alert("Erreur : " + error.message);
 
-  // 2. On met à jour le profil
-  const { error: updateError } = await supabase.from('profiles').update({ reputation_points: newTotal }).eq('id', currentRepTargetUser);
-  
-  if (updateError) return alert("Erreur lors de la mise à jour : " + updateError.message);
+  // 2. Enregistrement dans l'historique (seulement si ça a changé)
+  if (difference !== 0) {
+    await supabase.from('reputation_history').insert({
+      user_id: currentRepTargetUser,
+      action: reason,
+      points: difference
+    });
+  }
 
-  // 3. On enregistre l'historique
-  await supabase.from('reputation_history').insert({
-    user_id: currentRepTargetUser,
-    action: actionName,
-    points: pointsToAdd
-  });
-
-  alert(`Réputation mise à jour ! (${pointsToAdd > 0 ? '+' : ''}${pointsToAdd} pts)`);
+  alert(`Réputation mise à jour à ${newPts} pts !`);
   document.getElementById('reputation-modal').classList.remove('active');
+  
+  // Rafraîchir la liste admin
+  if (document.getElementById('admin-membres-list')) loadAdminMembres();
 };
 
 // Fonction pour afficher l'historique sur le profil du joueur

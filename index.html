@@ -596,22 +596,27 @@
         </div>
       </div>
 
-            <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
-            <div id="reputation-modal" class="support-modal-overlay">
-              <div class="support-modal" style="max-width: 450px;">
-                <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
-                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Gérer la Réputation</h2>
-                
-                <div class="form-group">
-                  <label>Choisir l'action :</label>
-                  <select id="reputation-action-select" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
-                    <!-- Les options seront injectées par le JS -->
-                  </select>
-                </div>
-      
-                <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="appliquerReputation()">Appliquer</button>
-              </div>
-            </div>
+                  <!-- MODAL GESTION RÉPUTATION (ADMIN) -->
+      <div id="reputation-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Gérer la Réputation</h2>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.2rem;">
+            <span>Points :</span>
+            <span id="rep-slider-value" style="color: var(--accent); font-weight: bold;">0</span>
+          </div>
+          
+          <input type="range" id="reputation-slider" min="0" max="500" value="0" style="width: 100%; height: 8px; margin-bottom: 20px; accent-color: var(--accent);" />
+
+          <div class="form-group">
+            <label>Raison de la modification :</label>
+            <input type="text" id="reputation-reason" placeholder="Ex: A gagné un combat, Punition..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+
+          <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="appliquerReputation()">Enregistrer</button>
+        </div>
+      </div>
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
