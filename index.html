@@ -455,67 +455,67 @@
         </nav>
       </div> <!-- FIN SCREEN-APP JOUEUR -->
 
-      <!-- ÉCRAN 4 : APPLICATION ADMIN -->
-      <div id="screen-admin" class="screen app-layout admin-layout">
-        <div class="app-content">
-          
-          <div class="admin-header">
-            <h2>Panneau d'Administration</h2>
-            <span>Moonlight Studio</span>
-          </div>
-
-          <h3 class="admin-title">Gestion de l'Accueil</h3>
-          <div class="profile-card">
-            <label style="color: var(--text-dim);">Nouveau message d'actualité :</label>
-            <textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-            <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierActu()">Publier sur l'Accueil</button>
-          </div>
-
-          <div id="admin-view-fiches" class="view">
-            <h3 class="admin-title">Fiches en attente</h3>
-            <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
-
-          <div id="admin-view-membres" class="view">
-            <h3 class="admin-title">Gestion des Membres</h3>
-            <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
-
-          <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
-          <div class="profile-card">
-            <label style="color: var(--text-dim);">Titre de la chronique :</label>
-            <input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-            <label style="color: var(--text-dim);">Contenu :</label>
-            <textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
-            <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierChronique()">Publier la Chronique</button>
-          </div>
-
-          <div id="admin-view-tickets" class="view">
-            <h3 class="admin-title">Tickets & Support</h3>
-            <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
-
-        </div>
-
-        <!-- BARRE DE NAVIGATION ADMIN -->
-        <nav class="bottom-nav admin-nav">
-          <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
-          <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
-          <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
-          <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
-          <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
-          <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
-        </nav>
-      </div> <!-- FIN SCREEN-ADMIN -->
-
-      <div id="toast-success" class="toast hidden">
-        <div class="toast-icon">✓</div>
-        <div class="toast-text">
-          <h4>Succès !</h4>
-          <p>Action réalisée avec succès.</p>
-        </div>
-      </div>
-    </div>
+            <!-- ÉCRAN 4 : APPLICATION ADMIN -->
+            <div id="screen-admin" class="screen app-layout admin-layout">
+              <div class="app-content">
+                
+                <div class="admin-header">
+                  <h2>Panneau d'Administration</h2>
+                  <span>Moonlight Studio</span>
+                </div>
+      
+                <!-- VUE ACCUEIL ADMIN -->
+                <div id="admin-view-accueil" class="view active">
+                  <h3 class="admin-title">Gestion de l'Accueil</h3>
+                  <div class="profile-card">
+                    <label style="color: var(--text-dim);">Nouveau message d'actualité :</label>
+                    <textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+                    <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierActu()">Publier sur l'Accueil</button>
+                  </div>
+                </div>
+      
+                <!-- VUE FICHES ADMIN -->
+                <div id="admin-view-fiches" class="view">
+                  <h3 class="admin-title">Fiches en attente</h3>
+                  <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
+                </div>
+      
+                <!-- VUE MEMBRES ADMIN -->
+                <div id="admin-view-membres" class="view">
+                  <h3 class="admin-title">Gestion des Membres</h3>
+                  <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
+                </div>
+      
+                <!-- VUE CHRONIQUES ADMIN -->
+                <div id="admin-view-chroniques" class="view">
+                  <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
+                  <div class="profile-card">
+                    <label style="color: var(--text-dim);">Titre de la chronique :</label>
+                    <input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+                    <label style="color: var(--text-dim);">Contenu :</label>
+                    <textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+                    <button class="btn-primary" style="padding: 10px; width: 100%;" onclick="publierChronique()">Publier la Chronique</button>
+                  </div>
+                </div>
+      
+                <!-- VUE TICKETS ADMIN -->
+                <div id="admin-view-tickets" class="view">
+                  <h3 class="admin-title">Tickets & Support</h3>
+                  <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
+                </div>
+      
+              </div>
+      
+              <!-- BARRE DE NAVIGATION ADMIN -->
+              <nav class="bottom-nav admin-nav">
+                <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
+                <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
+                <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
+                <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
+                <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
+                <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
+              </nav>
+            </div> <!-- FIN SCREEN-ADMIN -->
 
     <script type="module" src="/src/main.js"></script>
   </body>
