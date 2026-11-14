@@ -70,6 +70,7 @@
             <div class="season-banner">
               <h2 id="display-saison">Automne</h2>
               <p id="display-lune">Lune des Feuilles Mortes</p>
+              <p id="display-meteo" style="font-size: 1.2rem; margin-top: 10px; color: #fff; background: rgba(0,0,0,0.4); display: inline-block; padding: 5px 15px; border-radius: 20px;">☀️ Ensoleillé</p>
             </div>
             <div class="feed-container">
               <div id="actualites-container" style="margin-bottom: 20px;"></div>
@@ -470,7 +471,7 @@
           <!-- VUE ACCUEIL ADMIN -->
           <div id="admin-view-accueil" class="view active">
             
-            <!-- GESTION DU TEMPS RP -->
+            <!-- GESTION DU TEMPS RP (MÉTÉO / SAISON) -->
             <h3 class="admin-title">Gestion du Temps RP</h3>
             <div class="profile-card" style="margin-bottom: 20px;">
               <label style="color: var(--text-dim);">Saison actuelle :</label>
@@ -483,6 +484,17 @@
               
               <label style="color: var(--text-dim);">Nom de la Lune :</label>
               <input type="text" id="admin-lune-input" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+
+              <label style="color: var(--text-dim);">Météo actuelle :</label>
+              <select id="admin-meteo-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+                <option>☀️ Ensoleillé</option>
+                <option>🌤️ Nuageux</option>
+                <option>🌧️ Pluvieux</option>
+                <option>⛈️ Orageux</option>
+                <option>🌫️ Brumeux</option>
+                <option>❄️ Neige</option>
+                <option>🌬️ Venteux</option>
+              </select>
 
               <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #10b981;" onclick="updateTempsRP()">Mettre à jour le temps</button>
             </div>

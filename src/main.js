@@ -12,6 +12,7 @@ let currentTicketType = "";
 let currentRelationFicheId = null;
 let currentChatTicketId = null;
 let currentChatIsAdmin = false;
+let currentChatUserName = "";
 
 // ==========================================
 // --- GESTION DES ÉCRANS ---
@@ -942,7 +943,7 @@ async function loadAdminTickets() {
 }
 
 // ==========================================
-// --- TEMPS RP (SAISONS & LUNES) ---
+// --- TEMPS RP (SAISONS, LUNES & MÉTÉO) ---
 // ==========================================
 async function loadTempsRP() {
   const { data } = await supabase.from('config').select('*');
@@ -950,35 +951,44 @@ async function loadTempsRP() {
 
   let saison = "Automne";
   let lune = "Lune des Feuilles Mortes";
+  let meteo = "☀️ Ensoleillé";
 
   data.forEach(item => {
     if (item.key === 'saison') saison = item.value;
     if (item.key === 'lune') lune = item.value;
+    if (item.key === 'meteo') meteo = item.value;
   });
 
   const displaySaison = document.getElementById('display-saison');
   const displayLune = document.getElementById('display-lune');
+  const displayMeteo = document.getElementById('display-meteo');
   
   if (displaySaison) displaySaison.textContent = saison;
   if (displayLune) displayLune.textContent = lune;
+  if (displayMeteo) displayMeteo.textContent = meteo;
 
   // Remplir les champs de l'admin
   const adminSaison = document.getElementById('admin-saison-select');
   const adminLune = document.getElementById('admin-lune-input');
+  const adminMeteo = document.getElementById('admin-meteo-select');
+  
   if (adminSaison) adminSaison.value = saison;
   if (adminLune) adminLune.value = lune;
+  if (adminMeteo) adminMeteo.value = meteo;
 }
 loadTempsRP();
 
 window.updateTempsRP = async function() {
   const newSaison = document.getElementById('admin-saison-select').value;
   const newLune = document.getElementById('admin-lune-input').value;
+  const newMeteo = document.getElementById('admin-meteo-select').value;
 
   if (!newLune) return alert("Écris le nom de la lune.");
 
   const { error } = await supabase.from('config').upsert([
     { key: 'saison', value: newSaison },
-    { key: 'lune', value: newLune }
+    { key: 'lune', value: newLune },
+    { key: 'meteo', value: newMeteo }
   ]);
 
   if (error) alert("Erreur : " + error.message);
@@ -1109,8 +1119,6 @@ async function loadPlayerTickets() {
 // ==========================================
 // --- SYSTEME DE CHAT (TICKETS) ---
 // ==========================================
-let currentChatUserName = "";
-
 window.openTicketChat = async function(ticketId, isAdmin) {
   currentChatTicketId = ticketId;
   currentChatIsAdmin = isAdmin;
