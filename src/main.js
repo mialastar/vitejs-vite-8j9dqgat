@@ -1026,19 +1026,21 @@ async function loadActualites() {
   const container = document.getElementById('actualites-container');
   if (!container) return;
   
-  // On récupère le profil du joueur pour connaître son clan
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  if (!user) return;
+  
+  // On vérifie si le joueur est Admin ou MJ
+  const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).single();
   const monClan = profile ? profile.clan : 'Aucun';
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
-  // On récupère TOUTES les actus
   const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
   if (!data || data.length === 0) return;
 
-  // On filtre : soit l'actu est pour tout le monde (clan_cible est null), soit c'est pour MON clan
+  // On filtre les actus (globales ou pour mon clan)
   const actusVisibles = data.filter(actu => {
-    if (!actu.clan_cible) return true; // Actu globale
-    return actu.clan_cible === monClan; // Actu pour mon clan
+    if (!actu.clan_cible) return true; 
+    return actu.clan_cible === monClan; 
   });
 
   if (actusVisibles.length === 0) {
@@ -1047,7 +1049,11 @@ async function loadActualites() {
   }
 
   container.innerHTML = actusVisibles.map(actu => `
-    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'};">
+    <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
+      
+      <!-- BOUTON SUPPRIMER (Visible que par les Admins/MJ) -->
+      ${isAdmin ? `<button onclick="supprimerActu(${actu.id})" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;">❌</button>` : ''}
+      
       <div class="embed-header" style="color: ${actu.couleur || 'var(--accent)'};">📢 ${actu.auteur || 'Moonlight Studio'}</div>
       ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
       <div class="embed-desc">${actu.contenu}</div>
@@ -1083,6 +1089,10 @@ async function loadChroniques() {
   const container = document.getElementById('chroniques-container');
   if (!container) return;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
+  const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
+
   const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
   if (!data || data.length === 0) {
     container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
@@ -1090,7 +1100,11 @@ async function loadChroniques() {
   }
 
   container.innerHTML = data.map(chro => `
-    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'};">
+    <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
+      
+      <!-- BOUTON SUPPRIMER (Visible que par les Admins/MJ) -->
+      ${isAdmin ? `<button onclick="supprimerChronique(${chro.id})" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;">❌</button>` : ''}
+      
       <div class="embed-header" style="color: ${chro.couleur || 'var(--accent)'};">📜 ${chro.auteur || 'Maître du Jeu'}</div>
       <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
       <div class="embed-desc">${chro.contenu}</div>
@@ -1098,7 +1112,6 @@ async function loadChroniques() {
     </div>
   `).join('');
 }
-loadChroniques();
 
 // ==========================================
 // --- MES TICKETS (JOUEUR - CHAT) ---
@@ -1460,5 +1473,21 @@ window.envoyerGuerre = async function() {
   else {
     alert("Ta demande de guerre a été envoyée au Staff !");
     document.getElementById('guerre-modal').classList.remove('active');
+  }
+};
+
+window.supprimerActu = async function(id) {
+  if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette actualité ?")) {
+    const { error } = await supabase.from('actualites').delete().eq('id', id);
+    if (error) alert("Erreur : " + error.message);
+    else loadActualites(); // On rafraîchit
+  }
+};
+
+window.supprimerChronique = async function(id) {
+  if (confirm("⚠️ Es-tu sûr de vouloir supprimer cette chronique ?")) {
+    const { error } = await supabase.from('chroniques').delete().eq('id', id);
+    if (error) alert("Erreur : " + error.message);
+    else loadChroniques(); // On rafraîchit
   }
 };
