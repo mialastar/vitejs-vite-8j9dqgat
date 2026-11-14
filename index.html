@@ -161,7 +161,6 @@
               <button type="button" class="sub-tab-btn" data-sub="relations">Relations</button>
             </div>
 
-            <!-- 1. CRÉER -->
             <div id="subview-create" class="subview active">
               <div class="progress-container">
                 <div class="progress-text">Étape <span id="current-step-num">1</span> sur 9</div>
@@ -201,10 +200,14 @@
                   <h3>5. Compétences</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
                   <div class="checkbox-grid">
-                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
                   </div>
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
@@ -245,12 +248,10 @@
               </div>
             </div>
 
-            <!-- 2. MES FICHES -->
             <div id="subview-mine" class="subview">
               <div id="my-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
-            <!-- 3. VOIR LES FICHES -->
             <div id="subview-all" class="subview">
               <div class="search-container">
                 <input type="text" id="search-fiches" placeholder="Rechercher un nom..." />
@@ -259,7 +260,6 @@
               <div id="all-fiches-container"><p style="text-align: center; color: gray; margin-top: 20px;">Chargement...</p></div>
             </div>
 
-            <!-- 4. RELATIONS -->
             <div id="subview-relations" class="subview">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.5rem; margin: 0;">Relations</h3>
@@ -457,31 +457,40 @@
       <!-- ÉCRAN 4 : APPLICATION ADMIN -->
       <div id="screen-admin" class="screen app-layout admin-layout">
         <div class="app-content">
+          
           <div class="admin-header">
             <h2>Panneau d'Administration</h2>
             <span>Moonlight Studio</span>
           </div>
+
           <div id="admin-view-accueil" class="view active">
             <h3 class="admin-title">Gestion de l'Accueil</h3>
             <div class="profile-card"><p style="color: gray;">Publier des messages, changer la saison...</p></div>
           </div>
+
           <div id="admin-view-fiches" class="view">
             <h3 class="admin-title">Fiches en attente</h3>
             <div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div>
           </div>
+
           <div id="admin-view-membres" class="view">
             <h3 class="admin-title">Gestion des Membres</h3>
             <div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div>
           </div>
+
           <div id="admin-view-chroniques" class="view">
             <h3 class="admin-title">Gestion des Chroniques (MJ)</h3>
             <div class="profile-card"><p style="color: gray;">Écrire les chroniques, gérer le temps RP...</p></div>
           </div>
+
           <div id="admin-view-tickets" class="view">
             <h3 class="admin-title">Tickets & Support</h3>
             <div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div>
           </div>
+
         </div>
+
+        <!-- BARRE DE NAVIGATION ADMIN -->
         <nav class="bottom-nav admin-nav">
           <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
@@ -494,7 +503,10 @@
 
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
-        <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
+        <div class="toast-text">
+          <h4>Succès !</h4>
+          <p>Action réalisée avec succès.</p>
+        </div>
       </div>
     </div>
 
