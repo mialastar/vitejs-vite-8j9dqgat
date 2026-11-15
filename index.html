@@ -6,12 +6,17 @@
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
-      serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
-      serviceWorkerParam: { scope: "/push/onesignal/" },
-    });
+    OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
+    // On indique simplement le nom du fichier à la racine
+    serviceWorkerPath: "OneSignalSDKWorker.js",
+    serviceWorkerParam: { scope: "/" }, 
+    allowLocalhostAsSecureOrigin: true,
+    notifyButton: { enable: false },
   });
+});
+    });
 </script>
 
     <meta charset="UTF-8" />
