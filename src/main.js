@@ -1765,21 +1765,32 @@ window.genererCodeAcces = async function() {
   }
 
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
-  
-  // On utilise un domaine qui n'est PAS sur la liste noire
   const emailFictif = safePseudo + "@terresducrepuscule.com"; 
 
-  // On utilise signUp standard, qui fonctionnera car "Confirm email" est désactivé
-  const { data, error: authError } = await supabaseAdmin.auth.signUp({
-    email: emailFictif,
-    password: code,
-  });
+  // ON APPELLE L'EDGE FUNCTION ICI
+  try {
+    // ⚠️ VÉRIFIE QUE L'URL CORRESPOND AU NOM DE TA FONCTION SUR SUPABASE
+    const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/smart-action", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ email: emailFictif, password: code })
+    });
 
-  // Si l'utilisateur existe déjà, on ignore l'erreur "already registered"
-  if (authError && !authError.message.includes("already registered")) {
-    return alert("Erreur création compte : " + authError.message);
+    const data = await response.json();
+
+    // Si l'utilisateur existe déjà, ce n'est pas grave, on continue
+    if (!response.ok && !data.error?.includes("already been registered") && !data.error?.includes("already exists")) {
+      return alert("Erreur création compte : " + (data.error || "Erreur inconnue"));
+    }
+
+  } catch (err) {
+    return alert("Erreur réseau : " + err.message);
   }
 
+  // On enregistre le code dans la base de données
   const { error } = await supabase.from('access_codes').insert({ 
     code: code, 
     discord_pseudo: pseudo, 
