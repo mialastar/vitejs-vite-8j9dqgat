@@ -1729,14 +1729,16 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     alert("⚠️ Ce code a déjà été utilisé.");
   }
   else if (codeData.status === 'Validé') {
-    // On nettoie le pseudo EXACTEMENT de la même façon que lors de la création
-    const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    const emailFictif = safePseudo + "@example.com";
+        // Dans la fonction btn-submit-access
+        const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: emailFictif,
-      password: code
-    });
+        // LE DOMAINE DOIT ÊTRE LE MÊME QUE DANS genererCodeAcces
+        const emailFictif = safePseudo + "@terresducrepuscule.com"; 
+        
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: emailFictif,
+          password: code
+        });
 
     if (authError) {
       alert("Erreur de connexion. Le staff doit vérifier ton compte.");
@@ -1757,26 +1759,28 @@ window.genererCodeAcces = async function() {
   const pseudo = document.getElementById('dev-gen-pseudo').value.trim();
   if (!pseudo) return alert("Entre un pseudo Discord.");
 
-  // On nettoie le pseudo pour l'email (on garde que les lettres et les chiffres)
   const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  
   if (safePseudo.length < 2) {
     return alert("Le pseudo doit contenir au moins 2 lettres ou chiffres.");
   }
 
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
   
-  // ON UTILISE @example.com (domaine accepté par Supabase)
-  const emailFictif = safePseudo + "@example.com"; 
+  // On utilise un domaine qui n'est PAS sur la liste noire de Supabase
+  const emailFictif = safePseudo + "@terresducrepuscule.com"; 
 
-  // On utilise supabaseAdmin pour ne pas déconnecter l'admin actuel
-  const { error: authError } = await supabaseAdmin.auth.signUp({
+  // On utilise l'API Admin pour créer l'utilisateur sans validation d'email
+  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
     email: emailFictif,
     password: code,
+    email_confirm: true // Confirme l'email automatiquement
   });
 
-  if (authError && !authError.message.includes("already registered")) {
-    return alert("Erreur création compte : " + authError.message);
+  if (authError) {
+    // Si l'utilisateur existe déjà, on continue (on met juste à jour le code)
+    if (!authError.message.includes("already been registered")) {
+      return alert("Erreur création compte : " + authError.message);
+    }
   }
 
   const { error } = await supabase.from('access_codes').insert({ 
