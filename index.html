@@ -8,9 +8,7 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
-      // Chemin relatif (sans slash initial) vers le fichier du service worker
       serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
-      // Portée du service worker (doit correspondre au dossier)
       serviceWorkerParam: { scope: "/push/onesignal/" },
     });
   });
@@ -33,9 +31,7 @@
         await OneSignal.init({
           appId: "3ba8814c-36cb-484e-a32d-f430f7966c6c",
           allowLocalhostAsSecureOrigin: true,
-          notifyButton: {
-            enable: false // On utilise notre propre bouton dans le profil
-          },
+          notifyButton: { enable: false },
         });
       });
     </script>
@@ -130,19 +126,35 @@
                 <button type="button" class="lore-tab-btn" data-lore="clans">Les Clans</button>
                 <button type="button" class="lore-tab-btn" data-lore="source">Source Lunaire</button>
               </div>
+              
+              <!-- NOUVEAU LORE ICI -->
               <div id="lore-histoire" class="lore-content active">
-                <h3>La Création des Terres</h3>
-                <p>Il y a bien longtemps, quatre chats légendaires s'unirent pour vaincre une menace terrible dont le nom s'est perdu dans les brumes du temps. Après leur victoire, la discorde éclata. Se disputant les meilleures terres de chasse, ils se séparèrent, donnant naissance aux quatre Clans que nous connaissons aujourd'hui.</p>
+                <h3>La Création des Terres et le Sanctuaire de l'Île Lunaire</h3>
+                <p>Bien avant que les étoiles ne murmurent leurs prophéties aux guérisseurs et que les frontières ne soient gravées dans l’écorce des arbres ou la pierre des falaises, cette vallée ne connaissait que le sang et l'effroi. Nul Clan n’y avait encore vu le jour, nul code n’y protégeait les faibles, et aucun félin n’osait s’aventurer à découvert sans craindre d’être déchiqueté. Sur ces terres sauvages régnait une terreur implacable : une immense horde de chiens errants, affamés et sanguinaires, qui chassaient en meute hurlante et ne laissaient derrière eux que des carcasses et des cendres. Leurs aboiements rauques faisaient trembler les feuillages jusque dans les recoins les plus reculés des montagnes, et les rares solitaires qui peuplaient la vallée survivaient comme des ombres traquées, tapis au fond des crevasses, le cœur rongé par une peur incessante.</p>
+                <p>C’est au cœur de cet âge sombre que le destin réunit quatre chats d’exception, dont les noms allaient résonner à travers les générations. Rien ne semblait pourtant les rapprocher. Il y avait Ronce, un mâle massif au pelage sombre comme la terre humide des sous-bois, capable de se fondre dans le moindre fourré sans faire craquer une seule brindille ; Torrent, une féline agile au pelage gris argenté, aussi vive et imprévisible que les remous d’une rivière en crue ; Astre, un guerrier imposant à la fourrure dorée et au regard perçant, qui savait lire la course des astres et anticiper les embuscades bien avant que l'ennemi ne surgisse ; et enfin Voile, une chatte élancée au pelage pâle comme la fumée, dont la voix calme semblait porter l’écho d’esprits invisibles.</p>
+                <p>Pendant des lunes interminables, ces quatre héros unirent leurs griffes, leur ruse et leur courage pour tenir tête à la meute. Là où un solitaire isolé aurait été mis en pièces en quelques battements de cœur, leur alliance fit des miracles. Tandis que Ronce attirait les bêtes massives dans les fourrés épais pour les aveugler et les désorienter, Torrent surgissait des eaux vives pour frapper leurs flancs avec la violence d’un éclair avant de replonger dans le courant. Depuis les crêtes rocheuses, Astre guidait leurs assauts avec une lucidité implacable, et Voile déjouait les pièges de la meute grâce à une intuition surnaturelle. Leur lutte s'étira sur plusieurs saisons, faite de retraites nocturnes, de blessures profondes et de veilles épuisantes, jusqu'à culminer lors d'une bataille titanesque au bord du grand lac. Sous un ciel déchiré par l'orage, les quatre légendes menèrent une ultime charge désespérée, repoussant le chef de la meute et ses bêtes hurlantes hors des gorges et par-delà les montagnes, d'où ils ne revinrent jamais. Lorsque l'aube se leva le lendemain matin, le silence était enfin revenu sur la vallée, révélant une terre libre, baignée de lumière et gorgée de gibier.</p>
+                <p>Mais la paix est parfois plus difficile à porter que la guerre. Une fois la horde chassée et les plaies refermées, le lien forgé dans le sang et la survie commença lentement à s’effriter. Les solitaires de la vallée affluaient désormais vers les quatre libérateurs, cherchant protection et guidance, mais les différences profondes qui avaient jadis fait la force des quatre héros devinrent le poison de leur alliance. Les tensions s’accumulèrent au fil des jours, jusqu’au soir où, au bord du grand lac où la rivière se scindait en deux bras autour d’une île paisible, la discorde éclata au grand jour.</p>
+                <p>Ronce fit un pas vers la lisière des bois qui s'étendaient au nord du lac, la queue basse et les épaules tendues.<br><br>
+                — On est trop nombreux au même endroit, grogna-t-il en jetant un regard agacé aux solitaires qui se disputaient déjà un mulot quelques longueurs plus loin. Mes pattes sont faites pour les sous-bois et l'ombre des arbres, pas pour rester à découvert. Demain à l'aube, je pars vers la forêt avec ceux qui veulent me suivre.</p>
+                <p>Torrent laissa échapper un feulement bref, les oreilles plaquées contre son crâne. Elle tourna la tête vers les grandes cascades rugissantes qui dévalaient les falaises au sud-ouest.<br><br>
+                — Ne fais pas comme si tu étais le seul à avoir besoin d'espace, Ronce, répliqua-t-elle sèchement. Tes fourrés m'étouffent. Moi, il me faut le courant des rivières et les berges ouvertes, là où on peut courir et chasser sans se cogner à un tronc à chaque bond. Si tu pars dans les bois, je descends vers les cascades.</p>
+                <p>Posté sur un rocher plat qui surplombait la berge, Astre poussa un long soupir avant de les observer tour à tour.<br><br>
+                — Vous n'avez donc rien retenu de ces dernières lunes ? lança-t-il d'un ton froid. Les chiens viennent à peine de fuir, et vous vous comportez déjà comme de vulgaires errants prêts à se battre pour un morceau de territoire. Ni les bois ni les rivières ne suffiront à vous protéger si vous perdez votre sang-froid. Pour ma part, je monte vers les crêtes à l'est : là-haut, au moins, on voit venir le danger de loin.</p>
+                <p>Un silence lourd retomba sur la rive. Tous les regards se tournèrent alors vers Voile, assise en retrait près des nappes de brouillard qui s'élevaient lentement de la vallée encaissée. Elle fixa l'eau sombre du lac pendant un long moment avant de parler d'une voix posée.<br><br>
+                — Astre a raison sur un point : on ne peut plus vivre tous ensemble, dit-elle simplement. On a su se battre côte à côte parce qu'on n'avait pas le choix, mais on ne chasse pas de la même façon et on ne vit pas de la même manière. Si on force les choses, on finira par s'entre-tuer. Chacun doit suivre sa propre voie.</p>
+                <p>Nul ne trouva rien à redire à cette vérité implacable. Pourtant, avant de se tourner le dos pour toujours, les quatre héros posèrent les yeux sur l'île boisée qui reposait au centre même du grand lac, reliée aux berges par d'anciens ponts de bois et baignée par la lumière argentée de l'astre nocturne. Ils comprirent d'un commun accord que cette terre neutre n'appartiendrait à aucun d'entre eux. Ils la baptisèrent l'Île Lunaire et décrétèrent qu'à chaque pleine lune, leurs peuples respectifs traverseraient les ponts pour s'y réunir lors des Assemblées, déposant toute haine et toute rivalité le temps d'une nuit sacrée afin que le souvenir de leur alliance passée ne s'éteigne jamais.</p>
+                <p>À l’aube suivante, le pacte scellé, les quatre chats légendaires prirent chacun une direction différente, suivis par les félins qui avaient choisi de croire en leur vision du monde. Ronce s’enfonça au nord dans les profondeurs verdoyantes des grands bois, fondant le Clan de la Forêt, un peuple discret, furtif et intimement lié aux rythmes de la nature. Torrent descendit vers le sud-ouest, là où les eaux se précipitent en cascades vertigineuses et serpentent à travers les terres, donnant naissance au Clan de la Pluie, composé de guerriers agiles, imprévisibles et rapides comme l’éclair. Astre entreprit l’ascension des hautes montagnes rocheuses au sud-est, établissant le Clan du Zénith, un peuple de chats sages, observateurs et proches du ciel, veillant non loin des sentiers escarpés menant vers les hauteurs sacrées de la Source Lunaire. Quant à Voile, elle s’évanouit dans les terres basses et enveloppées de mystère situées entre les bois et les contreforts montagneux, fondant le Clan de la Brume, un peuple silencieux, énigmatique et profondément connecté aux esprits. Ainsi naquirent les quatre Clans qui règnent aujourd'hui sur la vallée, unis dans le souvenir de leur victoire et liés à jamais par les nuits d'Assemblée sur l'Île Lunaire.</p>
               </div>
+
               <div id="lore-clans" class="lore-content">
-                <div class="clan-lore-card"><h4>Clan de la Forêt</h4><p>Discrets, furtifs et connectés à la nature.</p></div>
-                <div class="clan-lore-card"><h4>Clan de la Pluie</h4><p>Agiles, imprévisibles et rapides.</p></div>
-                <div class="clan-lore-card"><h4>Clan du Zénith</h4><p>Sages, observateurs et proches du ciel.</p></div>
-                <div class="clan-lore-card"><h4>Clan de la Brume</h4><p>Mystérieux et proches des esprits.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Forêt</h4><p>Discrets, furtifs et connectés à la nature. Fondé par Ronce, ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Pluie</h4><p>Agiles, imprévisibles et rapides. Fondé par Torrent, maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p></div>
+                <div class="clan-lore-card"><h4>Clan du Zénith</h4><p>Sages, observateurs et proches du ciel. Fondé par Astre, ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Brume</h4><p>Mystérieux et proches des esprits. Fondé par Voile, vivant dans les marais, ils connaissent les poisons et les plantes rares.</p></div>
               </div>
               <div id="lore-source" class="lore-content">
                 <p><strong>Lieu Neutre et Sacré</strong></p>
-                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles.</p>
+                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. Le Clan du Zénith veille non loin de ces sentiers escarpés menant vers les hauteurs sacrées.</p>
               </div>
             </div>
             <div id="monde-carte" class="monde-content">
@@ -243,22 +255,19 @@
                   <label>Événements marquants</label><textarea rows="4" placeholder="Qu'est-ce qui l'a façonné ?"></textarea>
                 </div>
 
-                                <!-- ÉTAPE 6 : COMPÉTENCES -->
-                                <div class="wizard-step" id="step-6">
-                                  <h3>6. Compétences</h3>
-                                  <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
-                                  <div class="checkbox-grid">
-                                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
-                                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
-                                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
-                                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
-                                    
-                                    <!-- NOUVELLE LIGNE ICI -->
-                                    <label><input type="checkbox" class="comp-checkbox" value="Manipulation"> Manipulation</label>
-                                    
-                                  </div>
-                                  <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
-                                </div>
+                <!-- ÉTAPE 6 : COMPÉTENCES -->
+                <div class="wizard-step" id="step-6">
+                  <h3>6. Compétences</h3>
+                  <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px;">Coche ses spécialités :</p>
+                  <div class="checkbox-grid">
+                    <label><input type="checkbox" class="comp-checkbox" value="Chasse"> Chasse</label><label><input type="checkbox" class="comp-checkbox" value="Combat"> Combat</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Pistage"> Pistage</label><label><input type="checkbox" class="comp-checkbox" value="Escalade"> Escalade</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Natation"> Natation</label><label><input type="checkbox" class="comp-checkbox" value="Soin"> Soin / Herbes</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Discrétion"> Discrétion</label><label><input type="checkbox" class="comp-checkbox" value="Stratégie"> Stratégie</label>
+                    <label><input type="checkbox" class="comp-checkbox" value="Manipulation"> Manipulation</label>
+                  </div>
+                  <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
+                </div>
 
                 <!-- ÉTAPE 7 : OBJECTIFS -->
                 <div class="wizard-step" id="step-7">
@@ -275,18 +284,16 @@
                   <label>Vulnérabilités</label><textarea rows="2"></textarea>
                 </div>
 
-                                <!-- ÉTAPE 9 : IMAGE -->
-                                <div class="wizard-step" id="step-9">
-                                  <h3>9. Images (Jusqu'à 3)</h3>
-                                  <label>Images de référence</label>
-                                  <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
-                                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour choisir tes images</p>
-                                    <!-- On ajoute l'attribut multiple -->
-                                    <input type="file" id="image-upload" accept="image/*" multiple style="border: none; background: transparent; margin: 0 auto; color: #fff; display: block;" />
-                                    <!-- Conteneur pour les aperçus -->
-                                    <div id="image-preview-container" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px;"></div>
-                                  </div>
-                                </div>
+                <!-- ÉTAPE 9 : IMAGES -->
+                <div class="wizard-step" id="step-9">
+                  <h3>9. Images (Jusqu'à 3)</h3>
+                  <label>Images de référence</label>
+                  <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
+                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour choisir tes images</p>
+                    <input type="file" id="image-upload" accept="image/*" multiple style="border: none; background: transparent; margin: 0 auto; color: #fff; display: block;" />
+                    <div id="image-preview-container" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px;"></div>
+                  </div>
+                </div>
 
                 <!-- ÉTAPE 10 : STATISTIQUES -->
                 <div class="wizard-step" id="step-10">
@@ -394,7 +401,7 @@
               <h3 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">Liens utiles</h3>
               <div class="quick-links-grid">
                 <button type="button" class="btn-secondary" onclick="alert('Ouverture du Discord...')">💬 Discord</button>
-                <button type="button" class="btn-secondary" onclick="alert('Ouverture du Code du Guerrier...')">📜 Règles</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('rules-modal').classList.add('active')">📜 Règles</button>
                 <button type="button" class="btn-secondary" onclick="alert('Ouverture des Tickets...')">🎫 Support</button>
                 <button type="button" class="btn-secondary" onclick="alert('Ouverture des Crédits...')">⭐ Crédits</button>
               </div>
@@ -405,7 +412,6 @@
               <button type="button" class="btn-secondary" id="btn-open-settings">⚙️ Paramètres</button>
               <button type="button" class="btn-secondary" id="btn-my-tickets">🎫 Mes Tickets en cours</button>
               
-              <!-- NOUVEAU BOUTON PWA -->
               <button type="button" class="btn-secondary" id="btn-notifications" onclick="demanderNotifications()">🔔 Activer les notifications</button>
 
               <button type="button" class="btn-secondary" style="display: none;" id="btn-admin-panel">🛡️ Panel Admin</button>
@@ -489,6 +495,31 @@
               <button type="button" class="btn-close-support" onclick="document.getElementById('player-tickets-modal').classList.remove('active')">✕</button>
               <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Mes Tickets</h2>
               <div id="player-tickets-list"><p style="color: gray; text-align: center;">Chargement...</p></div>
+            </div>
+          </div>
+
+          <!-- MODAL RÈGLES (CODE DU GUERRIER) -->
+          <div id="rules-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('rules-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">⚔️ Le Code du Guerrier ⚔️</h2>
+              
+              <div style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🛡️ 1. Loyauté et Défense</h3>
+                <p>Ton premier devoir est de protéger ton clan, ton territoire et tes camarades. Tu ne trahis jamais ton clan. Un traître est jugé par le Clan de la Lune (ou les Ronces, selon son acte). Tu respectes ton Chef et ton guérisseur, et tu suis leurs décisions.</p>
+                
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🐾 2. Honneur et Respect</h3>
+                <p>Tu ne tues jamais sans une raison valable. La vie est précieuse. Tu respectes les anciens, les guérisseurs et les chatons. Tu ne les attaques jamais (sauf en cas de légitime défense extrême). Tu ne voles pas le gibier d'un autre clan.</p>
+                
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">⚖️ 3. La Guerre et la Paix</h3>
+                <p>Tu ne déclenches pas de guerre sans l'accord de ton Chef. Pendant une bataille, tu te bats avec honneur. Pas de coups bas, pas d'attaques dans le dos (sauf si le RP l'exige et que l'autre joueur est d'accord). Tu peux capturer un ennemi, mais tu ne le tortures pas. Après la guerre, tu respectes les accords de paix.</p>
+
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🌙 4. Les Esprits</h3>
+                <p>Tu respectes les esprits du Clan de la Lune. Ils guident tes pas et veillent sur ton clan. Tu crains le Clan des Ronces et tu sais que tes actes sombres pourraient te mener vers eux. Tu ne blasphèmes pas contre les esprits lors des rassemblements.</p>
+
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🐾 5. La Vie de Clan</h3>
+                <p>Chaque guerrier participe à la vie du clan : chasse, patrouilles, entraînement des apprentis. Tu ne laisses jamais un camarade blessé seul. Tu accueilles les nouveaux membres et les aides à s'intégrer.</p>
+              </div>
             </div>
           </div>
 
