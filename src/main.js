@@ -1733,7 +1733,7 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     
     // LE DOMAINE DOIT ÊTRE LE MÊME QUE DANS genererCodeAcces
-    const emailFictif = safePseudo + "@terresducrepuscule.com"; 
+    const emailFictif = safePseudo + "@lgdc-rp.vercel.app";
     
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: emailFictif,
@@ -1765,7 +1765,7 @@ window.genererCodeAcces = async function() {
   }
 
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
-  const emailFictif = safePseudo + "@terresducrepuscule.com"; 
+  const emailFictif = safePseudo + "@lgdc-rp.vercel.app"; 
 
   // ON APPELLE L'EDGE FUNCTION ICI
   try {
