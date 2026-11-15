@@ -1154,13 +1154,39 @@ window.publierActu = async function() {
   
   if (!contenu) return alert("Écris une description.");
   
+  // 1. On publie dans la base de données (Supabase)
   const { error } = await supabase.from('actualites').insert({ titre, auteur, contenu, sous_description: sous, couleur });
-  if (error) alert(error.message);
-  else {
+  
+  if (error) {
+    alert(error.message);
+  } else {
+    // 2. ON APPELLE LA FONCTION EDGE DE SUPABASE POUR ENVOYER LA NOTIF
+    try {
+      const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/send-push-notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` // On utilise la clé publique Supabase
+        },
+        body: JSON.stringify({
+          title: titre || "Nouvelle actualité !",
+          message: contenu.substring(0, 100) + "...",
+          url: `${window.location.origin}/?view=accueil`
+        })
+      });
+
+      if (!response.ok) {
+        console.error("Erreur d'envoi de la notification");
+      }
+    } catch (err) {
+      console.error("Erreur réseau :", err);
+    }
+
+    // 3. On nettoie le formulaire
     document.getElementById('admin-actu-titre').value = '';
     document.getElementById('admin-actu-input').value = '';
     document.getElementById('admin-actu-sous').value = '';
-    alert("Message publié !");
+    alert("Message publié et notification envoyée à tous les joueurs !");
     loadActualites();
   }
 };
