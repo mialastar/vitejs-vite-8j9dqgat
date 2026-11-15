@@ -33,9 +33,13 @@ function switchScreen(current, next) {
   setTimeout(() => next.classList.add('active'), 800); 
 }
 
-if(btnStart) btnStart.addEventListener('click', () => switchScreen(screenIntro, screenCredits));
+if(btnStart) {
+  btnStart.addEventListener('click', () => {
+    screenIntro.classList.remove('active');
+    setTimeout(() => screenCredits.classList.add('active'), 800);
+  });
+}
 if(btnContinueCredits) btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
-
 if(btnDiscordLogin) {
   btnDiscordLogin.addEventListener('click', async () => {
     const { error } = await supabase.auth.signInWithOAuth({
