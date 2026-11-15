@@ -199,11 +199,38 @@ function updateWizard() {
 if(btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
 
 if(btnNext) btnNext.addEventListener('click', async () => {
+  // 1. VÉRIFICATION DES CHAMPS OBLIGATOIRES AVANT DE PASSER À LA SUITE
+  if (currentStep === 2) { // Étape Identité (Nom)
+    const nom = document.querySelector('#step-2 input').value;
+    if (!nom || nom.trim() === "") {
+      alert("⚠️ Tu dois donner un nom à ton personnage avant de continuer !");
+      return; // On bloque le passage
+    }
+  }
+  
+  if (currentStep === 3) { // Étape Apparence
+    const pelage = document.querySelectorAll('#step-3 input')[0].value;
+    const yeux = document.querySelectorAll('#step-3 input')[1].value;
+    if (!pelage || !yeux) {
+      alert("⚠️ Remplis au moins la couleur du pelage et des yeux !");
+      return;
+    }
+  }
+
+  if (currentStep === 5) { // Étape Histoire (Origines)
+    const origines = document.querySelectorAll('#step-5 textarea')[0].value;
+    if (!origines || origines.trim() === "") {
+      alert("⚠️ N'oublie pas d'écrire les origines de ton personnage !");
+      return;
+    }
+  }
+
+  // 2. SI TOUT EST BON, ON PASSE À LA SUITE
   if (currentStep < totalSteps) {
     currentStep++;
     updateWizard();
   } else {
-    // RÉCUPÉRATION DES DONNÉES (Nouvel ordre)
+    // ... (Le reste du code pour l'enregistrement de la fiche reste inchangé)
     const factionType = document.querySelector('input[name="faction-type"]:checked').value;
     let clan = "";
     if (factionType === 'clan') {
@@ -214,8 +241,8 @@ if(btnNext) btnNext.addEventListener('click', async () => {
       clan = "Domestique";
     }
 
-    const nom = document.querySelector('#step-2 input').value; // <-- Décalé à l'étape 2
-    const rang = document.querySelector('#step-2 select').value; // <-- Décalé
+    const nom = document.querySelector('#step-2 input').value;
+    const rang = document.querySelector('#step-2 select').value;
     const pelage = document.querySelectorAll('#step-3 input')[0].value;
     const yeux = document.querySelectorAll('#step-3 input')[1].value;
     const traits = document.querySelectorAll('#step-4 input')[0].value;
