@@ -1704,35 +1704,47 @@ document.getElementById('btn-access-code')?.addEventListener('click', () => {
 
 document.getElementById('btn-submit-access')?.addEventListener('click', async () => {
   const pseudo = document.getElementById('access-pseudo').value.trim();
-  const code = document.getElementById('access-code').value.trim();
+  const code = document.getElementById('access-code').value.trim().toUpperCase(); // Force le code en majuscules
 
   if (!pseudo || !code) {
     return alert("Remplis ton pseudo et ton code.");
   }
 
+  // On cherche le code en ignorant la casse pour le pseudo (.ilike)
+  // Et on utilise .maybeSingle() pour éviter les plantages
   const { data: codeData, error } = await supabase
     .from('access_codes')
     .select('*')
     .eq('code', code)
-    .eq('discord_pseudo', pseudo)
-    .single();
+    .ilike('discord_pseudo', pseudo) 
+    .maybeSingle();
 
+  // SI ON NE TROUVE RIEN :
   if (error || !codeData) {
-    return alert("❌ Code ou pseudo incorrect.");
+    // On va chercher pour voir si le code existe tout court (pour aider au debug)
+    const { data: checkCode } = await supabase
+      .from('access_codes')
+      .select('discord_pseudo, status')
+      .eq('code', code)
+      .maybeSingle();
+
+    if (checkCode) {
+      return alert(`❌ Le code existe, mais il est associé au pseudo "${checkCode.discord_pseudo}" (Statut: ${checkCode.status}). Vérifie l'orthographe !`);
+    } else {
+      return alert("❌ Ce code n'existe pas du tout dans la base de données. As-tu bien cliqué sur 'Générer' ?");
+    }
   }
 
+  // SI ON TROUVE LE CODE :
   if (codeData.status === 'En attente') {
-    alert("⏳ Ta demande a bien été enregistrée ! Le staff doit la valider. Réessaie dans quelques minutes.");
+    alert("⏳ Ta demande est enregistrée ! Mais le Staff doit d'abord la valider dans le Panel Dev. Réessaie après validation.");
     document.getElementById('access-code-modal').classList.remove('active');
   } 
   else if (codeData.status === 'Utilisé') {
-    alert("⚠️ Ce code a déjà été utilisé.");
+    alert("⚠️ Ce code a déjà été utilisé pour se connecter.");
   }
   else if (codeData.status === 'Validé') {
-            // Dans la fonction btn-submit-access
-    const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    
-    // LE DOMAINE DOIT ÊTRE LE MÊME QUE DANS genererCodeAcces
+    const safePseudo = codeData.discord_pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     const emailFictif = safePseudo + "@lgdc-rp.vercel.app";
     
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -1741,7 +1753,7 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     });
 
     if (authError) {
-      alert("Erreur de connexion. Le staff doit vérifier ton compte.");
+      alert("Erreur de connexion du compte fantôme : " + authError.message);
       console.error(authError);
     } else {
       await supabase.from('access_codes').update({ status: 'Utilisé' }).eq('id', codeData.id);
@@ -1750,7 +1762,6 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     }
   }
 });
-
 // ==========================================
 // --- PANEL DEV (GESTION DES CODES D'ACCÈS) ---
 // ==========================================
