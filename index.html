@@ -78,14 +78,12 @@
             Se connecter avec Discord
           </button>
 
-          <!-- CONNEXION PAR CODE -->
-          <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <button type="button" id="btn-access-code" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
-              🔑 J'ai un code d'accès spécial
-            </button>
-          </div>
-        </div>
-      </div>
+                    <!-- CONNEXION PAR CODE -->
+                    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                      <button type="button" id="btn-access-code" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+                        🔑 J'ai un code d'accès spécial
+                      </button>
+                    </div>
 
       <!-- ÉCRAN 3 : APPLICATION JOUEUR -->
       <div id="screen-app" class="screen app-layout">
@@ -701,21 +699,26 @@
         </div>
       </div>
 
-            <!-- MODAL CODE GÉNÉRÉ -->
-            <div id="code-generated-modal" class="support-modal-overlay">
-              <div class="support-modal" style="max-width: 400px; text-align: center;">
-                <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
-                <p style="color: #cbd5e1; margin-bottom: 15px;">Donne ce code à <strong id="gen-pseudo-display" style="color: #fff;"></strong> :</p>
-                
-                <div id="gen-code-display" style="background: rgba(0,0,0,0.5); border: 2px dashed var(--accent); padding: 15px; border-radius: 8px; font-size: 1.8rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
-                  LGDC-XXXX
-                </div>
-                
-                <button type="button" id="btn-copy-code" class="btn-primary" style="width: 100%; margin-bottom: 10px; background: #10b981; border-color: #10b981;">📋 Copier le code</button>
-                
-                <button type="button" class="btn-secondary" style="width: 100%;" onclick="document.getElementById('code-generated-modal').classList.remove('active')">Fermer</button>
-              </div>
-            </div>
+                  <!-- MODAL CODE D'ACCÈS -->
+      <div id="access-code-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 400px;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('access-code-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Accès par Code</h2>
+          <p style="color: #cbd5e1; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">Si tu ne peux pas utiliser Discord, entre ton pseudo et ton code fourni par le Staff.</p>
+          
+          <div class="form-group">
+            <label>Pseudo Discord</label>
+            <input type="text" id="access-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          
+          <div class="form-group">
+            <label>Code Spécial</label>
+            <input type="text" id="access-code" placeholder="Ex: LGDC-A1B2" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+
+          <button type="button" id="btn-submit-access" class="btn-primary" style="width: 100%; margin-top: 10px;">Valider mon accès</button>
+        </div>
+      </div>
       
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
