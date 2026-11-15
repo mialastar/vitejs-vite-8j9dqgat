@@ -1020,13 +1020,30 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
 async function loadAdminFiches() {
   const container = document.getElementById('admin-fiches-list');
   if(!container) return;
-  const { data: fiches } = await supabase.from('fiches_oc').select('*').eq('statut', 'En attente');
-  if (!fiches || fiches.length === 0) { container.innerHTML = '<p style="color: #10b981;">Aucune fiche en attente.</p>'; return; }
+  container.innerHTML = '<p style="color: gray;">Chargement...</p>';
+  
+  // On demande TOUTES les fiches en attente (sans filtrer par user_id)
+  const { data: fiches, error } = await supabase
+    .from('fiches_oc')
+    .select('*')
+    .eq('statut', 'En attente');
+
+  if (error) {
+    container.innerHTML = '<p style="color: red;">Erreur de chargement.</p>';
+    return;
+  }
+
+  if (!fiches || fiches.length === 0) { 
+    container.innerHTML = '<p style="color: #10b981;">Aucune fiche en attente.</p>'; 
+    return; 
+  }
+  
   container.innerHTML = '';
   fiches.forEach(fiche => {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px;">
         <h4 style="color: var(--accent); margin-bottom: 5px;">${fiche.nom} <span style="font-size: 0.7rem; color: gray;">(${fiche.clan})</span></h4>
+        <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px;">Créée par l'ID : ${fiche.user_id.substring(0, 8)}...</p>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
           <button class="btn-action" style="background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="validerFicheAdmin('${fiche.id}')">✅ Valider</button>
           <button class="btn-action" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="refuserFicheAdmin('${fiche.id}')">❌ Refuser</button>
@@ -1035,6 +1052,7 @@ async function loadAdminFiches() {
     `;
   });
 }
+
 window.validerFicheAdmin = async function(id) { 
   // 1. On récupère les infos de la fiche
   const { data: fiche } = await supabase.from('fiches_oc').select('nom, user_id').eq('id', id).single();
