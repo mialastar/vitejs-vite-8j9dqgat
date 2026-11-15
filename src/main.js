@@ -1162,7 +1162,7 @@ window.publierActu = async function() {
   } else {
     // 2. Appel de la fonction Edge
     try {
-      const response = await fetch("curl -L -X POST 'https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
+      const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
