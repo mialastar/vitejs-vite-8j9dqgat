@@ -1729,16 +1729,16 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     alert("⚠️ Ce code a déjà été utilisé.");
   }
   else if (codeData.status === 'Validé') {
-        // Dans la fonction btn-submit-access
-        const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            // Dans la fonction btn-submit-access
+    const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     
-        // LE DOMAINE DOIT ÊTRE LE MÊME QUE DANS genererCodeAcces
-        const emailFictif = safePseudo + "@terresducrepuscule.com"; 
-        
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: emailFictif,
-          password: code
-        });
+    // LE DOMAINE DOIT ÊTRE LE MÊME QUE DANS genererCodeAcces
+    const emailFictif = safePseudo + "@terresducrepuscule.com"; 
+    
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: emailFictif,
+      password: code
+    });
 
     if (authError) {
       alert("Erreur de connexion. Le staff doit vérifier ton compte.");
@@ -1766,21 +1766,18 @@ window.genererCodeAcces = async function() {
 
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
   
-  // On utilise un domaine qui n'est PAS sur la liste noire de Supabase
+  // On utilise un domaine qui n'est PAS sur la liste noire
   const emailFictif = safePseudo + "@terresducrepuscule.com"; 
 
-  // On utilise l'API Admin pour créer l'utilisateur sans validation d'email
-  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+  // On utilise signUp standard, qui fonctionnera car "Confirm email" est désactivé
+  const { data, error: authError } = await supabaseAdmin.auth.signUp({
     email: emailFictif,
     password: code,
-    email_confirm: true // Confirme l'email automatiquement
   });
 
-  if (authError) {
-    // Si l'utilisateur existe déjà, on continue (on met juste à jour le code)
-    if (!authError.message.includes("already been registered")) {
-      return alert("Erreur création compte : " + authError.message);
-    }
+  // Si l'utilisateur existe déjà, on ignore l'erreur "already registered"
+  if (authError && !authError.message.includes("already registered")) {
+    return alert("Erreur création compte : " + authError.message);
   }
 
   const { error } = await supabase.from('access_codes').insert({ 
