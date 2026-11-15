@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Client principal (pour l'utilisateur connecté)
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Client secondaire (pour créer des comptes sans déconnecter l'admin)
+// Client secondaire (pour créer des comptes sans déconnecter le développeur)
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false }
 });
@@ -28,6 +28,7 @@ const screenCredits = document.getElementById('screen-credits');
 const screenAuth = document.getElementById('screen-auth');
 const screenApp = document.getElementById('screen-app');
 const screenAdmin = document.getElementById('screen-admin');
+const screenDev = document.getElementById('screen-dev'); // Nouvel écran Dev
 
 const btnStart = document.getElementById('btn-start');
 const btnContinueCredits = document.getElementById('btn-continue-credits');
@@ -62,6 +63,7 @@ function showApp() {
   screenCredits.classList.remove('active');
   screenAuth.classList.remove('active');
   screenAdmin.classList.remove('active');
+  screenDev.classList.remove('active');
   screenApp.classList.add('active');
   
   loadActualites();
@@ -72,6 +74,7 @@ function showApp() {
 function showIntro() {
   screenApp.classList.remove('active');
   screenAdmin.classList.remove('active');
+  screenDev.classList.remove('active');
   screenCredits.classList.remove('active');
   screenAuth.classList.remove('active');
   screenIntro.classList.add('active');
@@ -174,7 +177,7 @@ document.querySelectorAll('.sub-tab-btn').forEach(btn => {
 });
 
 // ==========================================
-// --- WIZARD FICHES OC (MIS A JOUR) ---
+// --- WIZARD FICHES OC ---
 // ==========================================
 let currentStep = 1;
 const totalSteps = 10; 
@@ -740,12 +743,24 @@ async function loadProfil() {
     }
   }
 
+  // Gestion des boutons Admin et Dev
   const btnAdmin = document.getElementById('btn-admin-panel');
+  const btnDevPanel = document.getElementById('btn-dev-panel');
+  
   if (btnAdmin) {
-    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ' || roleApp.toUpperCase().trim() === 'DEV') {
+    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ') {
       btnAdmin.style.display = 'flex';
     } else { 
       btnAdmin.style.display = 'none'; 
+    }
+  }
+
+  if (btnDevPanel) {
+    if (roleApp.toUpperCase().trim() === 'DEV') {
+      btnDevPanel.style.display = 'flex';
+      if (btnAdmin) btnAdmin.style.display = 'flex'; // Le DEV peut aussi voir l'admin s'il veut
+    } else { 
+      btnDevPanel.style.display = 'none'; 
     }
   }
 
@@ -796,6 +811,31 @@ async function loadProfil() {
 }
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
+
+// ==========================================
+// --- BASCULE VERS LE PANEL DEV ---
+// ==========================================
+document.getElementById('btn-dev-panel')?.addEventListener('click', () => {
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-dev').classList.add('active');
+  loadAdminCodes(); // On charge les codes dès l'ouverture
+});
+
+document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
+  document.getElementById('screen-dev').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+});
+
+document.querySelectorAll('[data-dev-target]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('[data-dev-target]').forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    document.querySelectorAll('#screen-dev .view').forEach(v => v.classList.remove('active'));
+    
+    const target = e.currentTarget.getAttribute('data-dev-target');
+    document.getElementById(`dev-view-${target}`).classList.add('active');
+  });
+});
 
 // ==========================================
 // --- PANEL DE GESTION RP (CHEF) ---
@@ -990,21 +1030,9 @@ document.getElementById('btn-open-credits')?.addEventListener('click', () => {
 // ==========================================
 // --- BASCULE ADMIN & GESTION ---
 // ==========================================
-document.getElementById('btn-admin-panel')?.addEventListener('click', async () => {
+document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-admin').classList.add('active');
-  
-  // On vérifie si le joueur est DEV pour afficher le bouton
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
-  const btnNavDev = document.querySelector('[data-admin-target="dev"]');
-  
-  if (profile && profile.role_app === 'DEV') {
-    if(btnNavDev) btnNavDev.style.display = 'flex';
-  } else {
-    if(btnNavDev) btnNavDev.style.display = 'none';
-  }
-
   loadAdminFiches();
   loadAdminMembres();
   loadAdminTickets();
@@ -1027,8 +1055,6 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
     
     const target = e.currentTarget.getAttribute('data-admin-target');
     document.getElementById(`admin-view-${target}`).classList.add('active');
-
-    if (target === 'dev') loadAdminCodes();
   });
 });
 
