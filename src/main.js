@@ -75,6 +75,14 @@ async function checkUser() {
   const { data } = await supabase.auth.getSession();
   if (data && data.session) {
     showApp();
+    
+    // On lie l'ID Discord à OneSignal
+    if (window.OneSignal) {
+      window.OneSignal.push(function() {
+        OneSignal.login(data.session.user.id);
+      });
+    }
+    
   } else {
     showIntro();
   }
@@ -1027,7 +1035,36 @@ async function loadAdminFiches() {
     `;
   });
 }
-window.validerFicheAdmin = async function(id) { await supabase.from('fiches_oc').update({ statut: 'Validée' }).eq('id', id); loadAdminFiches(); };
+window.validerFicheAdmin = async function(id) { 
+  // 1. On récupère les infos de la fiche
+  const { data: fiche } = await supabase.from('fiches_oc').select('nom, user_id').eq('id', id).single();
+  
+  // 2. On valide la fiche dans la base
+  await supabase.from('fiches_oc').update({ statut: 'Validée' }).eq('id', id); 
+  
+  // 3. On envoie la notification
+  if (fiche && fiche.user_id) {
+    try {
+      await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` 
+        },
+        body: JSON.stringify({
+          title: "Fiche Validée ! 🎉",
+          message: `La fiche de ${fiche.nom} a été acceptée ! Tu peux commencer à RP.`,
+          url: `${window.location.origin}/?view=fiches`,
+          target_user_id: fiche.user_id // On cible le joueur
+        })
+      });
+    } catch (err) {
+      console.error("Erreur notif :", err);
+    }
+  }
+  
+  loadAdminFiches(); 
+};
 window.refuserFicheAdmin = async function(id) { await supabase.from('fiches_oc').update({ statut: 'Refusée' }).eq('id', id); loadAdminFiches(); };
 
 async function loadAdminMembres() {
