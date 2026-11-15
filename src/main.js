@@ -1800,7 +1800,11 @@ window.genererCodeAcces = async function() {
   if (error) {
     alert("Erreur base de données : " + error.message);
   } else {
-    alert(`✅ Code généré pour ${pseudo} : \n\n${code}\n\nDonne-lui ce code !`);
+    // On affiche la nouvelle modale avec le code
+    document.getElementById('gen-pseudo-display').textContent = pseudo;
+    document.getElementById('gen-code-display').textContent = code;
+    document.getElementById('code-generated-modal').classList.add('active');
+    
     document.getElementById('dev-gen-pseudo').value = '';
     loadAdminCodes();
   }
@@ -1846,3 +1850,29 @@ window.supprimerCode = async function(id) {
   if (error) alert("Erreur : " + error.message);
   else loadAdminCodes();
 };
+
+// ==========================================
+// --- BOUTON COPIER LE CODE ---
+// ==========================================
+document.getElementById('btn-copy-code')?.addEventListener('click', async () => {
+  const codeText = document.getElementById('gen-code-display').textContent;
+  const btn = document.getElementById('btn-copy-code');
+
+  try {
+    // On copie dans le presse-papiers
+    await navigator.clipboard.writeText(codeText);
+    
+    // On change le texte du bouton pour confirmer
+    btn.textContent = "✅ Copié !";
+    btn.style.background = "#10b981"; 
+    
+    // On remet le texte original après 2 secondes
+    setTimeout(() => {
+      btn.textContent = "📋 Copier le code";
+      btn.style.background = "#10b981"; 
+    }, 2000);
+
+  } catch (err) {
+    alert("Impossible de copier. Ton navigateur bloque peut-être le presse-papiers.");
+  }
+});

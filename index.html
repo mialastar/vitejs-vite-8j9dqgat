@@ -700,6 +700,22 @@
           <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
         </div>
       </div>
+
+            <!-- MODAL CODE GÉNÉRÉ -->
+            <div id="code-generated-modal" class="support-modal-overlay">
+              <div class="support-modal" style="max-width: 400px; text-align: center;">
+                <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
+                <p style="color: #cbd5e1; margin-bottom: 15px;">Donne ce code à <strong id="gen-pseudo-display" style="color: #fff;"></strong> :</p>
+                
+                <div id="gen-code-display" style="background: rgba(0,0,0,0.5); border: 2px dashed var(--accent); padding: 15px; border-radius: 8px; font-size: 1.8rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
+                  LGDC-XXXX
+                </div>
+                
+                <button type="button" id="btn-copy-code" class="btn-primary" style="width: 100%; margin-bottom: 10px; background: #10b981; border-color: #10b981;">📋 Copier le code</button>
+                
+                <button type="button" class="btn-secondary" style="width: 100%;" onclick="document.getElementById('code-generated-modal').classList.remove('active')">Fermer</button>
+              </div>
+            </div>
       
       <div id="toast-success" class="toast hidden">
         <div class="toast-icon">✓</div>
