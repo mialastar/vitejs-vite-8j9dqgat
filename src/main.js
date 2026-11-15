@@ -4,7 +4,13 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
+// Client principal (pour l'utilisateur connecté)
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Client secondaire (pour créer des comptes sans déconnecter l'admin)
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false }
+});
 
 let editingFicheId = null; 
 let currentEditingImage = ""; 
@@ -207,7 +213,6 @@ function updateWizard() {
 if(btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
 
 if(btnNext) btnNext.addEventListener('click', async () => {
-  // 1. VÉRIFICATION DES CHAMPS OBLIGATOIRES AVANT DE PASSER À LA SUITE
   if (currentStep === 2) { 
     const nom = document.querySelector('#step-2 input').value;
     if (!nom || nom.trim() === "") {
@@ -233,7 +238,6 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     }
   }
 
-  // 2. SI TOUT EST BON, ON PASSE À LA SUITE
   if (currentStep < totalSteps) {
     currentStep++;
     updateWizard();
@@ -274,20 +278,19 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     const stats_ruse = document.getElementById('stat-ruse').value;
     const stats_charisme = document.getElementById('stat-charisme').value;
 
-    // --- GESTION DES IMAGES MULTIPLES ---
     let imageUrl = currentEditingImage; 
     const fileInput = document.getElementById('image-upload');
     
     if (fileInput.files.length > 0) {
       let uploadedUrls = [];
-      const files = Array.from(fileInput.files).slice(0, 3); // Max 3 fichiers
+      const files = Array.from(fileInput.files).slice(0, 3);
 
       for (const file of files) {
         const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
         const { error: uploadError } = await supabase.storage.from('fiches-images').upload(fileName, file);
         if (uploadError) { alert("Erreur upload : " + uploadError.message); return; }
         
-        const { data: urlData } = await supabase.storage.from('fiches-images').getPublicUrl(fileName);
+        const { data: urlData } = supabase.storage.from('fiches-images').getPublicUrl(fileName);
         uploadedUrls.push(urlData.publicUrl);
       }
       imageUrl = uploadedUrls.join(',');
@@ -370,7 +373,6 @@ sliders.forEach(s => {
 });
 updateStats();
 
-// --- GESTION DE L'UPLOAD MULTIPLE ET DE L'APERÇU ---
 const fileInput = document.getElementById('image-upload');
 if(fileInput) {
   fileInput.addEventListener('change', function(e) {
@@ -438,7 +440,6 @@ window.editFiche = async function(id) {
   editingFicheId = id;
   currentEditingImage = fiche.image_url || "";
   
-  // Remplissage étape 1 (Faction)
   if (fiche.clan === 'Solitaire') {
     document.querySelector('input[name="faction-type"][value="solitaire"]').checked = true;
   } else if (fiche.clan === 'Domestique') {
@@ -449,7 +450,6 @@ window.editFiche = async function(id) {
   }
   toggleClanChoice();
 
-  // Remplissage du reste
   document.querySelector('#step-2 input').value = fiche.nom || '';
   document.querySelector('#step-2 select').value = fiche.rang || 'Guerrier';
   document.querySelectorAll('#step-3 input')[0].value = fiche.pelage || '';
@@ -470,7 +470,6 @@ window.editFiche = async function(id) {
   document.querySelector('#step-8 input').value = fiche.peurs || '';
   document.querySelector('#step-8 textarea').value = fiche.vulnerabilites || '';
   
-  // APERÇU DES IMAGES MULTIPLES EN MODE ÉDITION
   const previewContainer = document.getElementById('image-preview-container');
   if(previewContainer) {
     previewContainer.innerHTML = '';
@@ -526,7 +525,7 @@ function renderPublicFiches(fiches) {
   fiches.forEach(fiche => {
     let firstImg = "";
     if (fiche.image_url && fiche.image_url.trim() !== '') {
-      firstImg = fiche.image_url.split(',')[0].trim(); // On prend la 1ère image pour la carte
+      firstImg = fiche.image_url.split(',')[0].trim();
     }
     let imageHtml = firstImg ? `<div class="card-image" style="background-image: url('${firstImg}')"></div>` : '';
     
@@ -743,7 +742,7 @@ async function loadProfil() {
 
   const btnAdmin = document.getElementById('btn-admin-panel');
   if (btnAdmin) {
-    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ') {
+    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ' || roleApp.toUpperCase().trim() === 'DEV') {
       btnAdmin.style.display = 'flex';
     } else { 
       btnAdmin.style.display = 'none'; 
@@ -991,9 +990,21 @@ document.getElementById('btn-open-credits')?.addEventListener('click', () => {
 // ==========================================
 // --- BASCULE ADMIN & GESTION ---
 // ==========================================
-document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
+document.getElementById('btn-admin-panel')?.addEventListener('click', async () => {
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-admin').classList.add('active');
+  
+  // On vérifie si le joueur est DEV pour afficher le bouton
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('role_app').eq('id', user.id).single();
+  const btnNavDev = document.querySelector('[data-admin-target="dev"]');
+  
+  if (profile && profile.role_app === 'DEV') {
+    if(btnNavDev) btnNavDev.style.display = 'flex';
+  } else {
+    if(btnNavDev) btnNavDev.style.display = 'none';
+  }
+
   loadAdminFiches();
   loadAdminMembres();
   loadAdminTickets();
@@ -1013,7 +1024,11 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
     document.querySelectorAll('[data-admin-target]').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     document.querySelectorAll('#screen-admin .view').forEach(v => v.classList.remove('active'));
-    document.getElementById(`admin-view-${e.currentTarget.getAttribute('data-admin-target')}`).classList.add('active');
+    
+    const target = e.currentTarget.getAttribute('data-admin-target');
+    document.getElementById(`admin-view-${target}`).classList.add('active');
+
+    if (target === 'dev') loadAdminCodes();
   });
 });
 
@@ -1022,7 +1037,6 @@ async function loadAdminFiches() {
   if(!container) return;
   container.innerHTML = '<p style="color: gray;">Chargement...</p>';
   
-  // On demande TOUTES les fiches en attente (sans filtrer par user_id)
   const { data: fiches, error } = await supabase
     .from('fiches_oc')
     .select('*')
@@ -1054,13 +1068,9 @@ async function loadAdminFiches() {
 }
 
 window.validerFicheAdmin = async function(id) { 
-  // 1. On récupère les infos de la fiche
   const { data: fiche } = await supabase.from('fiches_oc').select('nom, user_id').eq('id', id).single();
-  
-  // 2. On valide la fiche dans la base
   await supabase.from('fiches_oc').update({ statut: 'Validée' }).eq('id', id); 
   
-  // 3. On envoie la notification
   if (fiche && fiche.user_id) {
     try {
       await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
@@ -1073,14 +1083,13 @@ window.validerFicheAdmin = async function(id) {
           title: "Fiche Validée ! 🎉",
           message: `La fiche de ${fiche.nom} a été acceptée ! Tu peux commencer à RP.`,
           url: `${window.location.origin}/?view=fiches`,
-          target_user_id: fiche.user_id // On cible le joueur
+          target_user_id: fiche.user_id
         })
       });
     } catch (err) {
       console.error("Erreur notif :", err);
     }
   }
-  
   loadAdminFiches(); 
 };
 window.refuserFicheAdmin = async function(id) { await supabase.from('fiches_oc').update({ statut: 'Refusée' }).eq('id', id); loadAdminFiches(); };
@@ -1121,7 +1130,7 @@ window.changerClan = async function(id) {
   if (newClan) { await supabase.from('profiles').update({ clan: newClan }).eq('id', id); loadAdminMembres(); }
 };
 window.changerRoleApp = async function(id) {
-  const newRole = prompt("Nouveau rôle APP (ADMIN, MJ, JOUEUR) :");
+  const newRole = prompt("Nouveau rôle APP (ADMIN, MJ, JOUEUR, DEV) :");
   if (newRole) { await supabase.from('profiles').update({ role_app: newRole.toUpperCase() }).eq('id', id); loadAdminMembres(); }
 };
 
@@ -1209,13 +1218,11 @@ window.publierActu = async function() {
   
   if (!contenu) return alert("Écris une description.");
   
-  // 1. Publication dans la base
   const { error } = await supabase.from('actualites').insert({ titre, auteur, contenu, sous_description: sous, couleur });
   
   if (error) {
     alert(error.message);
   } else {
-    // 2. Appel de la fonction Edge
     try {
       const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
         method: "POST",
@@ -1233,7 +1240,6 @@ window.publierActu = async function() {
       console.error("Erreur réseau :", err);
     }
 
-    // 3. Nettoyage du formulaire
     document.getElementById('admin-actu-titre').value = '';
     document.getElementById('admin-actu-input').value = '';
     document.getElementById('admin-actu-sous').value = '';
@@ -1661,4 +1667,133 @@ window.demanderNotifications = async function() {
   } else if (permission === "denied") {
     alert("Tu as refusé les notifications. Tu peux changer d'avis dans les paramètres de ton navigateur.");
   }
+};
+
+// ==========================================
+// --- SYSTEME D'ACCÈS PAR CODE (JOUEUR) ---
+// ==========================================
+document.getElementById('btn-access-code')?.addEventListener('click', () => {
+  document.getElementById('access-code-modal').classList.add('active');
+});
+
+document.getElementById('btn-submit-access')?.addEventListener('click', async () => {
+  const pseudo = document.getElementById('access-pseudo').value.trim();
+  const code = document.getElementById('access-code').value.trim();
+
+  if (!pseudo || !code) {
+    return alert("Remplis ton pseudo et ton code.");
+  }
+
+  const { data: codeData, error } = await supabase
+    .from('access_codes')
+    .select('*')
+    .eq('code', code)
+    .eq('discord_pseudo', pseudo)
+    .single();
+
+  if (error || !codeData) {
+    return alert("❌ Code ou pseudo incorrect.");
+  }
+
+  if (codeData.status === 'En attente') {
+    alert("⏳ Ta demande a bien été enregistrée ! Le staff doit la valider. Réessaie dans quelques minutes.");
+    document.getElementById('access-code-modal').classList.remove('active');
+  } 
+  else if (codeData.status === 'Utilisé') {
+    alert("⚠️ Ce code a déjà été utilisé.");
+  }
+  else if (codeData.status === 'Validé') {
+    const emailFictif = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + "@terresducrepuscule.com";
+    
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: emailFictif,
+      password: code
+    });
+
+    if (authError) {
+      alert("Erreur de connexion. Le staff doit vérifier ton compte.");
+      console.error(authError);
+    } else {
+      await supabase.from('access_codes').update({ status: 'Utilisé' }).eq('id', codeData.id);
+      document.getElementById('access-code-modal').classList.remove('active');
+      showApp(); 
+    }
+  }
+});
+
+// ==========================================
+// --- PANEL DEV (GESTION DES CODES D'ACCÈS) ---
+// ==========================================
+
+window.genererCodeAcces = async function() {
+  const pseudo = document.getElementById('dev-gen-pseudo').value.trim();
+  if (!pseudo) return alert("Entre un pseudo Discord.");
+
+  const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+  const emailFictif = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + "@terresducrepuscule.com";
+
+  // On utilise supabaseAdmin pour ne pas déconnecter l'admin actuel
+  const { error: authError } = await supabaseAdmin.auth.signUp({
+    email: emailFictif,
+    password: code,
+  });
+
+  if (authError && !authError.message.includes("already registered")) {
+    return alert("Erreur création compte : " + authError.message);
+  }
+
+  const { error } = await supabase.from('access_codes').insert({ 
+    code: code, 
+    discord_pseudo: pseudo, 
+    status: 'En attente' 
+  });
+
+  if (error) {
+    alert("Erreur base de données : " + error.message);
+  } else {
+    alert(`✅ Code généré pour ${pseudo} : \n\n${code}\n\nDonne-lui ce code !`);
+    document.getElementById('dev-gen-pseudo').value = '';
+    loadAdminCodes();
+  }
+};
+
+async function loadAdminCodes() {
+  const container = document.getElementById('admin-dev-codes-list');
+  if(!container) return;
+  
+  const { data: codes, error } = await supabase.from('access_codes').select('*').order('created_at', { ascending: false });
+  
+  if (error || !codes || codes.length === 0) {
+    container.innerHTML = '<p style="color: gray;">Aucun code pour le moment.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  codes.forEach(c => {
+    let color = c.status === 'Validé' ? '#10b981' : (c.status === 'Utilisé' ? 'gray' : '#fbbf24');
+    container.innerHTML += `
+      <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid ${color};">
+        <p style="font-size: 0.85rem; color: #cbd5e1;"><strong>Pseudo :</strong> ${c.discord_pseudo}</p>
+        <p style="font-size: 0.85rem; color: #cbd5e1;"><strong>Code :</strong> <span style="color: var(--accent); font-weight: bold;">${c.code}</span></p>
+        <p style="font-size: 0.85rem; color: ${color};"><strong>Statut :</strong> ${c.status}</p>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          ${c.status === 'En attente' ? `<button class="btn-action" style="background: rgba(16, 185, 129, 0.2); color: #10b981;" onclick="validerCode('${c.id}')">✅ Valider</button>` : ''}
+          <button class="btn-action" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="supprimerCode('${c.id}')">🗑️ Supprimer</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+window.validerCode = async function(id) {
+  const { error } = await supabase.from('access_codes').update({ status: 'Validé' }).eq('id', id);
+  if (error) alert("Erreur : " + error.message);
+  else loadAdminCodes();
+};
+
+window.supprimerCode = async function(id) {
+  if(!confirm("Supprimer ce code ?")) return;
+  const { error } = await supabase.from('access_codes').delete().eq('id', id);
+  if (error) alert("Erreur : " + error.message);
+  else loadAdminCodes();
 };
