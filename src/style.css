@@ -387,3 +387,12 @@ body {
   margin-bottom: 2px;
   display: block;
 }
+
+/* Aperçu des images multiples */
+#image-preview-container img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+}

@@ -40,6 +40,7 @@ if(btnStart) {
   });
 }
 if(btnContinueCredits) btnContinueCredits.addEventListener('click', () => switchScreen(screenCredits, screenAuth));
+
 if(btnDiscordLogin) {
   btnDiscordLogin.addEventListener('click', async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -162,13 +163,12 @@ document.querySelectorAll('.sub-tab-btn').forEach(btn => {
 // --- WIZARD FICHES OC (MIS A JOUR) ---
 // ==========================================
 let currentStep = 1;
-const totalSteps = 10; // <-- Modifié à 10
+const totalSteps = 10; 
 const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 const progressFill = document.getElementById('progress-bar-fill');
 const stepNumText = document.getElementById('current-step-num');
 
-// LOGIQUE POUR LE CHOIX DU CLAN / SOLITAIRE / DOMESTIQUE
 window.toggleClanChoice = function() {
   const selectedFaction = document.querySelector('input[name="faction-type"]:checked').value;
   const clanContainer = document.getElementById('clan-choice-container');
@@ -200,15 +200,15 @@ if(btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 1) { cur
 
 if(btnNext) btnNext.addEventListener('click', async () => {
   // 1. VÉRIFICATION DES CHAMPS OBLIGATOIRES AVANT DE PASSER À LA SUITE
-  if (currentStep === 2) { // Étape Identité (Nom)
+  if (currentStep === 2) { 
     const nom = document.querySelector('#step-2 input').value;
     if (!nom || nom.trim() === "") {
       alert("⚠️ Tu dois donner un nom à ton personnage avant de continuer !");
-      return; // On bloque le passage
+      return; 
     }
   }
   
-  if (currentStep === 3) { // Étape Apparence
+  if (currentStep === 3) { 
     const pelage = document.querySelectorAll('#step-3 input')[0].value;
     const yeux = document.querySelectorAll('#step-3 input')[1].value;
     if (!pelage || !yeux) {
@@ -217,7 +217,7 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     }
   }
 
-  if (currentStep === 5) { // Étape Histoire (Origines)
+  if (currentStep === 5) { 
     const origines = document.querySelectorAll('#step-5 textarea')[0].value;
     if (!origines || origines.trim() === "") {
       alert("⚠️ N'oublie pas d'écrire les origines de ton personnage !");
@@ -230,7 +230,6 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     currentStep++;
     updateWizard();
   } else {
-    // ... (Le reste du code pour l'enregistrement de la fiche reste inchangé)
     const factionType = document.querySelector('input[name="faction-type"]:checked').value;
     let clan = "";
     if (factionType === 'clan') {
@@ -241,8 +240,8 @@ if(btnNext) btnNext.addEventListener('click', async () => {
       clan = "Domestique";
     }
 
-    const nom = document.querySelector('#step-2 input').value;
-    const rang = document.querySelector('#step-2 select').value;
+    const nom = document.querySelector('#step-2 input').value; 
+    const rang = document.querySelector('#step-2 select').value; 
     const pelage = document.querySelectorAll('#step-3 input')[0].value;
     const yeux = document.querySelectorAll('#step-3 input')[1].value;
     const traits = document.querySelectorAll('#step-4 input')[0].value;
@@ -267,18 +266,23 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     const stats_ruse = document.getElementById('stat-ruse').value;
     const stats_charisme = document.getElementById('stat-charisme').value;
 
+    // --- GESTION DES IMAGES MULTIPLES ---
     let imageUrl = currentEditingImage; 
     const fileInput = document.getElementById('image-upload');
     
     if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-      
-      const { error: uploadError } = await supabase.storage.from('fiches-images').upload(fileName, file);
-      if (uploadError) { alert("Erreur upload : " + uploadError.message); return; }
+      let uploadedUrls = [];
+      const files = Array.from(fileInput.files).slice(0, 3); // Max 3 fichiers
 
-      const { data: urlData } = supabase.storage.from('fiches-images').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
+      for (const file of files) {
+        const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+        const { error: uploadError } = await supabase.storage.from('fiches-images').upload(fileName, file);
+        if (uploadError) { alert("Erreur upload : " + uploadError.message); return; }
+        
+        const { data: urlData } = await supabase.storage.from('fiches-images').getPublicUrl(fileName);
+        uploadedUrls.push(urlData.publicUrl);
+      }
+      imageUrl = uploadedUrls.join(',');
     }
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -315,8 +319,9 @@ if(btnNext) btnNext.addEventListener('click', async () => {
       document.querySelectorAll('.wizard-form input, .wizard-form textarea').forEach(el => el.value = '');
       document.querySelectorAll('.wizard-form select').forEach(el => el.selectedIndex = 0);
       document.querySelectorAll('.comp-checkbox').forEach(cb => cb.checked = false);
-      const preview = document.getElementById('image-preview');
-      if(preview) preview.style.display = 'none';
+      
+      const previewContainer = document.getElementById('image-preview-container');
+      if(previewContainer) previewContainer.innerHTML = '';
       
       document.querySelector('input[name="faction-type"][value="clan"]').checked = true;
       toggleClanChoice();
@@ -357,17 +362,28 @@ sliders.forEach(s => {
 });
 updateStats();
 
+// --- GESTION DE L'UPLOAD MULTIPLE ET DE L'APERÇU ---
 const fileInput = document.getElementById('image-upload');
 if(fileInput) {
   fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('image-preview-container');
+    if(previewContainer) previewContainer.innerHTML = ''; 
+
+    if (files.length > 3) {
+      alert("⚠️ Tu ne peux sélectionner que 3 images maximum !");
+      fileInput.value = ''; 
+      return;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const reader = new FileReader();
       reader.onload = function(event) {
-        const preview = document.getElementById('image-preview');
-        if(preview) {
-          preview.src = event.target.result;
-          preview.style.display = 'block';
+        if(previewContainer) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          previewContainer.appendChild(img);
         }
       }
       reader.readAsDataURL(file);
@@ -446,9 +462,19 @@ window.editFiche = async function(id) {
   document.querySelector('#step-8 input').value = fiche.peurs || '';
   document.querySelector('#step-8 textarea').value = fiche.vulnerabilites || '';
   
-  const preview = document.getElementById('image-preview');
-  if(preview) {
-    if (fiche.image_url) { preview.src = fiche.image_url; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  // APERÇU DES IMAGES MULTIPLES EN MODE ÉDITION
+  const previewContainer = document.getElementById('image-preview-container');
+  if(previewContainer) {
+    previewContainer.innerHTML = '';
+    if (fiche.image_url) {
+      fiche.image_url.split(',').forEach(url => {
+        if(url.trim() !== '') {
+          const img = document.createElement('img');
+          img.src = url.trim();
+          previewContainer.appendChild(img);
+        }
+      });
+    }
   }
   
   document.getElementById('stat-force').value = fiche.stats_force || 1;
@@ -490,7 +516,12 @@ function renderPublicFiches(fiches) {
   if(!container) return;
   container.innerHTML = '';
   fiches.forEach(fiche => {
-    let imageHtml = (fiche.image_url && fiche.image_url.trim() !== '') ? `<div class="card-image" style="background-image: url('${fiche.image_url}')"></div>` : '';
+    let firstImg = "";
+    if (fiche.image_url && fiche.image_url.trim() !== '') {
+      firstImg = fiche.image_url.split(',')[0].trim(); // On prend la 1ère image pour la carte
+    }
+    let imageHtml = firstImg ? `<div class="card-image" style="background-image: url('${firstImg}')"></div>` : '';
+    
     const card = document.createElement('div');
     card.className = 'public-fiche-card';
     card.innerHTML = `${imageHtml}<div class="card-content"><h3>${fiche.nom}</h3><div class="card-tags"><span class="tag">${fiche.clan}</span><span class="tag">${fiche.rang}</span></div><p class="card-bio">${fiche.origines ? fiche.origines.substring(0, 100) + '...' : 'Pas d\'histoire.'}</p></div>`;
@@ -547,7 +578,8 @@ function openFicheDetail(fiche) {
   const imgContainer = document.getElementById('detail-image');
   if(imgContainer) {
     if (fiche.image_url && fiche.image_url.trim() !== '') {
-      imgContainer.style.backgroundImage = `url('${fiche.image_url}')`;
+      const firstImage = fiche.image_url.split(',')[0].trim();
+      imgContainer.style.backgroundImage = `url('${firstImage}')`;
       imgContainer.style.display = 'block';
     } else { imgContainer.style.display = 'none'; }
   }
@@ -678,7 +710,6 @@ async function loadProfil() {
     profile = newProfile; 
   }
 
-  // --- 1. AFFICHAGE DES 3 BADGES ---
   const roleApp = profile?.role_app || 'JOUEUR';
   const roleRp = profile?.role_rp || 'Aucun';
   const clan = profile?.clan || 'Aucun';
@@ -692,7 +723,6 @@ async function loadProfil() {
   const clanBadge = document.getElementById('profile-clan-badge');
   if (clanBadge) clanBadge.textContent = `Clan: ${clan}`;
 
-  // --- 2. AFFICHAGE DES BOUTONS ---
   const btnRpPanel = document.getElementById('btn-rp-panel');
   if (btnRpPanel) {
     if (roleRp.toLowerCase().includes('chef')) {
@@ -712,7 +742,6 @@ async function loadProfil() {
     }
   }
 
-  // --- 3. RÉPUTATION ---
   const pts = profile ? profile.reputation_points : 0;
   let title = "Inconnu", nextThreshold = 25;
   if (pts >= 25 && pts < 50) { title = "Loyal"; nextThreshold = 50; }
@@ -749,8 +778,11 @@ async function loadProfil() {
 
     if (fiches && fiches.length > 0) {
       fiches.forEach(fiche => {
-        const img = fiche.image_url ? fiche.image_url : 'https://cdn.discordapp.com/embed/avatars/0.png';
-        ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${img}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
+        let firstImg = "https://cdn.discordapp.com/embed/avatars/0.png";
+        if (fiche.image_url && fiche.image_url.trim() !== '') {
+          firstImg = fiche.image_url.split(',')[0].trim();
+        }
+        ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${firstImg}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
       });
     } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
   }
@@ -791,13 +823,18 @@ async function openRpPanel() {
   container.innerHTML = '';
   membres.forEach(membre => {
     const isSelf = membre.user_id === user.id;
+    let firstImg = "https://cdn.discordapp.com/embed/avatars/0.png";
+    if (membre.image_url && membre.image_url.trim() !== '') {
+      firstImg = membre.image_url.split(',')[0].trim();
+    }
+
     const card = document.createElement('div');
     card.className = 'fiche-card';
     card.style.padding = '15px';
     card.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 10px; align-items: center;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('${membre.image_url || 'https://cdn.discordapp.com/embed/avatars/0.png'}'); background-size: cover; background-position: center; border: 1px solid var(--accent);"></div>
+          <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('${firstImg}'); background-size: cover; background-position: center; border: 1px solid var(--accent);"></div>
           <div>
             <h4 style="font-family: var(--font-title); color: var(--accent); font-size: 1.1rem; margin: 0;">${membre.nom}</h4>
             <span style="font-size: 0.8rem; color: gray;">Rang : ${membre.rang}</span>
@@ -1076,7 +1113,6 @@ async function loadTempsRP() {
   if (displayLune) displayLune.textContent = lune;
   if (displayMeteo) displayMeteo.textContent = meteo;
 
-  // Remplir les champs de l'admin
   const adminSaison = document.getElementById('admin-saison-select');
   const adminLune = document.getElementById('admin-lune-input');
   const adminMeteo = document.getElementById('admin-meteo-select');

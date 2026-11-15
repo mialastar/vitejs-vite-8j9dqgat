@@ -275,16 +275,18 @@
                   <label>Vulnérabilités</label><textarea rows="2"></textarea>
                 </div>
 
-                <!-- ÉTAPE 9 : IMAGE -->
-                <div class="wizard-step" id="step-9">
-                  <h3>9. Image</h3>
-                  <label>Image de référence (Avatar)</label>
-                  <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
-                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour choisir une image</p>
-                    <input type="file" id="image-upload" accept="image/*" style="border: none; background: transparent; margin: 0 auto; color: #fff; display: block;" />
-                    <img id="image-preview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 10px; margin: 15px auto 0; object-fit: cover;" />
-                  </div>
-                </div>
+                                <!-- ÉTAPE 9 : IMAGE -->
+                                <div class="wizard-step" id="step-9">
+                                  <h3>9. Images (Jusqu'à 3)</h3>
+                                  <label>Images de référence</label>
+                                  <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
+                                    <p style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Clique pour choisir tes images</p>
+                                    <!-- On ajoute l'attribut multiple -->
+                                    <input type="file" id="image-upload" accept="image/*" multiple style="border: none; background: transparent; margin: 0 auto; color: #fff; display: block;" />
+                                    <!-- Conteneur pour les aperçus -->
+                                    <div id="image-preview-container" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px;"></div>
+                                  </div>
+                                </div>
 
                 <!-- ÉTAPE 10 : STATISTIQUES -->
                 <div class="wizard-step" id="step-10">
