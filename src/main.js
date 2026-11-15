@@ -1729,7 +1729,9 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     alert("⚠️ Ce code a déjà été utilisé.");
   }
   else if (codeData.status === 'Validé') {
-    const emailFictif = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + "@terresducrepuscule.com";
+    // On nettoie le pseudo EXACTEMENT de la même façon que lors de la création
+    const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    const emailFictif = safePseudo + "@example.com";
     
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: emailFictif,
@@ -1755,8 +1757,17 @@ window.genererCodeAcces = async function() {
   const pseudo = document.getElementById('dev-gen-pseudo').value.trim();
   if (!pseudo) return alert("Entre un pseudo Discord.");
 
+  // On nettoie le pseudo pour l'email (on garde que les lettres et les chiffres)
+  const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  
+  if (safePseudo.length < 2) {
+    return alert("Le pseudo doit contenir au moins 2 lettres ou chiffres.");
+  }
+
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
-  const emailFictif = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + "@terresducrepuscule.com";
+  
+  // ON UTILISE @example.com (domaine accepté par Supabase)
+  const emailFictif = safePseudo + "@example.com"; 
 
   // On utilise supabaseAdmin pour ne pas déconnecter l'admin actuel
   const { error: authError } = await supabaseAdmin.auth.signUp({
