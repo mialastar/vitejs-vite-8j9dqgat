@@ -79,11 +79,9 @@
           </button>
 
                     <!-- CONNEXION PAR CODE -->
-                    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                      <button type="button" id="btn-access-code" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
-                        🔑 J'ai un code d'accès spécial
-                      </button>
-                    </div>
+                    <button type="button" id="btn-access-code" onclick="document.getElementById('access-code-modal').classList.add('active')" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+                      🔑 J'ai un code d'accès spécial
+                    </button>
 
       <!-- ÉCRAN 3 : APPLICATION JOUEUR -->
       <div id="screen-app" class="screen app-layout">
