@@ -46,7 +46,6 @@ if(btnDiscordLogin) {
   });
 }
 
-// Fonction pour afficher l'App
 function showApp() {
   screenIntro.classList.remove('active');
   screenCredits.classList.remove('active');
@@ -54,13 +53,11 @@ function showApp() {
   screenAdmin.classList.remove('active');
   screenApp.classList.add('active');
   
-  // Charger les données de la page d'accueil
   loadActualites();
   loadChroniques();
   loadTempsRP();
 }
 
-// Fonction pour afficher l'intro (si déconnecté)
 function showIntro() {
   screenApp.classList.remove('active');
   screenAdmin.classList.remove('active');
@@ -69,7 +66,6 @@ function showIntro() {
   screenIntro.classList.add('active');
 }
 
-// Vérification au démarrage
 async function checkUser() {
   const { data } = await supabase.auth.getSession();
   if (data && data.session) {
@@ -78,9 +74,8 @@ async function checkUser() {
     showIntro();
   }
 }
-checkUser(); // <--- ON LANCE LA VÉRIFICATION ICI
+checkUser(); 
 
-// ÉCOUTEUR DE CONNEXION (Règle le retour de Discord)
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') {
     showApp();
@@ -105,7 +100,7 @@ navBtns.forEach(btn => {
     
     if(target === 'accueil') {
       document.getElementById('view-accueil').classList.add('active');
-      loadActualites(); // <--- ON RECHARGE LES ACTUS À CHAQUE CLIC
+      loadActualites();
     }
     if(target === 'fiches') {
       document.getElementById('view-fiches').classList.add('active');
@@ -115,7 +110,7 @@ navBtns.forEach(btn => {
     }
     if(target === 'chroniques') {
       document.getElementById('view-chroniques').classList.add('active');
-      loadChroniques(); // <--- ON RECHARGE LES CHRONIQUES À CHAQUE CLIC
+      loadChroniques();
     }
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
@@ -143,7 +138,7 @@ document.querySelectorAll('.lore-tab-btn').forEach(btn => {
   });
 });
 
-// Onglets Fiches (4 onglets)
+// Onglets Fiches
 document.querySelectorAll('.sub-tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -160,14 +155,26 @@ document.querySelectorAll('.sub-tab-btn').forEach(btn => {
 });
 
 // ==========================================
-// --- WIZARD FICHES OC ---
+// --- WIZARD FICHES OC (MIS A JOUR) ---
 // ==========================================
 let currentStep = 1;
-const totalSteps = 9;
+const totalSteps = 10; // <-- Modifié à 10
 const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 const progressFill = document.getElementById('progress-bar-fill');
 const stepNumText = document.getElementById('current-step-num');
+
+// LOGIQUE POUR LE CHOIX DU CLAN / SOLITAIRE / DOMESTIQUE
+window.toggleClanChoice = function() {
+  const selectedFaction = document.querySelector('input[name="faction-type"]:checked').value;
+  const clanContainer = document.getElementById('clan-choice-container');
+  
+  if (selectedFaction === 'clan') {
+    clanContainer.style.display = 'block';
+  } else {
+    clanContainer.style.display = 'none';
+  }
+};
 
 function updateWizard() {
   document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
@@ -192,26 +199,36 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     currentStep++;
     updateWizard();
   } else {
-    const nom = document.querySelector('#step-1 input').value;
-    const clan = document.getElementById('oc-clan').value; // <-- MODIFIÉ ICI
-    const rang = document.querySelectorAll('#step-1 select')[1].value; 
-    const pelage = document.querySelectorAll('#step-2 input')[0].value;
-    const yeux = document.querySelectorAll('#step-2 input')[1].value;
-    const traits = document.querySelectorAll('#step-3 input')[0].value;
-    const qualites = document.querySelectorAll('#step-3 input')[1].value;
-    const defauts = document.querySelectorAll('#step-3 input')[2].value;
-    const origines = document.querySelectorAll('#step-4 textarea')[0].value;
-    const evenements = document.querySelectorAll('#step-4 textarea')[1].value;
+    // RÉCUPÉRATION DES DONNÉES (Nouvel ordre)
+    const factionType = document.querySelector('input[name="faction-type"]:checked').value;
+    let clan = "";
+    if (factionType === 'clan') {
+      clan = document.getElementById('oc-clan-select').value;
+    } else if (factionType === 'solitaire') {
+      clan = "Solitaire";
+    } else {
+      clan = "Domestique";
+    }
+
+    const nom = document.querySelector('#step-2 input').value; // <-- Décalé à l'étape 2
+    const rang = document.querySelector('#step-2 select').value; // <-- Décalé
+    const pelage = document.querySelectorAll('#step-3 input')[0].value;
+    const yeux = document.querySelectorAll('#step-3 input')[1].value;
+    const traits = document.querySelectorAll('#step-4 input')[0].value;
+    const qualites = document.querySelectorAll('#step-4 input')[1].value;
+    const defauts = document.querySelectorAll('#step-4 input')[2].value;
+    const origines = document.querySelectorAll('#step-5 textarea')[0].value;
+    const evenements = document.querySelectorAll('#step-5 textarea')[1].value;
     
     const checkedBoxes = document.querySelectorAll('.comp-checkbox:checked');
     const competences_list = Array.from(checkedBoxes).map(cb => cb.value).join(', ');
-    const competences_details = document.querySelector('#step-5 textarea').value;
+    const competences_details = document.querySelector('#step-6 textarea').value;
     
-    const obj_court = document.querySelectorAll('#step-6 input')[0].value;
-    const obj_long = document.querySelectorAll('#step-6 input')[1].value;
-    const reves = document.querySelector('#step-6 textarea').value;
-    const peurs = document.querySelector('#step-7 input').value;
-    const vulnerabilites = document.querySelector('#step-7 textarea').value;
+    const obj_court = document.querySelectorAll('#step-7 input')[0].value;
+    const obj_long = document.querySelectorAll('#step-7 input')[1].value;
+    const reves = document.querySelector('#step-7 textarea').value;
+    const peurs = document.querySelector('#step-8 input').value;
+    const vulnerabilites = document.querySelector('#step-8 textarea').value;
 
     const stats_force = document.getElementById('stat-force').value;
     const stats_agilite = document.getElementById('stat-agilite').value;
@@ -270,6 +287,9 @@ if(btnNext) btnNext.addEventListener('click', async () => {
       const preview = document.getElementById('image-preview');
       if(preview) preview.style.display = 'none';
       
+      document.querySelector('input[name="faction-type"][value="clan"]').checked = true;
+      toggleClanChoice();
+
       editingFicheId = null; 
       currentEditingImage = "";
       currentStep = 1;
@@ -363,26 +383,37 @@ window.editFiche = async function(id) {
   editingFicheId = id;
   currentEditingImage = fiche.image_url || "";
   
-  document.querySelector('#step-1 input').value = fiche.nom || '';
-  document.getElementById('oc-clan').value = fiche.clan || 'Clan de la Forêt'; // <-- MODIFIÉ ICI
-  document.querySelectorAll('#step-1 select')[1].value = fiche.rang || 'Guerrier';
-  document.querySelectorAll('#step-2 input')[0].value = fiche.pelage || '';
-  document.querySelectorAll('#step-2 input')[1].value = fiche.yeux || '';
-  document.querySelectorAll('#step-3 input')[0].value = fiche.traits || '';
-  document.querySelectorAll('#step-3 input')[1].value = fiche.qualites || '';
-  document.querySelectorAll('#step-3 input')[2].value = fiche.defauts || '';
-  document.querySelectorAll('#step-4 textarea')[0].value = fiche.origines || '';
-  document.querySelectorAll('#step-4 textarea')[1].value = fiche.evenements || '';
+  // Remplissage étape 1 (Faction)
+  if (fiche.clan === 'Solitaire') {
+    document.querySelector('input[name="faction-type"][value="solitaire"]').checked = true;
+  } else if (fiche.clan === 'Domestique') {
+    document.querySelector('input[name="faction-type"][value="domestique"]').checked = true;
+  } else {
+    document.querySelector('input[name="faction-type"][value="clan"]').checked = true;
+    document.getElementById('oc-clan-select').value = fiche.clan || 'Clan de la Forêt';
+  }
+  toggleClanChoice();
+
+  // Remplissage du reste
+  document.querySelector('#step-2 input').value = fiche.nom || '';
+  document.querySelector('#step-2 select').value = fiche.rang || 'Guerrier';
+  document.querySelectorAll('#step-3 input')[0].value = fiche.pelage || '';
+  document.querySelectorAll('#step-3 input')[1].value = fiche.yeux || '';
+  document.querySelectorAll('#step-4 input')[0].value = fiche.traits || '';
+  document.querySelectorAll('#step-4 input')[1].value = fiche.qualites || '';
+  document.querySelectorAll('#step-4 input')[2].value = fiche.defauts || '';
+  document.querySelectorAll('#step-5 textarea')[0].value = fiche.origines || '';
+  document.querySelectorAll('#step-5 textarea')[1].value = fiche.evenements || '';
   
   document.querySelectorAll('.comp-checkbox').forEach(cb => {
     cb.checked = fiche.competences_list ? fiche.competences_list.includes(cb.value) : false;
   });
-  document.querySelector('#step-5 textarea').value = fiche.competences_details || '';
-  document.querySelectorAll('#step-6 input')[0].value = fiche.objectifs_court || '';
-  document.querySelectorAll('#step-6 input')[1].value = fiche.objectifs_long || '';
-  document.querySelector('#step-6 textarea').value = fiche.reves || '';
-  document.querySelector('#step-7 input').value = fiche.peurs || '';
-  document.querySelector('#step-7 textarea').value = fiche.vulnerabilites || '';
+  document.querySelector('#step-6 textarea').value = fiche.competences_details || '';
+  document.querySelectorAll('#step-7 input')[0].value = fiche.objectifs_court || '';
+  document.querySelectorAll('#step-7 input')[1].value = fiche.objectifs_long || '';
+  document.querySelector('#step-7 textarea').value = fiche.reves || '';
+  document.querySelector('#step-8 input').value = fiche.peurs || '';
+  document.querySelector('#step-8 textarea').value = fiche.vulnerabilites || '';
   
   const preview = document.getElementById('image-preview');
   if(preview) {
@@ -711,7 +742,6 @@ async function openRpPanel() {
 
   const { data: { user } } = await supabase.auth.getUser();
   
-  // On récupère le clan depuis le PROFIL du joueur
   let { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
   const monClan = profile?.clan;
 
@@ -720,7 +750,6 @@ async function openRpPanel() {
     return;
   }
 
-  // On cherche les fiches validées qui ont ce clan
   const { data: membres, error } = await supabase.from('fiches_oc').select('id, nom, rang, user_id, image_url').eq('clan', monClan).eq('statut', 'Validée');
 
   if (error || !membres || membres.length === 0) {
@@ -898,7 +927,6 @@ document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
   document.getElementById('screen-admin').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   
-  // On recharge les données immédiatement quand on quitte l'admin
   loadActualites();
   loadChroniques();
   loadTempsRP();
@@ -1077,7 +1105,6 @@ async function loadActualites() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   
-  // maybeSingle() empêche le site de planter si le profil n'existe pas encore
   const { data: profile } = await supabase.from('profiles').select('clan, role_app').eq('id', user.id).maybeSingle();
   const monClan = profile ? profile.clan : 'Aucun';
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
@@ -1090,9 +1117,7 @@ async function loadActualites() {
   }
 
   const actusVisibles = data.filter(actu => {
-    // Si l'actu n'a pas de clan cible, tout le monde la voit
     if (!actu.clan_cible || actu.clan_cible === 'null' || actu.clan_cible === '') return true; 
-    // Sinon, seulement si c'est mon clan
     return actu.clan_cible === monClan; 
   });
 
@@ -1182,7 +1207,6 @@ window.supprimerElement = async function(btn, table) {
 
   if (!confirm("⚠️ Es-tu sûr de vouloir supprimer ce message ? Il sera effacé de la base de données.")) return;
 
-  // On désactive le bouton le temps de la suppression
   btn.textContent = "Suppression...";
   btn.disabled = true;
 
@@ -1193,7 +1217,6 @@ window.supprimerElement = async function(btn, table) {
     btn.textContent = "🗑️ Supprimer";
     btn.disabled = false;
   } else {
-    // Si ça marche, on rafraîchit la liste sans recharger la page
     if (table === 'actualites') loadActualites();
     if (table === 'chroniques') loadChroniques();
   }
@@ -1250,7 +1273,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const { data: { user } } = await supabase.auth.getUser();
   currentChatUserName = user.user_metadata.full_name || "Joueur";
 
-  // On récupère l'historique des messages
   const { data: messages } = await supabase
     .from('ticket_messages')
     .select('*')
@@ -1260,7 +1282,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const messagesContainer = document.getElementById('chat-messages');
   messagesContainer.innerHTML = '';
 
-  // Message initial
   messagesContainer.innerHTML += `
     <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.05); border-color: gray; margin-bottom: 20px;">
       <span class="chat-sender">Demande initiale</span>
@@ -1268,7 +1289,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     </div>
   `;
 
-  // Affichage de tous les messages
   if (messages && messages.length > 0) {
     messages.forEach(msg => {
       const isMe = msg.sender_id === user.id;
@@ -1284,11 +1304,9 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     });
   }
 
-  // Scroll tout en bas
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 };
 
-// Envoyer un nouveau message
 document.getElementById('chat-send-btn')?.addEventListener('click', async () => {
   const input = document.getElementById('chat-input').value;
   if (!input || !currentChatTicketId) return;
@@ -1297,7 +1315,6 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // On enregistre le message dans la table
   const { error } = await supabase.from('ticket_messages').insert({
     ticket_id: currentChatTicketId,
     sender_id: user.id,
@@ -1308,16 +1325,13 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
   if (error) {
     alert("Erreur lors de l'envoi : " + error.message);
   } else {
-    // On change le statut du ticket
     await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
     
-    // On rafraichit le chat
     openTicketChat(currentChatTicketId, currentChatIsAdmin);
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
 });
 
-// Permettre d'envoyer avec la touche "Entrée"
 document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
   if (e.key === 'Enter') {
     document.getElementById('chat-send-btn').click();
@@ -1332,7 +1346,6 @@ let currentRepTargetUser = null;
 window.openReputationModal = async function(userId) {
   currentRepTargetUser = userId;
   
-  // On récupère les points actuels du joueur
   const { data: profile } = await supabase.from('profiles').select('reputation_points').eq('id', userId).single();
   const currentPts = profile ? profile.reputation_points : 0;
 
@@ -1340,12 +1353,10 @@ window.openReputationModal = async function(userId) {
   const sliderVal = document.getElementById('rep-slider-value');
   const reasonInput = document.getElementById('reputation-reason');
 
-  // On initialise le slider avec les points actuels
   slider.value = currentPts;
   sliderVal.textContent = currentPts;
   reasonInput.value = '';
 
-  // On met à jour l'affichage du chiffre quand on fait glisser
   slider.oninput = function() {
     sliderVal.textContent = this.value;
   };
@@ -1359,16 +1370,13 @@ window.appliquerReputation = async function() {
   const newPts = parseInt(document.getElementById('reputation-slider').value);
   const reason = document.getElementById('reputation-reason').value || 'Ajustement manuel du staff';
 
-  // On récupère les anciens points pour calculer la différence
   const { data: profile } = await supabase.from('profiles').select('reputation_points').eq('id', currentRepTargetUser).single();
   const oldPts = profile ? profile.reputation_points : 0;
   const difference = newPts - oldPts;
 
-  // 1. Mise à jour du profil
   const { error } = await supabase.from('profiles').update({ reputation_points: newPts }).eq('id', currentRepTargetUser);
   if (error) return alert("Erreur : " + error.message);
 
-  // 2. Enregistrement dans l'historique (seulement si ça a changé)
   if (difference !== 0) {
     await supabase.from('reputation_history').insert({
       user_id: currentRepTargetUser,
@@ -1380,11 +1388,9 @@ window.appliquerReputation = async function() {
   alert(`Réputation mise à jour à ${newPts} pts !`);
   document.getElementById('reputation-modal').classList.remove('active');
   
-  // Rafraîchir la liste admin
   if (document.getElementById('admin-membres-list')) loadAdminMembres();
 };
 
-// Fonction pour afficher l'historique sur le profil du joueur
 window.toggleHistory = async function() {
   const container = document.getElementById('reputation-history-list');
   
@@ -1440,7 +1446,6 @@ window.envoyerAssemblee = async function() {
 
   if (!motif || !dateHeure || !desc) return alert("Remplis le motif, la date et la description.");
 
-  // Formatage de la date en français (ex: 15/11/2026 à 21:00)
   const dateObj = new Date(dateHeure);
   const dateFormatee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
@@ -1453,7 +1458,7 @@ window.envoyerAssemblee = async function() {
     contenu: contenu,
     sous_description: sous,
     couleur: couleur,
-    clan_cible: monClan // <--- La clé pour cibler uniquement le clan
+    clan_cible: monClan
   });
 
   if (error) alert("Erreur : " + error.message);
@@ -1483,7 +1488,6 @@ window.envoyerGuerre = async function() {
   const sujet = `⚔️ Demande de Guerre : ${profile.clan} vs ${cible}`;
   const description = `Le clan ${profile.clan} souhaite déclarer la guerre au ${cible}.\n\nMotif : ${motif}\n\nDescription : ${desc}`;
 
-  // Création du ticket pour le staff
   const { error } = await supabase.from('tickets').insert({
     user_id: user.id, 
     type_ticket: 'guerre', 
