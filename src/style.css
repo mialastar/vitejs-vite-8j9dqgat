@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #050a06; /* Vert forêt très sombre (secours) */
+  --bg-color: #050a06;
   --text-main: #f8fafc;
   --text-dim: #cbd5e1;
   --accent: #fbbf24; 
@@ -10,7 +10,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* L'image de la forêt optimisée + filtre sombre */
   background-image: linear-gradient(rgba(5, 10, 6, 0.7), rgba(5, 10, 6, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
@@ -77,7 +76,7 @@ body {
 .app-layout { padding: 0; background: transparent; display: flex; flex-direction: column; height: 100dvh; justify-content: flex-start; }
 .app-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; width: 100%; max-width: 800px; margin: 0 auto; }
 
-/* --- BANNIÈRE AUTOMNE --- */
+/* --- BANNIÈRE SAISON --- */
 .season-banner {
   background-color: #78350f; 
   background-image: linear-gradient(to bottom, rgba(10, 10, 20, 0.3), rgba(10, 10, 20, 0.8)), url('https://images.unsplash.com/photo-1476820865390-c52aeebb9891?q=80&w=800&auto=format&fit=crop');
@@ -224,7 +223,7 @@ body {
 .profile-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 .profile-actions button { padding: 15px; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; }
 
-/* --- MODALES (SUPPORT, PARAM, RELATION, RP) --- */
+/* --- MODALES --- */
 .support-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
 .support-modal-overlay.active { opacity: 1; visibility: visible; }
 .support-modal { background: #0f150f; width: 90%; max-width: 500px; border-radius: 15px; padding: 30px; border: 1px solid rgba(251, 191, 36, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
@@ -249,7 +248,7 @@ body {
 /* --- ANIMATIONS --- */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* --- POPUP TOAST (MESSAGE DE SUCCÈS) --- */
+/* --- POPUP TOAST --- */
 .toast {
   position: fixed;
   top: 20px;
@@ -315,16 +314,12 @@ body {
 }
 
 .admin-nav .nav-btn.active {
-  color: #f87171; /* Rouge/Orange pour différencier l'admin */
+  color: #f87171;
 }
 
 .admin-nav .nav-btn.active .icon {
   filter: drop-shadow(0 0 8px #f87171);
 }
-
-/* --- PANEL ADMIN --- */
-.admin-view { display: none; }
-.admin-view.active { display: block; animation: fadeIn 0.3s ease; }
 
 /* --- EMBEDS (ACTUS & CHRONIQUES) --- */
 .embed-card {
@@ -397,42 +392,7 @@ body {
   border: 1px solid var(--accent);
 }
 
-/* ==========================================
-   --- STYLES POUR LES NOUVEAUX PANELS --- 
-   ========================================== */
-
-/* Les onglets à l'intérieur des panels (Calendrier, Arbre, etc.) */
-.panel-tab-btn {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: var(--text-dim);
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: 600;
-  transition: 0.3s;
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-.panel-tab-btn.active {
-  background: var(--accent);
-  color: #000;
-}
-
-/* Le contenu des onglets (caché par défaut, visible si actif) */
-.panel-content {
-  display: none;
-  animation: fadeIn 0.4s ease;
-}
-
-.panel-content.active {
-  display: block;
-}
-
-/* Ajustement pour que la grille du menu "Plus" soit belle sur tous les écrans */
+/* --- GRILLE DU MENU PLUS --- */
 #view-plus .profile-card {
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -442,7 +402,7 @@ body {
   box-shadow: 0 5px 15px rgba(251, 191, 36, 0.2);
 }
 
-/* --- FULLCALENDAR DARK THEME --- */
+/* --- FULLCALENDAR DARK THEME (version conservée) --- */
 .fc {
   --fc-border-color: rgba(255, 255, 255, 0.1);
   --fc-daygrid-event-dot: var(--accent);
@@ -457,36 +417,22 @@ body {
 }
 
 .fc-theme-standard .fc-scrollgrid { border-color: rgba(255, 255, 255, 0.1); }
-.fc .fc-toolbar-title { font-family: var(--font-title); color: var(--accent); text-transform: capitalize; }
+.fc .fc-toolbar-title { font-family: var(--font-title); color: var(--accent); text-transform: capitalize; font-size: 1.5rem; }
 .fc .fc-button-primary { background-color: rgba(251, 191, 36, 0.2); border-color: var(--accent); color: var(--accent); text-transform: capitalize; }
 .fc .fc-button-primary:hover { background-color: var(--accent); color: #000; }
 .fc .fc-button-primary:disabled { background-color: transparent; border-color: rgba(255,255,255,0.2); color: gray; }
 .fc .fc-col-header-cell-cushion { color: #fff; text-decoration: none; }
 .fc .fc-daygrid-day-number { color: #cbd5e1; text-decoration: none; }
 .fc .fc-daygrid-day.fc-day-today { background-color: rgba(251, 191, 36, 0.05); }
-.fc-event { cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 4px; }
+.fc-event { cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; }
+.fc-daygrid-day-frame { min-height: 80px; }
 
-/* --- FULLCALENDAR DARK THEME --- */
-.fc {
-  --fc-border-color: rgba(255, 255, 255, 0.1);
-  --fc-daygrid-event-dot: var(--accent);
-  --fc-event-bg-color: var(--accent);
-  --fc-event-border-color: var(--accent);
-  --fc-event-text-color: #000;
-  --fc-today-bg-color: rgba(251, 191, 36, 0.1);
-  --fc-page-bg-color: transparent;
-  --fc-neutral-bg-color: rgba(0, 0, 0, 0.3);
-  --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
-  color: #fff;
+/* --- RESPONSIVE (FIX calendrier mobile) --- */
+@media (max-width: 600px) {
+  #calendar { min-height: 400px !important; padding: 8px !important; }
+  .fc-daygrid-day-frame { min-height: 55px; }
+  .fc .fc-toolbar-title { font-size: 1.1rem; }
+  .fc .fc-button-primary { font-size: 0.75rem; padding: 4px 6px; }
+  .main-title { font-size: 3rem; }
+  .main-title .highlight { font-size: 2.6rem; }
 }
-
-.fc-theme-standard .fc-scrollgrid { border-color: rgba(255, 255, 255, 0.1); }
-.fc .fc-toolbar-title { font-family: var(--font-title); color: var(--accent); text-transform: capitalize; font-size: 1.5rem;}
-.fc .fc-button-primary { background-color: rgba(251, 191, 36, 0.2); border-color: var(--accent); color: var(--accent); text-transform: capitalize; }
-.fc .fc-button-primary:hover { background-color: var(--accent); color: #000; }
-.fc .fc-button-primary:disabled { background-color: transparent; border-color: rgba(255,255,255,0.2); color: gray; }
-.fc .fc-col-header-cell-cushion { color: #fff; text-decoration: none; }
-.fc .fc-daygrid-day-number { color: #cbd5e1; text-decoration: none; }
-.fc .fc-daygrid-day.fc-day-today { background-color: rgba(251, 191, 36, 0.05); }
-.fc-event { cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem;}
-.fc-daygrid-day-frame { min-height: 80px; } /* Donne un peu de hauteur aux cases des jours */

@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Les Terres du Crépuscule</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet" />
-    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
-    
-    <!-- FullCalendar CSS & JS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <!-- Panzoom (carte interactive) — defer pour ne pas bloquer le parsing -->
+    <script defer src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
+    <!-- FullCalendar v6 : le CSS est injecté par le JS, PAS de <link> CSS séparé -->
+    <script defer src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -82,14 +83,13 @@
             Se connecter avec Discord
           </button>
 
-          <!-- CONNEXION PAR CODE -->
           <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <button type="button" id="btn-access-code" onclick="document.getElementById('access-code-modal').classList.add('active')" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+            <button type="button" id="btn-access-code" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
               🔑 J'ai un code d'accès spécial
             </button>
           </div>
         </div>
-      </div> <!-- FIN SCREEN-AUTH -->
+      </div>
 
       <!-- ÉCRAN 3 : APPLICATION JOUEUR -->
       <div id="screen-app" class="screen app-layout">
@@ -192,37 +192,31 @@
             <div id="chroniques-container"><p style="color: gray; text-align: center;">Chargement...</p></div>
           </div>
 
-          <!-- VUE PLUS (GRILLE D'APPLICATIONS) -->
+          <!-- VUE PLUS -->
           <div id="view-plus" class="view">
             <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.8rem; margin-bottom: 20px; text-align: center;">Menu des Panels</h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px;">
-              
-              <!-- PANEL + -->
               <button class="profile-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 25px 10px; border: 1px solid var(--accent); background: rgba(251, 191, 36, 0.05); cursor: pointer;" onclick="openPanelScreen('screen-panel-plus')">
                 <span style="font-size: 2rem;">📁</span>
                 <span style="font-family: var(--font-title); color: #fff; font-size: 1rem;">Panel +</span>
               </button>
 
-              <!-- PANEL CLAN -->
               <button class="profile-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 25px 10px; border: 1px solid var(--accent); background: rgba(251, 191, 36, 0.05); cursor: pointer;" onclick="openPanelScreen('screen-panel-clan')">
                 <span style="font-size: 2rem;">🛡️</span>
                 <span style="font-family: var(--font-title); color: #fff; font-size: 1rem;">Mon Clan</span>
               </button>
 
-              <!-- PANEL CHEF -->
               <button id="btn-plus-chef" class="profile-card" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 25px 10px; border: 1px solid #fbbf24; background: rgba(251, 191, 36, 0.1); cursor: pointer;" onclick="openPanelScreen('screen-panel-chef')">
                 <span style="font-size: 2rem;">👑</span>
                 <span style="font-family: var(--font-title); color: #fbbf24; font-size: 1rem;">Panel Chef</span>
               </button>
 
-              <!-- PANEL ADMIN -->
               <button id="btn-plus-admin" class="profile-card" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 25px 10px; border: 1px solid #60a5fa; background: rgba(96, 165, 250, 0.1); cursor: pointer;" onclick="openPanelScreen('screen-admin')">
                 <span style="font-size: 2rem;">🛠️</span>
                 <span style="font-family: var(--font-title); color: #60a5fa; font-size: 1rem;">Panel Admin</span>
               </button>
 
-              <!-- PANEL DEV -->
               <button id="btn-plus-dev" class="profile-card" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 25px 10px; border: 1px solid #8b5cf6; background: rgba(139, 92, 246, 0.1); cursor: pointer;" onclick="openPanelScreen('screen-dev')">
                 <span style="font-size: 2rem;">💻</span>
                 <span style="font-family: var(--font-title); color: #8b5cf6; font-size: 1rem;">Panel Dev</span>
@@ -245,7 +239,6 @@
               </div>
               
               <div class="wizard-form">
-                <!-- ÉTAPE 1 : FACTION -->
                 <div class="wizard-step active" id="step-1">
                   <h3>1. Faction / Origine</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">Choisis d'où vient ton personnage.</p>
@@ -265,7 +258,6 @@
                   </div>
                 </div>
 
-                <!-- ÉTAPE 2 : IDENTITÉ -->
                 <div class="wizard-step" id="step-2">
                   <h3>2. Identité</h3>
                   <label>Nom du personnage</label><input type="text" placeholder="Ex: Étoile de Feu" />
@@ -275,14 +267,12 @@
                   </select>
                 </div>
 
-                <!-- ÉTAPE 3 : APPARENCE -->
                 <div class="wizard-step" id="step-3">
                   <h3>3. Apparence</h3>
                   <label>Couleur du pelage</label><input type="text" placeholder="Ex: Roux et blanc" />
                   <label>Couleur des yeux</label><input type="text" placeholder="Ex: Ambre" />
                 </div>
 
-                <!-- ÉTAPE 4 : CARACTÈRE -->
                 <div class="wizard-step" id="step-4">
                   <h3>4. Caractère</h3>
                   <label>Traits principaux</label><input type="text" placeholder="Ex: Loyal, Impulsif" />
@@ -290,14 +280,12 @@
                   <label>Défauts</label><input type="text" placeholder="Ex: Têtu, Impatient" />
                 </div>
 
-                <!-- ÉTAPE 5 : HISTOIRE -->
                 <div class="wizard-step" id="step-5">
                   <h3>5. Histoire</h3>
                   <label>Origines / Naissance</label><textarea rows="3" placeholder="Où est-il né ?"></textarea>
                   <label>Événements marquants</label><textarea rows="4" placeholder="Qu'est-ce qui l'a façonné ?"></textarea>
                 </div>
 
-                <!-- ÉTAPE 6 : COMPÉTENCES -->
                 <div class="wizard-step" id="step-6">
                   <h3>6. Compétences</h3>
                   <div class="checkbox-grid">
@@ -310,7 +298,6 @@
                   <label>Détails supplémentaires</label><textarea rows="2" placeholder="Explique ses techniques..."></textarea>
                 </div>
 
-                <!-- ÉTAPE 7 : OBJECTIFS -->
                 <div class="wizard-step" id="step-7">
                   <h3>7. Objectifs & Rêves</h3>
                   <label>Objectifs à court terme</label><input type="text" />
@@ -318,14 +305,12 @@
                   <label>Rêves secrets</label><textarea rows="2"></textarea>
                 </div>
 
-                <!-- ÉTAPE 8 : FAIBLESSES -->
                 <div class="wizard-step" id="step-8">
                   <h3>8. Faiblesses & Peurs</h3>
                   <label>Peurs / Phobies</label><input type="text" />
                   <label>Vulnérabilités</label><textarea rows="2"></textarea>
                 </div>
 
-                <!-- ÉTAPE 9 : IMAGES -->
                 <div class="wizard-step" id="step-9">
                   <h3>9. Images (Jusqu'à 3)</h3>
                   <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 10px; margin-top: 10px;">
@@ -334,7 +319,6 @@
                   </div>
                 </div>
 
-                <!-- ÉTAPE 10 : STATISTIQUES -->
                 <div class="wizard-step" id="step-10">
                   <h3>10. Statistiques</h3>
                   <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">Points restants : <span id="points-left" style="color: var(--accent); font-weight: bold; font-size: 1.2rem;">20</span></p>
@@ -364,7 +348,7 @@
             </div>
           </div>
 
-          <!-- DÉTAIL D'UNE FICHE -->
+          <!-- VUE DÉTAIL FICHE -->
           <div id="view-fiche-detail" class="view">
             <button type="button" id="btn-back-fiches" class="btn-back">← Retour</button>
             <div class="detail-header">
@@ -432,7 +416,7 @@
               <div id="profile-oc-preview" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <p style="color: gray; font-size: 0.9rem;">Aucune fiche pour le moment.</p>
               </div>
-              <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" onclick="document.querySelector('[data-target=\'fiches\']').click()">Gérer mes fiches</button>
+              <button type="button" class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px;" id="btn-manage-fiches">Gérer mes fiches</button>
             </div>
 
             <div class="profile-card">
@@ -495,7 +479,7 @@
             </div>
           </div>
 
-          <!-- MODAL DEMANDE DE RELATION -->
+          <!-- MODAL RELATION -->
           <div id="relation-modal" class="support-modal-overlay">
             <div class="support-modal" style="max-width: 450px;">
               <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
@@ -508,7 +492,7 @@
             </div>
           </div>
 
-          <!-- MODAL PANEL DE GESTION RP (CHEF) -->
+          <!-- MODAL PANEL RP (CHEF) -->
           <div id="rp-panel-modal" class="support-modal-overlay">
             <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
               <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
@@ -522,7 +506,7 @@
             </div>
           </div>
 
-          <!-- MODAL MES TICKETS (JOUEUR) -->
+          <!-- MODAL MES TICKETS -->
           <div id="player-tickets-modal" class="support-modal-overlay">
             <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
               <button type="button" class="btn-close-support" onclick="document.getElementById('player-tickets-modal').classList.remove('active')">✕</button>
@@ -531,7 +515,7 @@
             </div>
           </div>
 
-          <!-- MODAL RÈGLES (CODE DU GUERRIER) -->
+          <!-- MODAL RÈGLES -->
           <div id="rules-modal" class="support-modal-overlay">
             <div class="support-modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
               <button type="button" class="btn-close-support" onclick="document.getElementById('rules-modal').classList.remove('active')">✕</button>
@@ -556,54 +540,31 @@
             </div>
           </div>
 
-          <!-- MODAL CODE GÉNÉRÉ (DEV) -->
-          <div id="code-generated-modal" class="support-modal-overlay">
-            <div class="support-modal" style="max-width: 400px; text-align: center;">
-              <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
-              <p style="color: #cbd5e1; margin-bottom: 15px;">Donne ce code à <strong id="gen-pseudo-display" style="color: #fff;"></strong> :</p>
-              
-              <div id="gen-code-display" style="background: rgba(0,0,0,0.5); border: 2px dashed var(--accent); padding: 15px; border-radius: 8px; font-size: 1.8rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
-                LGDC-XXXX
-              </div>
-              
-              <button type="button" id="btn-copy-code" class="btn-primary" style="width: 100%; margin-bottom: 10px; background: #10b981; border-color: #10b981;">📋 Copier le code</button>
-              
-              <button type="button" class="btn-secondary" style="width: 100%;" onclick="document.getElementById('code-generated-modal').classList.remove('active')">Fermer</button>
+          <!-- MODAL ASSEMBLÉE (CHEF) -->
+          <div id="assemblee-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
+              <div class="form-group"><label>Couleur de l'embed :</label><input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" /></div>
+              <div class="form-group"><label>Motif de l'Assemblée :</label><input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+              <div class="form-group"><label>Convoqué par :</label><input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+              <div class="form-group"><label>Date et Heure :</label><input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+              <div class="form-group"><label>Description :</label><textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
+              <div class="form-group"><label>Sous-description :</label><input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+              <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
             </div>
           </div>
 
-          <!-- MODAL CODE D'ACCÈS (JOUEUR) -->
-          <div id="access-code-modal" class="support-modal-overlay">
-            <div class="support-modal" style="max-width: 400px;">
-              <button type="button" class="btn-close-support" onclick="document.getElementById('access-code-modal').classList.remove('active')">✕</button>
-              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Accès par Code</h2>
-              <p style="color: #cbd5e1; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">Si tu ne peux pas utiliser Discord, entre ton pseudo et ton code fourni par le Staff.</p>
-              
-              <div class="form-group">
-                <label>Pseudo Discord</label>
-                <input type="text" id="access-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              </div>
-              
-              <div class="form-group">
-                <label>Code Spécial</label>
-                <input type="text" id="access-code" placeholder="Ex: LGDC-A1B2" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              </div>
-
-              <button type="button" id="btn-submit-access" class="btn-primary" style="width: 100%; margin-top: 10px;">Valider mon accès</button>
-            </div>
-          </div>
-
-          <!-- MODAL CRÉATION ÉVÉNEMENT -->
-          <div id="event-modal" class="support-modal-overlay">
-            <div class="support-modal" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
-              <button type="button" class="btn-close-support" onclick="document.getElementById('event-modal').classList.remove('active')">✕</button>
-              <h2 id="event-modal-title" style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Créer un événement</h2>
-              
-              <div id="event-form-fields">
-                <!-- Les champs seront générés par le JS -->
-              </div>
-
-              <button type="button" id="btn-submit-event" class="btn-primary" style="width: 100%; margin-top: 20px;">Créer l'événement</button>
+          <!-- MODAL GUERRE (CHEF) -->
+          <div id="guerre-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
+              <div class="form-group"><label>Clan ciblé :</label><select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option></select></div>
+              <div class="form-group"><label>Motif de la Guerre :</label><input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+              <div class="form-group"><label>Description / Message pour le Staff :</label><textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
+              <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
+              <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
             </div>
           </div>
 
@@ -619,14 +580,10 @@
           <button type="button" class="nav-btn" data-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
           <button type="button" class="nav-btn" data-target="monde"><span class="icon">🗺️</span><span class="label">Monde</span></button>
           <button type="button" class="nav-btn" data-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
-          
-          <!-- LE NOUVEAU BOUTON PLUS -->
           <button type="button" class="nav-btn" data-target="plus"><span class="icon">➕</span><span class="label">Plus</span></button>
-          
           <button type="button" class="nav-btn" data-target="profil"><span class="icon">👤</span><span class="label">Profil</span></button>
         </nav>
       </div> <!-- FIN SCREEN-APP JOUEUR -->
-
 
       <!-- ========================================== -->
       <!-- ÉCRANS SÉPARÉS POUR LES PANELS -->
@@ -640,7 +597,6 @@
           <div id="view-panel-plus" class="view active">
             <div id="panel-calendrier" class="panel-content active">
               <h3 style="color: var(--accent); text-align: center; margin-bottom: 15px;">Calendrier</h3>
-              <!-- LE VRAI CALENDRIER INTERACTIF ICI (avec hauteur minimale) -->
               <div id="calendar" style="background: #1a1a24; padding: 15px; border-radius: 15px; border: 1px solid var(--accent); min-height: 600px;"></div>
             </div>
             <div id="panel-arbre" class="panel-content"><p style="color: gray; text-align: center;">L'arbre généalogique apparaîtra ici.</p></div>
@@ -696,8 +652,7 @@
         </nav>
       </div>
 
-
-      <!-- ÉCRAN 4 : APPLICATION ADMIN -->
+      <!-- ÉCRAN ADMIN -->
       <div id="screen-admin" class="screen app-layout admin-layout">
         <div class="app-content">
           <div class="admin-header">
@@ -705,7 +660,6 @@
             <span>Moonlight Studio</span>
           </div>
 
-          <!-- VUE ACCUEIL ADMIN -->
           <div id="admin-view-accueil" class="view active">
             <h3 class="admin-title">Gestion du Temps RP</h3>
             <div class="profile-card" style="margin-bottom: 20px;">
@@ -729,13 +683,9 @@
             </div>
           </div>
 
-          <!-- VUE FICHES ADMIN -->
           <div id="admin-view-fiches" class="view"><h3 class="admin-title">Fiches en attente</h3><div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div></div>
-
-          <!-- VUE MEMBRES ADMIN -->
           <div id="admin-view-membres" class="view"><h3 class="admin-title">Gestion des Membres</h3><div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div></div>
 
-          <!-- VUE CHRONIQUES ADMIN -->
           <div id="admin-view-chroniques" class="view">
             <h3 class="admin-title">Gestion des Chroniques (Embed)</h3>
             <div class="profile-card">
@@ -748,7 +698,6 @@
             </div>
           </div>
 
-          <!-- VUE CALENDRIER ADMIN -->
           <div id="admin-view-calendrier" class="view">
             <h3 class="admin-title">Gestion du Calendrier</h3>
             <p style="color: gray; margin-bottom: 15px;">Clique sur une carte pour créer un événement.</p>
@@ -769,26 +718,21 @@
             <div id="admin-events-list"><p style="color: gray;">Chargement...</p></div>
           </div>
 
-          <!-- VUE TICKETS ADMIN -->
           <div id="admin-view-tickets" class="view"><h3 class="admin-title">Tickets & Support</h3><div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div></div>
         </div>
 
-        <!-- BARRE DE NAVIGATION ADMIN -->
         <nav class="bottom-nav admin-nav">
           <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
           <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
           <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
           <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
-          
-          <!-- NOUVEAU BOUTON CALENDRIER ADMIN -->
           <button type="button" class="nav-btn" data-admin-target="calendrier"><span class="icon">📅</span><span class="label">Calendrier</span></button>
-          
           <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
           <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
         </nav>
       </div> <!-- FIN SCREEN-ADMIN -->
 
-      <!-- ÉCRAN 5 : APPLICATION DEV -->
+      <!-- ÉCRAN DEV -->
       <div id="screen-dev" class="screen app-layout admin-layout" style="background-image: linear-gradient(rgba(10, 5, 20, 0.9), rgba(10, 5, 20, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');">
         <div class="app-content">
           <div class="admin-header" style="border-bottom: 2px solid #8b5cf6;">
@@ -796,7 +740,6 @@
             <span>Moonlight Studio</span>
           </div>
 
-          <!-- VUE ACCUEIL DEV (Codes) -->
           <div id="dev-view-accueil" class="view active">
             <h3 class="admin-title">Gestion des Codes d'Accès</h3>
             <div class="profile-card" style="margin-bottom: 20px; border-color: rgba(139, 92, 246, 0.3);">
@@ -809,10 +752,8 @@
             <div id="admin-dev-codes-list"><p style="color: gray;">Chargement...</p></div>
           </div>
 
-          <!-- VUE STATISTIQUES DEV -->
           <div id="dev-view-stats" class="view">
             <h3 class="admin-title">Tableau de bord</h3>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
               <div class="profile-card" style="text-align: center; border-left: 4px solid #8b5cf6;">
                 <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Membres Inscrits</p>
@@ -833,15 +774,12 @@
             </div>
           </div>
 
-          <!-- VUE MEMBRES DEV -->
           <div id="dev-view-membres" class="view">
             <h3 class="admin-title">Gestion des Membres</h3>
             <div id="dev-membres-list"><p style="color: gray;">Chargement...</p></div>
           </div>
-
         </div>
 
-        <!-- BARRE DE NAVIGATION DEV -->
         <nav class="bottom-nav admin-nav" style="border-top-color: #8b5cf6;">
           <button type="button" class="nav-btn active" data-dev-target="accueil"><span class="icon">🔑</span><span class="label">Codes</span></button>
           <button type="button" class="nav-btn" data-dev-target="stats"><span class="icon">📊</span><span class="label">Stats</span></button>
@@ -859,7 +797,7 @@
         </div>
       </div>
 
-      <!-- MODAL GESTION RÉPUTATION -->
+      <!-- MODAL RÉPUTATION -->
       <div id="reputation-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 450px;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
@@ -871,35 +809,7 @@
         </div>
       </div>
 
-      <!-- MODAL ASSEMBLÉE (CHEF) -->
-      <div id="assemblee-modal" class="support-modal-overlay">
-        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
-          <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
-          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
-          <div class="form-group"><label>Couleur de l'embed :</label><input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" /></div>
-          <div class="form-group"><label>Motif de l'Assemblée :</label><input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
-          <div class="form-group"><label>Convoqué par :</label><input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
-          <div class="form-group"><label>Date et Heure :</label><input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
-          <div class="form-group"><label>Description :</label><textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
-          <div class="form-group"><label>Sous-description :</label><input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
-          <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
-        </div>
-      </div>
-
-      <!-- MODAL GUERRE (CHEF) -->
-      <div id="guerre-modal" class="support-modal-overlay">
-        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
-          <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
-          <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
-          <div class="form-group"><label>Clan ciblé :</label><select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option></select></div>
-          <div class="form-group"><label>Motif de la Guerre :</label><input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
-          <div class="form-group"><label>Description / Message pour le Staff :</label><textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
-          <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
-          <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
-        </div>
-      </div>
-
-      <!-- MODAL CODE GÉNÉRÉ (DEV) -->
+      <!-- MODALS UNIQUES (dédoublonnés) : CODE GÉNÉRÉ, CODE D'ACCÈS, ÉVÉNEMENT -->
       <div id="code-generated-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 400px; text-align: center;">
           <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
@@ -915,7 +825,6 @@
         </div>
       </div>
 
-      <!-- MODAL CODE D'ACCÈS (JOUEUR) -->
       <div id="access-code-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 400px;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('access-code-modal').classList.remove('active')">✕</button>
@@ -936,23 +845,15 @@
         </div>
       </div>
 
-      <!-- MODAL CRÉATION ÉVÉNEMENT -->
       <div id="event-modal" class="support-modal-overlay">
         <div class="support-modal" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
           <button type="button" class="btn-close-support" onclick="document.getElementById('event-modal').classList.remove('active')">✕</button>
           <h2 id="event-modal-title" style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Créer un événement</h2>
           
-          <div id="event-form-fields">
-            <!-- Les champs seront générés par le JS -->
-          </div>
+          <div id="event-form-fields"></div>
 
           <button type="button" id="btn-submit-event" class="btn-primary" style="width: 100%; margin-top: 20px;">Créer l'événement</button>
         </div>
-      </div>
-
-      <div id="toast-success" class="toast hidden">
-        <div class="toast-icon">✓</div>
-        <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
       </div>
     </div>
 

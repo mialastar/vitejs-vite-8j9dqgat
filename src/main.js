@@ -4,14 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://lrkiivqbnkkduxfcrbjn.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2lpdnFibmtrZHV4ZmNyYmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTI0MTMsImV4cCI6MjExMDA4ODQxM30.jpDPREZttmd__dVy2Uy3DdmjRUPQtdd_nUoJWAyOO6Y"; 
 
-// Client principal (pour l'utilisateur connecté)
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Client secondaire (pour créer des comptes sans déconnecter le développeur)
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false }
 });
 
+// ==========================================
+// --- VARIABLES GLOBALES (CORRIGÉ : doublon supprimé) ---
+// ==========================================
 let editingFicheId = null; 
 let currentEditingImage = ""; 
 let currentTicketType = "";
@@ -19,8 +20,7 @@ let currentRelationFicheId = null;
 let currentChatTicketId = null;
 let currentChatIsAdmin = false;
 let currentChatUserName = "";
-let myCalendar = null; // Variable globale pour stocker le calendrier
-let myCalendar = null; // Variable globale pour le calendrier
+let myCalendar = null; // UNE SEULE déclaration (bug #1 du calendrier)
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -60,15 +60,33 @@ if(btnDiscordLogin) {
   });
 }
 
-function showApp() {
+// ==========================================
+// --- CHARGEMENT DES RÔLES (CORRIGÉ : indépendant de loadProfil) ---
+// ==========================================
+async function loadUserRoles() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { roleApp: 'JOUEUR', roleRp: 'Aucun' };
+  
+  let { data: profile } = await supabase.from('profiles').select('role_app, role_rp').eq('id', user.id).maybeSingle();
+  return {
+    roleApp: profile?.role_app || 'JOUEUR',
+    roleRp: profile?.role_rp || 'Aucun'
+  };
+}
+
+async function showApp() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   screenApp.classList.add('active');
   
-  // On force le retour sur l'accueil
-  document.querySelectorAll('.app-content .view').forEach(v => v.classList.remove('active'));
+  // CORRIGÉ : scope strict à #screen-app
+  document.querySelectorAll('#screen-app .app-content .view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-accueil').classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="accueil"]')?.classList.add('active');
+  document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#screen-app .bottom-nav:not(.admin-nav) .nav-btn[data-target="accueil"]')?.classList.add('active');
+
+  // CORRIGÉ (bug #3) : on met à jour le menu Plus dès le démarrage
+  const { roleApp, roleRp } = await loadUserRoles();
+  window.updatePlusMenu(roleApp, roleRp);
 
   loadActualites();
   loadChroniques();
@@ -83,12 +101,11 @@ function showIntro() {
 async function checkUser() {
   const { data } = await supabase.auth.getSession();
   if (data && data.session) {
-    showApp();
+    await showApp();
     
-    if (window.OneSignal) {
-      window.OneSignal.push(function() {
-        OneSignal.login(data.session.user.id);
-      });
+    // CORRIGÉ : OneSignal v16 → OneSignal.login directement
+    if (window.OneSignal && typeof window.OneSignal.login === 'function') {
+      try { window.OneSignal.login(data.session.user.id); } catch(e) { console.warn(e); }
     }
     
   } else {
@@ -108,8 +125,9 @@ supabase.auth.onAuthStateChange((event, session) => {
 // ==========================================
 // --- NAVIGATION JOUEUR (BARRE DU BAS) ---
 // ==========================================
-const navBtns = document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn');
-const views = document.querySelectorAll('.app-content:not(.admin-layout .app-content) .view');
+// CORRIGÉ (bug #2) : scope strict à #screen-app
+const navBtns = document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn');
+const views = document.querySelectorAll('#screen-app .view');
 
 navBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
@@ -170,17 +188,15 @@ window.openPanelScreen = function(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(screenId).classList.add('active');
   
-  // Si on ouvre le Panel +, on charge le calendrier
   if (screenId === 'screen-panel-plus') loadPlayerEvents();
   
-  // Si on ouvre le Panel Admin, on charge toutes ses données
   if (screenId === 'screen-admin') {
     loadAdminFiches();
     loadAdminMembres();
     loadAdminTickets();
+    loadAdminEvents(); // CORRIGÉ (bonus B5)
   }
   
-  // Si on ouvre le Panel Dev, on charge ses données
   if (screenId === 'screen-dev') {
     loadAdminCodes();
     loadDevStats();
@@ -235,10 +251,11 @@ const progressFill = document.getElementById('progress-bar-fill');
 const stepNumText = document.getElementById('current-step-num');
 
 window.toggleClanChoice = function() {
-  const selectedFaction = document.querySelector('input[name="faction-type"]:checked').value;
+  const selectedFaction = document.querySelector('input[name="faction-type"]:checked');
+  if(!selectedFaction) return;
   const clanContainer = document.getElementById('clan-choice-container');
   
-  if (selectedFaction === 'clan') {
+  if (selectedFaction.value === 'clan') {
     clanContainer.style.display = 'block';
   } else {
     clanContainer.style.display = 'none';
@@ -266,25 +283,26 @@ if(btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 1) { cur
 if(btnNext) btnNext.addEventListener('click', async () => {
   if (currentStep === 2) { 
     const nom = document.querySelector('#step-2 input').value;
-    if (!nom || nom.trim() === "") {
-      alert("⚠️ Tu dois donner un nom à ton personnage avant de continuer !");
-      return; 
-    }
+    if (!nom || nom.trim() === "") { alert("⚠️ Tu dois donner un nom à ton personnage avant de continuer !"); return; }
   }
   
   if (currentStep === 3) { 
     const pelage = document.querySelectorAll('#step-3 input')[0].value;
     const yeux = document.querySelectorAll('#step-3 input')[1].value;
-    if (!pelage || !yeux) {
-      alert("⚠️ Remplis au moins la couleur du pelage et des yeux !");
-      return;
-    }
+    if (!pelage || !yeux) { alert("⚠️ Remplis au moins la couleur du pelage et des yeux !"); return; }
   }
 
   if (currentStep === 5) { 
     const origines = document.querySelectorAll('#step-5 textarea')[0].value;
-    if (!origines || origines.trim() === "") {
-      alert("⚠️ N'oublie pas d'écrire les origines de ton personnage !");
+    if (!origines || origines.trim() === "") { alert("⚠️ N'oublie pas d'écrire les origines de ton personnage !"); return; }
+  }
+
+  // CORRIGÉ (bonus B14) : vérif points restants avant soumission
+  if (currentStep === totalSteps) {
+    const sliders2 = document.querySelectorAll('.stat-slider');
+    let total = 0; sliders2.forEach(s => total += parseInt(s.value));
+    if (total > maxPoints) {
+      alert(`⚠️ Tu as dépassé le total de ${maxPoints} points de statistiques (actuel : ${total}). Ajuste tes curseurs.`);
       return;
     }
   }
@@ -295,13 +313,9 @@ if(btnNext) btnNext.addEventListener('click', async () => {
   } else {
     const factionType = document.querySelector('input[name="faction-type"]:checked').value;
     let clan = "";
-    if (factionType === 'clan') {
-      clan = document.getElementById('oc-clan-select').value;
-    } else if (factionType === 'solitaire') {
-      clan = "Solitaire";
-    } else {
-      clan = "Domestique";
-    }
+    if (factionType === 'clan') clan = document.getElementById('oc-clan-select').value;
+    else if (factionType === 'solitaire') clan = "Solitaire";
+    else clan = "Domestique";
 
     const nom = document.querySelector('#step-2 input').value; 
     const rang = document.querySelector('#step-2 select').value; 
@@ -575,9 +589,7 @@ function renderPublicFiches(fiches) {
   container.innerHTML = '';
   fiches.forEach(fiche => {
     let firstImg = "";
-    if (fiche.image_url && fiche.image_url.trim() !== '') {
-      firstImg = fiche.image_url.split(',')[0].trim();
-    }
+    if (fiche.image_url && fiche.image_url.trim() !== '') firstImg = fiche.image_url.split(',')[0].trim();
     let imageHtml = firstImg ? `<div class="card-image" style="background-image: url('${firstImg}')"></div>` : '';
     
     const card = document.createElement('div');
@@ -625,7 +637,7 @@ function openFicheDetail(fiche) {
     compContainer.innerHTML = '';
     if (fiche.competences_list) {
       fiche.competences_list.split(',').forEach(comp => {
-        if(comp.trim()) { compContainer.innerHTML += `<span class="tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent);">${comp.trim()}</span>`; }
+        if(comp.trim()) compContainer.innerHTML += `<span class="tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent);">${comp.trim()}</span>`;
       });
     }
   }
@@ -636,13 +648,16 @@ function openFicheDetail(fiche) {
   const imgContainer = document.getElementById('detail-image');
   if(imgContainer) {
     if (fiche.image_url && fiche.image_url.trim() !== '') {
-      const firstImage = fiche.image_url.split(',')[0].trim();
-      imgContainer.style.backgroundImage = `url('${firstImage}')`;
+      imgContainer.style.backgroundImage = `url('${fiche.image_url.split(',')[0].trim()}')`;
       imgContainer.style.display = 'block';
     } else { imgContainer.style.display = 'none'; }
   }
 
-  const stats = [{ id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite }, { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse }, { id: 'charisme', val: fiche.stats_charisme }];
+  const stats = [
+    { id: 'force', val: fiche.stats_force }, { id: 'agilite', val: fiche.stats_agilite },
+    { id: 'endurance', val: fiche.stats_endurance }, { id: 'ruse', val: fiche.stats_ruse },
+    { id: 'charisme', val: fiche.stats_charisme }
+  ];
   stats.forEach(stat => {
     const val = stat.val || 0;
     const numEl = document.getElementById(`num-${stat.id}`);
@@ -674,7 +689,7 @@ document.getElementById('btn-back-fiches')?.addEventListener('click', () => {
 });
 
 // ==========================================
-// --- RELATIONS (NOUVEL ONGLET) ---
+// --- RELATIONS ---
 // ==========================================
 async function loadMyRelations() {
   const container = document.getElementById('my-relations-container');
@@ -757,7 +772,6 @@ async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // On récupère le pseudo Discord (full_name ou username)
   const discordPseudo = user.user_metadata.full_name || user.user_metadata.user_name || "Joueur";
 
   const userEl = document.getElementById('profile-username');
@@ -769,14 +783,12 @@ async function loadProfil() {
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   
   if (!profile) { 
-    // Création du profil avec le pseudo
     const { data: newProfile } = await supabase.from('profiles').insert({ 
       id: user.id, 
       discord_pseudo: discordPseudo 
     }).select().single(); 
     profile = newProfile; 
   } else if (profile.discord_pseudo !== discordPseudo) {
-    // Mise à jour du pseudo si différent
     await supabase.from('profiles').update({ discord_pseudo: discordPseudo }).eq('id', user.id);
     profile.discord_pseudo = discordPseudo;
   }
@@ -787,42 +799,10 @@ async function loadProfil() {
 
   const appBadge = document.getElementById('profile-app-badge');
   if (appBadge) appBadge.textContent = `APP: ${roleApp}`;
-
   const rpBadge = document.getElementById('profile-rp-badge');
   if (rpBadge) rpBadge.textContent = `RP: ${roleRp}`;
-
   const clanBadge = document.getElementById('profile-clan-badge');
   if (clanBadge) clanBadge.textContent = `Clan: ${clan}`;
-
-  const btnRpPanel = document.getElementById('btn-rp-panel');
-  if (btnRpPanel) {
-    if (roleRp.toLowerCase().includes('chef')) {
-      btnRpPanel.style.display = 'flex';
-      btnRpPanel.onclick = () => openRpPanel();
-    } else { 
-      btnRpPanel.style.display = 'none'; 
-    }
-  }
-
-  const btnAdmin = document.getElementById('btn-admin-panel');
-  const btnDevPanel = document.getElementById('btn-dev-panel');
-  
-  if (btnAdmin) {
-    if (roleApp.toUpperCase().trim() === 'ADMIN' || roleApp.toUpperCase().trim() === 'MJ') {
-      btnAdmin.style.display = 'flex';
-    } else { 
-      btnAdmin.style.display = 'none'; 
-    }
-  }
-
-  if (btnDevPanel) {
-    if (roleApp.toUpperCase().trim() === 'DEV') {
-      btnDevPanel.style.display = 'flex';
-      if (btnAdmin) btnAdmin.style.display = 'flex';
-    } else { 
-      btnDevPanel.style.display = 'none'; 
-    }
-  }
 
   const pts = profile ? profile.reputation_points : 0;
   let title = "Inconnu", nextThreshold = 25;
@@ -847,8 +827,8 @@ async function loadProfil() {
 
   const banner = document.getElementById('profile-banner');
   if (banner) {
-    if (profile && profile.banner_url) { banner.style.backgroundImage = `url('${profile.banner_url}')`; } 
-    else { banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`; }
+    if (profile && profile.banner_url) banner.style.backgroundImage = `url('${profile.banner_url}')`; 
+    else banner.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop')`;
   }
 
   const { data: fiches } = await supabase.from('fiches_oc').select('nom, image_url, statut').eq('user_id', user.id);
@@ -861,39 +841,43 @@ async function loadProfil() {
     if (fiches && fiches.length > 0) {
       fiches.forEach(fiche => {
         let firstImg = "https://cdn.discordapp.com/embed/avatars/0.png";
-        if (fiche.image_url && fiche.image_url.trim() !== '') {
-          firstImg = fiche.image_url.split(',')[0].trim();
-        }
-        ocContainer.innerHTML += `<div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="document.querySelector('[data-target=\\'fiches\\']').click()"><div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${firstImg}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div><span style="font-size: 0.7rem; margin-top: 5px; color: white;">${fiche.nom.split(' ')[0]}</span></div>`;
+        if (fiche.image_url && fiche.image_url.trim() !== '') firstImg = fiche.image_url.split(',')[0].trim();
+        // CORRIGÉ (bonus B2) : évite l'échappement fragile du sélecteur
+        const safeName = (fiche.nom || 'OC').split(' ')[0].replace(/[<>&"']/g, '');
+        ocContainer.innerHTML += `
+          <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" 
+               onclick="document.querySelector('#screen-app .bottom-nav .nav-btn[data-target=&quot;fiches&quot;]').click()">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background-image: url('${firstImg}'); background-size: cover; background-position: center; border: 2px solid ${fiche.statut === 'Validée' ? '#10b981' : '#fbbf24'};"></div>
+            <span style="font-size: 0.7rem; margin-top: 5px; color: white;">${safeName}</span>
+          </div>`;
       });
     } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
   }
 
-  // Mise à jour du menu "Plus" selon le rôle
   window.updatePlusMenu(roleApp, roleRp);
 }
 
-// Cette fonction gère l'affichage des boutons dans l'onglet "Plus"
+// CORRIGÉ (bug #3) : fonction de révélation des boutons, appelable partout
 window.updatePlusMenu = function(roleApp, roleRp) {
   const btnChef = document.getElementById('btn-plus-chef');
   const btnAdmin = document.getElementById('btn-plus-admin');
   const btnDev = document.getElementById('btn-plus-dev');
 
-  if (roleRp.toLowerCase().includes('chef') || roleRp.toLowerCase().includes('lieutenant')) {
-    if(btnChef) btnChef.style.display = 'flex';
-  } else { if(btnChef) btnChef.style.display = 'none'; }
+  const app = (roleApp || 'JOUEUR').toUpperCase().trim();
+  const rp = (roleRp || 'Aucun').toLowerCase().trim();
 
-  if (roleApp.toUpperCase() === 'ADMIN' || roleApp.toUpperCase() === 'MJ') {
-    if(btnAdmin) btnAdmin.style.display = 'flex';
-  } else { if(btnAdmin) btnAdmin.style.display = 'none'; }
-
-  if (roleApp.toUpperCase() === 'DEV') {
-    if(btnDev) btnDev.style.display = 'flex';
-    if(btnAdmin) btnAdmin.style.display = 'flex';
-  } else { if(btnDev) btnDev.style.display = 'none'; }
+  if (btnChef) btnChef.style.display = (rp.includes('chef') || rp.includes('lieutenant')) ? 'flex' : 'none';
+  if (btnAdmin) btnAdmin.style.display = (app === 'ADMIN' || app === 'MJ') ? 'flex' : 'none';
+  if (btnDev) {
+    btnDev.style.display = (app === 'DEV') ? 'flex' : 'none';
+    if (btnAdmin && app === 'DEV') btnAdmin.style.display = 'flex';
+  }
 };
 
-document.getElementById('btn-logout')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
+document.getElementById('btn-logout')?.addEventListener('click', async () => { 
+  await supabase.auth.signOut(); 
+  window.location.reload(); 
+});
 
 // ==========================================
 // --- PANEL DE GESTION RP (CHEF) ---
@@ -929,9 +913,7 @@ async function openRpPanel() {
   membres.forEach(membre => {
     const isSelf = membre.user_id === user.id;
     let firstImg = "https://cdn.discordapp.com/embed/avatars/0.png";
-    if (membre.image_url && membre.image_url.trim() !== '') {
-      firstImg = membre.image_url.split(',')[0].trim();
-    }
+    if (membre.image_url && membre.image_url.trim() !== '') firstImg = membre.image_url.split(',')[0].trim();
 
     const card = document.createElement('div');
     card.className = 'fiche-card';
@@ -1023,9 +1005,16 @@ document.getElementById('map-sheet-overlay')?.addEventListener('click', (e) => {
 // ==========================================
 // --- SUPPORT (TICKETS) ---
 // ==========================================
-document.getElementById('btn-floating-support')?.addEventListener('click', () => { document.getElementById('support-modal').classList.add('active'); document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
+document.getElementById('btn-floating-support')?.addEventListener('click', () => { 
+  document.getElementById('support-modal').classList.add('active'); 
+  document.getElementById('support-menu-view').style.display = 'block'; 
+  document.getElementById('support-form-view').style.display = 'none'; 
+});
 document.getElementById('btn-close-support')?.addEventListener('click', () => { document.getElementById('support-modal').classList.remove('active'); });
-document.getElementById('btn-back-support')?.addEventListener('click', () => { document.getElementById('support-menu-view').style.display = 'block'; document.getElementById('support-form-view').style.display = 'none'; });
+document.getElementById('btn-back-support')?.addEventListener('click', () => { 
+  document.getElementById('support-menu-view').style.display = 'block'; 
+  document.getElementById('support-form-view').style.display = 'none'; 
+});
 
 window.openSupportForm = function(type) {
   currentTicketType = type;
@@ -1064,7 +1053,9 @@ document.getElementById('btn-submit-ticket')?.addEventListener('click', async ()
     const toast = document.getElementById('toast-success');
     if(toast) {
       toast.querySelector('h4').textContent = "Ticket envoyé !";
-      toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('show'), 50); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
+      toast.classList.remove('hidden'); 
+      setTimeout(() => toast.classList.add('show'), 50); 
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 500); }, 5000);
     }
   }
 });
@@ -1077,44 +1068,60 @@ document.getElementById('btn-open-settings')?.addEventListener('click', () => se
 document.getElementById('btn-close-settings')?.addEventListener('click', () => settingsModal.classList.remove('active'));
 
 document.getElementById('btn-open-credits')?.addEventListener('click', () => {
-  settingsModal.classList.remove('active'); screenApp.classList.remove('active'); screenCredits.classList.add('active');
+  settingsModal.classList.remove('active'); 
+  screenApp.classList.remove('active'); 
+  screenCredits.classList.add('active');
   const btnContinue = document.getElementById('btn-continue-credits');
   if(btnContinue) {
     btnContinue.textContent = "Retour à l'application";
-    btnContinue.onclick = () => { screenCredits.classList.remove('active'); screenApp.classList.add('active'); btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; btnContinue.onclick = null; window.location.reload(); };
+    btnContinue.onclick = () => { 
+      screenCredits.classList.remove('active'); 
+      screenApp.classList.add('active'); 
+      btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; 
+      btnContinue.onclick = null; 
+      // CORRIGÉ (bonus B9) : plus de reload brutal
+      showApp();
+    };
   }
 });
 
 // ==========================================
-// --- BASCULE VERS LES PANELS ADMIN & DEV (DEPUIS LE MENU PLUS) ---
+// --- BASCULE VERS LES PANELS ADMIN & DEV ---
 // ==========================================
-document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
-  screenApp.classList.remove('active');
-  screenAdmin.classList.add('active');
-  loadAdminFiches();
-  loadAdminMembres();
-  loadAdminTickets();
-});
-
+// CORRIGÉ (bonus B1) : les IDs existent maintenant (btn-plus-admin / btn-plus-dev)
+// et openPanelScreen() se charge déjà du chargement. On garde juste les listeners "Quitter".
 document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
   screenAdmin.classList.remove('active');
   screenApp.classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#screen-app .bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.querySelectorAll('#screen-app .view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-plus').classList.add('active');
-});
-
-document.getElementById('btn-dev-panel')?.addEventListener('click', () => {
-  screenApp.classList.remove('active');
-  screenDev.classList.add('active');
-  loadAdminCodes();
 });
 
 document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
   screenDev.classList.remove('active');
   screenApp.classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#screen-app .bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.querySelectorAll('#screen-app .view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-plus').classList.add('active');
+});
+
+// Boutons "Quitter" des panels +, clan, chef (manquaient à l'appel !)
+document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-plus').classList.remove('active');
+  screenApp.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
+});
+document.getElementById('btn-quit-panel-clan')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-clan').classList.remove('active');
+  screenApp.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
+});
+document.getElementById('btn-quit-panel-chef')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-chef').classList.remove('active');
+  screenApp.classList.add('active');
   document.getElementById('view-plus').classList.add('active');
 });
 
@@ -1139,20 +1146,10 @@ async function loadAdminFiches() {
   if(!container) return;
   container.innerHTML = '<p style="color: gray;">Chargement...</p>';
   
-  const { data: fiches, error } = await supabase
-    .from('fiches_oc')
-    .select('*')
-    .eq('statut', 'En attente');
+  const { data: fiches, error } = await supabase.from('fiches_oc').select('*').eq('statut', 'En attente');
 
-  if (error) {
-    container.innerHTML = '<p style="color: red;">Erreur de chargement.</p>';
-    return;
-  }
-
-  if (!fiches || fiches.length === 0) { 
-    container.innerHTML = '<p style="color: #10b981;">Aucune fiche en attente.</p>'; 
-    return; 
-  }
+  if (error) { container.innerHTML = '<p style="color: red;">Erreur de chargement.</p>'; return; }
+  if (!fiches || fiches.length === 0) { container.innerHTML = '<p style="color: #10b981;">Aucune fiche en attente.</p>'; return; }
   
   container.innerHTML = '';
   fiches.forEach(fiche => {
@@ -1177,10 +1174,7 @@ window.validerFicheAdmin = async function(id) {
     try {
       await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` 
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           title: "Fiche Validée ! 🎉",
           message: `La fiche de ${fiche.nom} a été acceptée ! Tu peux commencer à RP.`,
@@ -1188,13 +1182,14 @@ window.validerFicheAdmin = async function(id) {
           target_user_id: fiche.user_id
         })
       });
-    } catch (err) {
-      console.error("Erreur notif :", err);
-    }
+    } catch (err) { console.error("Erreur notif :", err); }
   }
   loadAdminFiches(); 
 };
-window.refuserFicheAdmin = async function(id) { await supabase.from('fiches_oc').update({ statut: 'Refusée' }).eq('id', id); loadAdminFiches(); };
+window.refuserFicheAdmin = async function(id) { 
+  await supabase.from('fiches_oc').update({ statut: 'Refusée' }).eq('id', id); 
+  loadAdminFiches(); 
+};
 
 async function loadAdminMembres() {
   const container = document.getElementById('admin-membres-list');
@@ -1202,10 +1197,7 @@ async function loadAdminMembres() {
   container.innerHTML = '<p style="color: gray;">Chargement...</p>';
   
   const { data: profils } = await supabase.from('profiles').select('*');
-  if (!profils || profils.length === 0) { 
-    container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; 
-    return; 
-  }
+  if (!profils || profils.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; return; }
   
   container.innerHTML = '';
   profils.forEach(profil => {
@@ -1266,10 +1258,7 @@ async function loadTempsRP() {
   const { data } = await supabase.from('config').select('*');
   if (!data) return;
 
-  let saison = "Automne";
-  let lune = "Lune des Feuilles Mortes";
-  let meteo = "☀️ Ensoleillé";
-
+  let saison = "Automne", lune = "Lune des Feuilles Mortes", meteo = "☀️ Ensoleillé";
   data.forEach(item => {
     if (item.key === 'saison') saison = item.value;
     if (item.key === 'lune') lune = item.value;
@@ -1279,7 +1268,6 @@ async function loadTempsRP() {
   const displaySaison = document.getElementById('display-saison');
   const displayLune = document.getElementById('display-lune');
   const displayMeteo = document.getElementById('display-meteo');
-  
   if (displaySaison) displaySaison.textContent = saison;
   if (displayLune) displayLune.textContent = lune;
   if (displayMeteo) displayMeteo.textContent = meteo;
@@ -1287,7 +1275,6 @@ async function loadTempsRP() {
   const adminSaison = document.getElementById('admin-saison-select');
   const adminLune = document.getElementById('admin-lune-input');
   const adminMeteo = document.getElementById('admin-meteo-select');
-  
   if (adminSaison) adminSaison.value = saison;
   if (adminLune) adminLune.value = lune;
   if (adminMeteo) adminMeteo.value = meteo;
@@ -1307,14 +1294,11 @@ window.updateTempsRP = async function() {
   ]);
 
   if (error) alert("Erreur : " + error.message);
-  else {
-    alert("Temps RP mis à jour !");
-    loadTempsRP();
-  }
+  else { alert("Temps RP mis à jour !"); loadTempsRP(); }
 };
 
 // ==========================================
-// --- ACTUALITÉS (ACCUEIL EMBEDS) ---
+// --- ACTUALITÉS ---
 // ==========================================
 window.publierActu = async function() {
   const titre = document.getElementById('admin-actu-titre').value;
@@ -1327,25 +1311,19 @@ window.publierActu = async function() {
   
   const { error } = await supabase.from('actualites').insert({ titre, auteur, contenu, sous_description: sous, couleur });
   
-  if (error) {
-    alert(error.message);
-  } else {
+  if (error) { alert(error.message); } 
+  else {
     try {
-      const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
+      await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/rapid-action", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` 
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           title: titre || "Nouvelle actualité !",
           message: contenu.substring(0, 100) + "...",
           url: `${window.location.origin}/?view=accueil`
         })
       });
-    } catch (err) {
-      console.error("Erreur réseau :", err);
-    }
+    } catch (err) { console.error("Erreur réseau :", err); }
 
     document.getElementById('admin-actu-titre').value = '';
     document.getElementById('admin-actu-input').value = '';
@@ -1367,21 +1345,14 @@ async function loadActualites() {
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
   const { data } = await supabase.from('actualites').select('*').order('date_publication', { ascending: false }).limit(10);
-  
-  if (!data || data.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
+  if (!data || data.length === 0) { container.innerHTML = ''; return; }
 
   const actusVisibles = data.filter(actu => {
     if (!actu.clan_cible || actu.clan_cible === 'null' || actu.clan_cible === '') return true; 
     return actu.clan_cible === monClan; 
   });
 
-  if (actusVisibles.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
+  if (actusVisibles.length === 0) { container.innerHTML = ''; return; }
 
   container.innerHTML = actusVisibles.map(actu => `
     <div class="embed-card" style="border-left-color: ${actu.couleur || 'var(--accent)'}; position: relative;">
@@ -1389,18 +1360,13 @@ async function loadActualites() {
       ${actu.titre ? `<div class="embed-title" style="color: ${actu.couleur || 'var(--accent)'};">${actu.titre}</div>` : ''}
       <div class="embed-desc">${actu.contenu}</div>
       ${actu.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${actu.sous_description}</div>` : ''}
-      
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${actu.id}" onclick="supprimerElement(this, 'actualites')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
+      ${isAdmin ? `<div style="margin-top: 15px; text-align: right;"><button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${actu.id}" onclick="supprimerElement(this, 'actualites')">🗑️ Supprimer</button></div>` : ''}
     </div>
   `).join('');
 }
 
 // ==========================================
-// --- CHRONIQUES (MJ EMBEDS) ---
+// --- CHRONIQUES ---
 // ==========================================
 window.publierChronique = async function() {
   const titre = document.getElementById('admin-chro-titre').value;
@@ -1433,11 +1399,7 @@ async function loadChroniques() {
   const isAdmin = profile && (profile.role_app === 'ADMIN' || profile.role_app === 'MJ');
 
   const { data } = await supabase.from('chroniques').select('*').order('date_publication', { ascending: false });
-  
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>';
-    return;
-  }
+  if (!data || data.length === 0) { container.innerHTML = '<p style="color: gray; text-align: center;">Aucune chronique pour le moment.</p>'; return; }
 
   container.innerHTML = data.map(chro => `
     <div class="embed-card" style="border-left-color: ${chro.couleur || 'var(--accent)'}; position: relative;">
@@ -1445,23 +1407,17 @@ async function loadChroniques() {
       <div class="embed-title" style="color: ${chro.couleur || 'var(--accent)'};">${chro.titre}</div>
       <div class="embed-desc">${chro.contenu}</div>
       ${chro.sous_description ? `<div style="font-size: 0.75rem; color: gray; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${chro.sous_description}</div>` : ''}
-      
-      ${isAdmin ? `
-        <div style="margin-top: 15px; text-align: right;">
-          <button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${chro.id}" onclick="supprimerElement(this, 'chroniques')">🗑️ Supprimer</button>
-        </div>
-      ` : ''}
+      ${isAdmin ? `<div style="margin-top: 15px; text-align: right;"><button class="btn-action btn-supprimer" style="padding: 5px 15px; font-size: 0.75rem;" data-id="${chro.id}" onclick="supprimerElement(this, 'chroniques')">🗑️ Supprimer</button></div>` : ''}
     </div>
   `).join('');
 }
 
 // ==========================================
-// --- FONCTION DE SUPPRESSION UNIVERSELLE ---
+// --- SUPPRESSION UNIVERSELLE ---
 // ==========================================
 window.supprimerElement = async function(btn, table) {
   const id = btn.getAttribute('data-id');
   if (!id) return alert("Erreur: Impossible de trouver l'ID.");
-
   if (!confirm("⚠️ Es-tu sûr de vouloir supprimer ce message ? Il sera effacé de la base de données.")) return;
 
   btn.textContent = "Suppression...";
@@ -1480,7 +1436,7 @@ window.supprimerElement = async function(btn, table) {
 };
 
 // ==========================================
-// --- MES TICKETS (JOUEUR - CHAT) ---
+// --- MES TICKETS (JOUEUR) ---
 // ==========================================
 document.getElementById('btn-my-tickets')?.addEventListener('click', () => {
   document.getElementById('player-tickets-modal').classList.add('active');
@@ -1495,10 +1451,7 @@ async function loadPlayerTickets() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data: tickets } = await supabase.from('tickets').select('*').eq('user_id', user.id).order('date_creation', { ascending: false });
 
-  if (!tickets || tickets.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Tu n\'as aucun ticket.</p>';
-    return;
-  }
+  if (!tickets || tickets.length === 0) { container.innerHTML = '<p style="color: gray; text-align: center;">Tu n\'as aucun ticket.</p>'; return; }
 
   container.innerHTML = '';
   tickets.forEach(t => {
@@ -1513,7 +1466,7 @@ async function loadPlayerTickets() {
 }
 
 // ==========================================
-// --- SYSTEME DE CHAT (TICKETS) ---
+// --- CHAT TICKETS ---
 // ==========================================
 window.openTicketChat = async function(ticketId, isAdmin) {
   currentChatTicketId = ticketId;
@@ -1530,11 +1483,7 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const { data: { user } } = await supabase.auth.getUser();
   currentChatUserName = user.user_metadata.full_name || "Joueur";
 
-  const { data: messages } = await supabase
-    .from('ticket_messages')
-    .select('*')
-    .eq('ticket_id', ticketId)
-    .order('created_at', { ascending: true });
+  const { data: messages } = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true });
 
   const messagesContainer = document.getElementById('chat-messages');
   messagesContainer.innerHTML = '';
@@ -1551,7 +1500,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
       const isMe = msg.sender_id === user.id;
       const bubbleClass = isMe ? 'staff' : 'player';
       const align = isMe ? 'flex-end' : 'flex-start';
-
       messagesContainer.innerHTML += `
         <div class="chat-bubble ${bubbleClass}" style="align-self: ${align};">
           <span class="chat-sender">${msg.sender_name}</span>
@@ -1579,24 +1527,20 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
     message: input
   });
   
-  if (error) {
-    alert("Erreur lors de l'envoi : " + error.message);
-  } else {
+  if (error) { alert("Erreur lors de l'envoi : " + error.message); } 
+  else {
     await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
-    
     openTicketChat(currentChatTicketId, currentChatIsAdmin);
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
 });
 
 document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
-  if (e.key === 'Enter') {
-    document.getElementById('chat-send-btn').click();
-  }
+  if (e.key === 'Enter') document.getElementById('chat-send-btn').click();
 });
 
 // ==========================================
-// --- SYSTÈME DE RÉPUTATION ---
+// --- RÉPUTATION ---
 // ==========================================
 let currentRepTargetUser = null;
 
@@ -1614,9 +1558,7 @@ window.openReputationModal = async function(userId) {
   sliderVal.textContent = currentPts;
   reasonInput.value = '';
 
-  slider.oninput = function() {
-    sliderVal.textContent = this.value;
-  };
+  slider.oninput = function() { sliderVal.textContent = this.value; };
 
   document.getElementById('reputation-modal').classList.add('active');
 };
@@ -1636,25 +1578,19 @@ window.appliquerReputation = async function() {
 
   if (difference !== 0) {
     await supabase.from('reputation_history').insert({
-      user_id: currentRepTargetUser,
-      action: reason,
-      points: difference
+      user_id: currentRepTargetUser, action: reason, points: difference
     });
   }
 
   alert(`Réputation mise à jour à ${newPts} pts !`);
   document.getElementById('reputation-modal').classList.remove('active');
-  
   if (document.getElementById('admin-membres-list')) loadAdminMembres();
 };
 
 window.toggleHistory = async function() {
   const container = document.getElementById('reputation-history-list');
   
-  if (container.style.display === 'block') {
-    container.style.display = 'none';
-    return;
-  }
+  if (container.style.display === 'block') { container.style.display = 'none'; return; }
 
   container.style.display = 'block';
   container.innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
@@ -1662,10 +1598,7 @@ window.toggleHistory = async function() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data: history } = await supabase.from('reputation_history').select('*').eq('user_id', user.id).order('date_creation', { ascending: false }).limit(5);
 
-  if (!history || history.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun historique.</p>';
-    return;
-  }
+  if (!history || history.length === 0) { container.innerHTML = '<p style="color: gray; text-align: center;">Aucun historique.</p>'; return; }
 
   container.innerHTML = '';
   history.forEach(item => {
@@ -1681,11 +1614,9 @@ window.toggleHistory = async function() {
 };
 
 // ==========================================
-// --- ASSEMBLÉE & GUERRE (PANEL CHEF) ---
+// --- ASSEMBLÉE & GUERRE ---
 // ==========================================
-window.convoquerAssemblee = function() {
-  document.getElementById('assemblee-modal').classList.add('active');
-};
+window.convoquerAssemblee = function() { document.getElementById('assemblee-modal').classList.add('active'); };
 
 window.envoyerAssemblee = async function() {
   const { data: { user } } = await supabase.auth.getUser();
@@ -1710,12 +1641,7 @@ window.envoyerAssemblee = async function() {
   const contenu = `Une assemblée a été convoquée le ${dateFormatee}.\n\n${desc}`;
 
   const { error } = await supabase.from('actualites').insert({
-    titre: titre,
-    auteur: auteur,
-    contenu: contenu,
-    sous_description: sous,
-    couleur: couleur,
-    clan_cible: monClan
+    titre, auteur, contenu, sous_description: sous, couleur, clan_cible: monClan
   });
 
   if (error) alert("Erreur : " + error.message);
@@ -1726,9 +1652,7 @@ window.envoyerAssemblee = async function() {
   }
 };
 
-window.declarerGuerre = function() {
-  document.getElementById('guerre-modal').classList.add('active');
-};
+window.declarerGuerre = function() { document.getElementById('guerre-modal').classList.add('active'); };
 
 window.envoyerGuerre = async function() {
   const cible = document.getElementById('guerre-cible').value;
@@ -1746,38 +1670,25 @@ window.envoyerGuerre = async function() {
   const description = `Le clan ${profile.clan} souhaite déclarer la guerre au ${cible}.\n\nMotif : ${motif}\n\nDescription : ${desc}`;
 
   const { error } = await supabase.from('tickets').insert({
-    user_id: user.id, 
-    type_ticket: 'guerre', 
-    sujet: sujet, 
-    description: description
+    user_id: user.id, type_ticket: 'guerre', sujet, description
   });
 
   if (error) alert("Erreur : " + error.message);
-  else {
-    alert("Ta demande de guerre a été envoyée au Staff !");
-    document.getElementById('guerre-modal').classList.remove('active');
-  }
+  else { alert("Ta demande de guerre a été envoyée au Staff !"); document.getElementById('guerre-modal').classList.remove('active'); }
 };
 
 // ==========================================
-// --- ACTIVATION DES NOTIFICATIONS PUSH ---
+// --- NOTIFICATIONS PUSH ---
 // ==========================================
 window.demanderNotifications = async function() {
-  if (!("Notification" in window)) {
-    return alert("Ton navigateur ne supporte pas les notifications.");
-  }
-
+  if (!("Notification" in window)) return alert("Ton navigateur ne supporte pas les notifications.");
   const permission = await Notification.requestPermission();
-  
-  if (permission === "granted") {
-    alert("Super ! Tu recevras désormais les notifications du RP.");
-  } else if (permission === "denied") {
-    alert("Tu as refusé les notifications. Tu peux changer d'avis dans les paramètres de ton navigateur.");
-  }
+  if (permission === "granted") alert("Super ! Tu recevras désormais les notifications du RP.");
+  else if (permission === "denied") alert("Tu as refusé les notifications. Tu peux changer d'avis dans les paramètres de ton navigateur.");
 };
 
 // ==========================================
-// --- SYSTEME D'ACCÈS PAR CODE (JOUEUR) ---
+// --- ACCÈS PAR CODE (JOUEUR) ---
 // ==========================================
 document.getElementById('btn-access-code')?.addEventListener('click', () => {
   document.getElementById('access-code-modal').classList.add('active');
@@ -1787,46 +1698,27 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
   const pseudo = document.getElementById('access-pseudo').value.trim();
   const code = document.getElementById('access-code').value.trim().toUpperCase();
 
-  if (!pseudo || !code) {
-    return alert("Remplis ton pseudo et ton code.");
-  }
+  if (!pseudo || !code) return alert("Remplis ton pseudo et ton code.");
 
   const { data: codeData, error } = await supabase
-    .from('access_codes')
-    .select('*')
-    .eq('code', code)
-    .ilike('discord_pseudo', pseudo) 
-    .maybeSingle();
+    .from('access_codes').select('*').eq('code', code).ilike('discord_pseudo', pseudo).maybeSingle();
 
   if (error || !codeData) {
-    const { data: checkCode } = await supabase
-      .from('access_codes')
-      .select('discord_pseudo, status')
-      .eq('code', code)
-      .maybeSingle();
-
-    if (checkCode) {
-      return alert(`❌ Le code existe, mais il est associé au pseudo "${checkCode.discord_pseudo}" (Statut: ${checkCode.status}). Vérifie l'orthographe !`);
-    } else {
-      return alert("❌ Ce code n'existe pas du tout dans la base de données. As-tu bien cliqué sur 'Générer' ?");
-    }
+    const { data: checkCode } = await supabase.from('access_codes').select('discord_pseudo, status').eq('code', code).maybeSingle();
+    if (checkCode) return alert(`❌ Le code existe, mais il est associé au pseudo "${checkCode.discord_pseudo}" (Statut: ${checkCode.status}). Vérifie l'orthographe !`);
+    else return alert("❌ Ce code n'existe pas du tout dans la base de données. As-tu bien cliqué sur 'Générer' ?");
   }
 
   if (codeData.status === 'En attente') {
     alert("⏳ Ta demande est enregistrée ! Mais le Staff doit d'abord la valider dans le Panel Dev. Réessaie après validation.");
     document.getElementById('access-code-modal').classList.remove('active');
   } 
-  else if (codeData.status === 'Utilisé') {
-    alert("⚠️ Ce code a déjà été utilisé pour se connecter.");
-  }
+  else if (codeData.status === 'Utilisé') { alert("⚠️ Ce code a déjà été utilisé pour se connecter."); }
   else if (codeData.status === 'Validé') {
     const safePseudo = codeData.discord_pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     const emailFictif = safePseudo + "@lgdc-rp.vercel.app";
     
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: emailFictif,
-      password: code
-    });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email: emailFictif, password: code });
 
     if (authError) {
       alert("Erreur de connexion du compte fantôme : " + authError.message);
@@ -1840,17 +1732,14 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
 });
 
 // ==========================================
-// --- PANEL DEV (GESTION DES CODES D'ACCÈS) ---
+// --- PANEL DEV : CODES ---
 // ==========================================
-
 window.genererCodeAcces = async function() {
   const pseudo = document.getElementById('dev-gen-pseudo').value.trim();
   if (!pseudo) return alert("Entre un pseudo Discord.");
 
   const safePseudo = pseudo.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  if (safePseudo.length < 2) {
-    return alert("Le pseudo doit contenir au moins 2 lettres ou chiffres.");
-  }
+  if (safePseudo.length < 2) return alert("Le pseudo doit contenir au moins 2 lettres ou chiffres.");
 
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
   const emailFictif = safePseudo + "@lgdc-rp.vercel.app"; 
@@ -1858,10 +1747,7 @@ window.genererCodeAcces = async function() {
   try {
     const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/smart-action", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
       body: JSON.stringify({ email: emailFictif, password: code })
     });
 
@@ -1870,24 +1756,15 @@ window.genererCodeAcces = async function() {
     if (!response.ok && !data.error?.includes("already been registered") && !data.error?.includes("already exists")) {
       return alert("Erreur création compte : " + (data.error || "Erreur inconnue"));
     }
+  } catch (err) { return alert("Erreur réseau : " + err.message); }
 
-  } catch (err) {
-    return alert("Erreur réseau : " + err.message);
-  }
+  const { error } = await supabase.from('access_codes').insert({ code, discord_pseudo: pseudo, status: 'En attente' });
 
-  const { error } = await supabase.from('access_codes').insert({ 
-    code: code, 
-    discord_pseudo: pseudo, 
-    status: 'En attente' 
-  });
-
-  if (error) {
-    alert("Erreur base de données : " + error.message);
-  } else {
+  if (error) { alert("Erreur base de données : " + error.message); } 
+  else {
     document.getElementById('gen-pseudo-display').textContent = pseudo;
     document.getElementById('gen-code-display').textContent = code;
     document.getElementById('code-generated-modal').classList.add('active');
-    
     document.getElementById('dev-gen-pseudo').value = '';
     loadAdminCodes();
   }
@@ -1899,10 +1776,7 @@ async function loadAdminCodes() {
   
   const { data: codes, error } = await supabase.from('access_codes').select('*').order('created_at', { ascending: false });
   
-  if (error || !codes || codes.length === 0) {
-    container.innerHTML = '<p style="color: gray;">Aucun code pour le moment.</p>';
-    return;
-  }
+  if (error || !codes || codes.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun code pour le moment.</p>'; return; }
 
   container.innerHTML = '';
   codes.forEach(c => {
@@ -1934,9 +1808,6 @@ window.supprimerCode = async function(id) {
   else loadAdminCodes();
 };
 
-// ==========================================
-// --- BOUTON COPIER LE CODE ---
-// ==========================================
 document.getElementById('btn-copy-code')?.addEventListener('click', async () => {
   const codeText = document.getElementById('gen-code-display').textContent;
   const btn = document.getElementById('btn-copy-code');
@@ -1945,47 +1816,37 @@ document.getElementById('btn-copy-code')?.addEventListener('click', async () => 
     await navigator.clipboard.writeText(codeText);
     btn.textContent = "✅ Copié !";
     btn.style.background = "#10b981"; 
-    
     setTimeout(() => {
       btn.textContent = "📋 Copier le code";
       btn.style.background = "#10b981"; 
     }, 2000);
-
-  } catch (err) {
-    alert("Impossible de copier. Ton navigateur bloque peut-être le presse-papiers.");
-  }
+  } catch (err) { alert("Impossible de copier. Ton navigateur bloque peut-être le presse-papiers."); }
 });
 
 // ==========================================
-// --- NOUVELLES FONCTIONS DEV (STATS & MEMBRES) ---
+// --- DEV : STATS & MEMBRES ---
 // ==========================================
-
-// Charger les statistiques
 async function loadDevStats() {
   const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-  document.getElementById('stat-users').textContent = usersCount || 0;
+  const el1 = document.getElementById('stat-users'); if (el1) el1.textContent = usersCount || 0;
 
   const { count: fichesCount } = await supabase.from('fiches_oc').select('*', { count: 'exact', head: true }).eq('statut', 'Validée');
-  document.getElementById('stat-fiches').textContent = fichesCount || 0;
+  const el2 = document.getElementById('stat-fiches'); if (el2) el2.textContent = fichesCount || 0;
 
   const { count: ticketsCount } = await supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('statut', 'Ouvert');
-  document.getElementById('stat-tickets').textContent = ticketsCount || 0;
+  const el3 = document.getElementById('stat-tickets'); if (el3) el3.textContent = ticketsCount || 0;
 
   const { count: codesCount } = await supabase.from('access_codes').select('*', { count: 'exact', head: true }).eq('status', 'En attente');
-  document.getElementById('stat-codes').textContent = codesCount || 0;
+  const el4 = document.getElementById('stat-codes'); if (el4) el4.textContent = codesCount || 0;
 }
 
-// Charger la liste des membres pour le Dev
 async function loadDevMembres() {
   const container = document.getElementById('dev-membres-list');
   if(!container) return;
   container.innerHTML = '<p style="color: gray;">Chargement...</p>';
   
   const { data: profils } = await supabase.from('profiles').select('*');
-  if (!profils || profils.length === 0) { 
-    container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; 
-    return; 
-  }
+  if (!profils || profils.length === 0) { container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; return; }
   
   container.innerHTML = '';
   profils.forEach(profil => {
@@ -2007,7 +1868,6 @@ async function loadDevMembres() {
   });
 }
 
-// Mise à jour de la navigation interne du panel DEV
 document.querySelectorAll('[data-dev-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('[data-dev-target]').forEach(b => b.classList.remove('active'));
@@ -2017,7 +1877,6 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
     const target = e.currentTarget.getAttribute('data-dev-target');
     document.getElementById(`dev-view-${target}`).classList.add('active');
 
-    // On charge les données en fonction de l'onglet
     if (target === 'stats') loadDevStats();
     if (target === 'membres') loadDevMembres();
     if (target === 'accueil') loadAdminCodes();
@@ -2025,95 +1884,65 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
 });
 
 // ==========================================
-// --- SYSTÈME DE CALENDRIER (ÉVÉNEMENTS) ---
+// --- CALENDRIER : CONFIG ÉVÉNEMENTS ---
 // ==========================================
-
-// Configuration des champs pour chaque type d'événement
 const eventConfigs = {
-  'assemblee_clan': {
-    title: "📢 Assemblée de Clan",
-    fields: [
-      { id: 'titre', label: 'Motif de l\'assemblée', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
-      { id: 'lieu', label: 'Lieu', type: 'text', placeholder: 'Ex: Camp principal' },
-      { id: 'desc', label: 'Description', type: 'textarea', required: true }
-    ]
-  },
-  'grande_assemblee': {
-    title: "🌙 Grande Assemblée",
-    fields: [
-      { id: 'titre', label: 'Motif', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'desc', label: 'Description', type: 'textarea', required: true }
-    ]
-  },
-  'patrouille': {
-    title: "👣 Patrouille",
-    fields: [
-      { id: 'titre', label: 'Type de patrouille', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
-      { id: 'lieu', label: 'Zone à patrouiller', type: 'text', required: true },
-      { id: 'desc', label: 'Détails', type: 'textarea' }
-    ]
-  },
-  'ceremonie': {
-    title: "🎖️ Cérémonie",
-    fields: [
-      { id: 'titre', label: 'Type de cérémonie', type: 'text', placeholder: 'Ex: Promotion d\'apprenti', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
-      { id: 'desc', label: 'Détails', type: 'textarea', required: true }
-    ]
-  },
-  'nuit_lune': {
-    title: "🔮 Nuit de la Lune",
-    fields: [
-      { id: 'titre', label: 'Nom de l\'événement', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'desc', label: 'Description', type: 'textarea', required: true }
-    ]
-  },
-  'rituel': {
-    title: "🌿 Rituel du Guérisseur",
-    fields: [
-      { id: 'titre', label: 'Type de rituel', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
-      { id: 'desc', label: 'Description', type: 'textarea' }
-    ]
-  },
-  'tournoi': {
-    title: "⚔️ Tournoi Amical",
-    fields: [
-      { id: 'titre', label: 'Nom du tournoi', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'lieu', label: 'Lieu', type: 'text', required: true },
-      { id: 'desc', label: 'Règles / Description', type: 'textarea', required: true }
-    ]
-  },
-  'maintenance': {
-    title: "🛠️ Maintenance",
-    fields: [
-      { id: 'titre', label: 'Sujet', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'desc', label: 'Détails de la maintenance', type: 'textarea', required: true }
-    ]
-  },
-  'reunion_staff': {
-    title: "📋 Réunion Staff",
-    fields: [
-      { id: 'titre', label: 'Sujet de la réunion', type: 'text', required: true },
-      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
-      { id: 'desc', label: 'Points à aborder', type: 'textarea', required: true }
-    ]
-  }
+  'assemblee_clan': { title: "📢 Assemblée de Clan", fields: [
+    { id: 'titre', label: 'Motif de l\'assemblée', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+    { id: 'lieu', label: 'Lieu', type: 'text', placeholder: 'Ex: Camp principal' },
+    { id: 'desc', label: 'Description', type: 'textarea', required: true }
+  ]},
+  'grande_assemblee': { title: "🌙 Grande Assemblée", fields: [
+    { id: 'titre', label: 'Motif', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'desc', label: 'Description', type: 'textarea', required: true }
+  ]},
+  'patrouille': { title: "👣 Patrouille", fields: [
+    { id: 'titre', label: 'Type de patrouille', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+    { id: 'lieu', label: 'Zone à patrouiller', type: 'text', required: true },
+    { id: 'desc', label: 'Détails', type: 'textarea' }
+  ]},
+  'ceremonie': { title: "🎖️ Cérémonie", fields: [
+    { id: 'titre', label: 'Type de cérémonie', type: 'text', placeholder: 'Ex: Promotion d\'apprenti', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+    { id: 'desc', label: 'Détails', type: 'textarea', required: true }
+  ]},
+  'nuit_lune': { title: "🔮 Nuit de la Lune", fields: [
+    { id: 'titre', label: 'Nom de l\'événement', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'desc', label: 'Description', type: 'textarea', required: true }
+  ]},
+  'rituel': { title: "🌿 Rituel du Guérisseur", fields: [
+    { id: 'titre', label: 'Type de rituel', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+    { id: 'desc', label: 'Description', type: 'textarea' }
+  ]},
+  'tournoi': { title: "⚔️ Tournoi Amical", fields: [
+    { id: 'titre', label: 'Nom du tournoi', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'lieu', label: 'Lieu', type: 'text', required: true },
+    { id: 'desc', label: 'Règles / Description', type: 'textarea', required: true }
+  ]},
+  'maintenance': { title: "🛠️ Maintenance", fields: [
+    { id: 'titre', label: 'Sujet', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'desc', label: 'Détails de la maintenance', type: 'textarea', required: true }
+  ]},
+  'reunion_staff': { title: "📋 Réunion Staff", fields: [
+    { id: 'titre', label: 'Sujet de la réunion', type: 'text', required: true },
+    { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+    { id: 'desc', label: 'Points à aborder', type: 'textarea', required: true }
+  ]}
 };
 
 let currentEventType = null;
 
-// Ouvre le formulaire avec les bons champs
 window.openEventForm = function(type) {
   currentEventType = type;
   const config = eventConfigs[type];
@@ -2133,18 +1962,15 @@ window.openEventForm = function(type) {
       const options = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
       inputHtml = `<select id="ev-${field.id}" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">${options}</select>`;
     }
-
     container.innerHTML += `<div class="form-group"><label>${field.label}</label>${inputHtml}</div>`;
   });
 
   document.getElementById('event-modal').classList.add('active');
 };
 
-// Enregistrer l'événement dans Supabase
 document.getElementById('btn-submit-event')?.addEventListener('click', async () => {
   if(!currentEventType) return;
   
-  // Récupération des données
   const titre = document.getElementById('ev-titre')?.value || "Sans titre";
   const date = document.getElementById('ev-date')?.value;
   const desc = document.getElementById('ev-desc')?.value || "";
@@ -2153,7 +1979,6 @@ document.getElementById('btn-submit-event')?.addEventListener('click', async () 
 
   if (!date || !titre) return alert("Remplis au moins le titre et la date.");
 
-  // On stocke les infos spécifiques (lieu, etc.) en JSON dans 'details'
   const details = { lieu: lieu };
 
   const { error } = await supabase.from('evenements').insert({
@@ -2166,25 +1991,20 @@ document.getElementById('btn-submit-event')?.addEventListener('click', async () 
     statut: 'Validé'
   });
 
-  if (error) {
-    alert("Erreur : " + error.message);
-  } else {
+  if (error) { alert("Erreur : " + error.message); } 
+  else {
     alert("✅ Événement ajouté au calendrier !");
     document.getElementById('event-modal').classList.remove('active');
     loadAdminEvents();
   }
 });
 
-// Charger les événements pour l'Admin
 async function loadAdminEvents() {
   const container = document.getElementById('admin-events-list');
   if(!container) return;
   
   const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>';
-    return;
-  }
+  if (!data || data.length === 0) { container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>'; return; }
 
   container.innerHTML = data.map(ev => `
     <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
@@ -2196,20 +2016,22 @@ async function loadAdminEvents() {
   `).join('');
 }
 
-// Charger les événements pour les joueurs (Panel +) avec FullCalendar
-// Charger les événements pour les joueurs (Panel +) avec FullCalendar
+// ==========================================
+// --- CALENDRIER JOUEUR (CORRIGÉ) ---
+// ==========================================
 async function loadPlayerEvents() {
   const calendarEl = document.getElementById('calendar');
   if(!calendarEl) return;
 
-  // 1. ON INITIALISE LE CALENDRIER EN PREMIER (pour être sûr qu'il s'affiche)
   if (!myCalendar) {
-    if (typeof FullCalendar === 'undefined') {
+    // CORRIGÉ (bug #1) : garde-fou plus robuste
+    if (typeof window.FullCalendar === 'undefined' && typeof FullCalendar === 'undefined') {
       calendarEl.innerHTML = '<p style="color: red; text-align: center;">Erreur : FullCalendar n\'a pas chargé. Vérifie ta connexion.</p>';
       return;
     }
+    const FC = window.FullCalendar || FullCalendar;
 
-    myCalendar = new FullCalendar.Calendar(calendarEl, {
+    myCalendar = new FC.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       locale: 'fr',
       headerToolbar: {
@@ -2217,13 +2039,8 @@ async function loadPlayerEvents() {
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,listWeek'
       },
-      buttonText: {
-        today: "Aujourd'hui",
-        month: 'Mois',
-        week: 'Semaine',
-        list: 'Liste'
-      },
-      events: [], // Vide pour le moment
+      buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
+      events: [],
       eventClick: function(info) {
         const props = info.event.extendedProps;
         alert(`📅 ${info.event.title}\n\n📍 Lieu : ${props.lieu || 'Non spécifié'}\n🏷️ Cible : ${props.clan}\n\n📝 ${props.description}`);
@@ -2233,7 +2050,6 @@ async function loadPlayerEvents() {
     myCalendar.render();
   }
 
-  // 2. ENSUITE, ON CHERCHE LES ÉVÉNEMENTS DANS SUPABASE
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -2269,7 +2085,5 @@ async function loadPlayerEvents() {
     myCalendar.removeAllEvents();
     myCalendar.addEventSource(formattedEvents);
 
-  } catch (err) {
-    console.error("Erreur chargement des événements :", err);
-  }
+  } catch (err) { console.error("Erreur chargement des événements :", err); }
 }
