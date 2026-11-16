@@ -2102,7 +2102,7 @@ async function loadAdminEvents() {
     .order('date_evenement', { ascending: true });
 
   if (error) {
-    container.innerHTML = '<p style="color: red;">Erreur de chargement.</p>';
+    container.innerHTML = '<p style="color: red; text-align: center;">Erreur de chargement.</p>';
     return;
   }
 
@@ -2112,14 +2112,86 @@ async function loadAdminEvents() {
   }
 
   container.innerHTML = data.map(ev => `
-    <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
+    <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent); position: relative;">
       <p style="font-size: 0.75rem; color: gray;">${new Date(ev.date_evenement).toLocaleString('fr-FR')}</p>
-      <h4 style="color: #fff; margin: 5px 0;">${ev.titre} <span style="font-size: 0.7rem; color: var(--accent);">(${ev.type_evenement})</span></h4>
-      <p style="font-size: 0.85rem; color: #cbd5e1;">${ev.description}</p>
+      <h4 style="color: #fff; margin: 5px 0; padding-right: 40px;">${ev.titre} <span style="font-size: 0.7rem; color: var(--accent);">(${ev.type_evenement})</span></h4>
+      <p style="font-size: 0.85rem; color: #cbd5e1;">${ev.description || ''}</p>
       <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">Cible : <strong>${ev.clan_cible}</strong></p>
+      <button type="button"
+              class="btn-action btn-supprimer"
+              style="position: absolute; top: 10px; right: 10px; padding: 6px 10px; font-size: 0.75rem; width: auto;"
+              onclick="supprimerEvenement('${ev.id}')"
+              title="Supprimer cet événement">🗑️</button>
     </div>
   `).join('');
 }
+
+// ==========================================
+// --- SUPPRESSION D'UN ÉVÉNEMENT ---
+// ==========================================
+window.supprimerEvenement = async function(eventId) {
+  if (!eventId) { alert("Erreur : ID événement manquant."); return; }
+  if (!confirm("⚠️ Supprimer cet événement ? Cette action est définitive.")) return;
+
+  const { error } = await supabase.from('evenements').delete().eq('id', eventId);
+
+  if (error) {
+    alert("Erreur de suppression : " + error.message);
+    return;
+  }
+
+  // Rafraîchit la liste admin
+  await loadAdminEvents();
+
+  // Rafraîchit le calendrier FullCalendar côté joueur s'il est ouvert
+  if (typeof myCalendar !== 'undefined' && myCalendar) {
+    try {
+      myCalendar.removeAllEvents();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).maybeSingle();
+        const monClan = profile?.clan || 'Aucun';
+        const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
+        const visibles = (data || []).filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
+        const formatted = visibles.map(ev => {
+          let color = '#fbbf24';
+          if (ev.type_evenement.includes('guerre')) color = '#ef4444';
+          if (ev.type_evenement.includes('nuit')) color = '#60a5fa';
+          if (ev.type_evenement.includes('rituel')) color = '#10b981';
+          return {
+            id: ev.id,
+            title: ev.titre,
+            start: ev.date_evenement,
+            backgroundColor: color,
+            borderColor: color,
+            extendedProps: {
+              description: ev.description,
+              clan: ev.clan_cible,
+              lieu: ev.details?.lieu || '',
+              type: ev.type_evenement
+            }
+          };
+        });
+        myCalendar.addEventSource(formatted);
+      }
+    } catch (e) { console.warn("Refresh calendrier joueur échoué", e); }
+  }
+
+  // Petit toast de confirmation
+  const toast = document.getElementById('toast-success');
+  if (toast) {
+    const h4 = toast.querySelector('h4');
+    const p = toast.querySelector('p');
+    if (h4) h4.textContent = "Événement supprimé";
+    if (p) p.textContent = "Il a été retiré du calendrier.";
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('show'), 50);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.classList.add('hidden'), 500);
+    }, 4000);
+  }
+};
 
 // ==========================================
 // --- CALENDRIER JOUEUR (CORRIGÉ) ---
