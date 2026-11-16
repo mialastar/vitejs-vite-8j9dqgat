@@ -599,36 +599,67 @@
         </nav>
       </div> <!-- FIN SCREEN-ADMIN -->
 
-      <!-- ÉCRAN 5 : APPLICATION DEV -->
-      <div id="screen-dev" class="screen app-layout admin-layout" style="background-image: linear-gradient(rgba(10, 5, 20, 0.9), rgba(10, 5, 20, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');">
-        <div class="app-content">
-          <div class="admin-header" style="border-bottom: 2px solid #8b5cf6;">
-            <h2 style="color: #8b5cf6;">Panel Développeur</h2>
-            <span>Moonlight Studio</span>
-          </div>
-
-          <!-- VUE ACCUEIL DEV -->
-          <div id="dev-view-accueil" class="view active">
-            <h3 class="admin-title">Gestion des Codes d'Accès</h3>
-            
-            <div class="profile-card" style="margin-bottom: 20px; border-color: rgba(139, 92, 246, 0.3);">
-              <h4 style="color: #8b5cf6; margin-bottom: 15px;">Générer un code d'accès</h4>
-              <label style="color: var(--text-dim);">Pseudo Discord du joueur :</label>
-              <input type="text" id="dev-gen-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
-              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #8b5cf6; border-color: #8b5cf6;" onclick="genererCodeAcces()">Générer le code</button>
-            </div>
-
-            <h4 style="color: #8b5cf6; margin-bottom: 15px;">Demandes de connexion</h4>
-            <div id="admin-dev-codes-list"><p style="color: gray;">Chargement...</p></div>
-          </div>
-        </div>
-
-        <!-- BARRE DE NAVIGATION DEV -->
-        <nav class="bottom-nav admin-nav" style="border-top-color: #8b5cf6;">
-          <button type="button" class="nav-btn active" data-dev-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
-          <button type="button" class="nav-btn" id="btn-quit-dev" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
-        </nav>
-      </div> <!-- FIN SCREEN-DEV -->
+            <!-- ÉCRAN 5 : APPLICATION DEV -->
+            <div id="screen-dev" class="screen app-layout admin-layout" style="background-image: linear-gradient(rgba(10, 5, 20, 0.9), rgba(10, 5, 20, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');">
+              <div class="app-content">
+                <div class="admin-header" style="border-bottom: 2px solid #8b5cf6;">
+                  <h2 style="color: #8b5cf6;">Panel Développeur</h2>
+                  <span>Moonlight Studio</span>
+                </div>
+      
+                <!-- VUE ACCUEIL DEV (Codes) -->
+                <div id="dev-view-accueil" class="view active">
+                  <h3 class="admin-title">Gestion des Codes d'Accès</h3>
+                  <div class="profile-card" style="margin-bottom: 20px; border-color: rgba(139, 92, 246, 0.3);">
+                    <h4 style="color: #8b5cf6; margin-bottom: 15px;">Générer un code d'accès</h4>
+                    <label style="color: var(--text-dim);">Pseudo Discord du joueur :</label>
+                    <input type="text" id="dev-gen-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+                    <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #8b5cf6; border-color: #8b5cf6;" onclick="genererCodeAcces()">Générer le code</button>
+                  </div>
+                  <h4 style="color: #8b5cf6; margin-bottom: 15px;">Demandes de connexion</h4>
+                  <div id="admin-dev-codes-list"><p style="color: gray;">Chargement...</p></div>
+                </div>
+      
+                <!-- VUE STATISTIQUES DEV -->
+                <div id="dev-view-stats" class="view">
+                  <h3 class="admin-title">Tableau de bord</h3>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="profile-card" style="text-align: center; border-left: 4px solid #8b5cf6;">
+                      <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Membres Inscrits</p>
+                      <h2 id="stat-users" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+                    </div>
+                    <div class="profile-card" style="text-align: center; border-left: 4px solid #10b981;">
+                      <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Fiches Validées</p>
+                      <h2 id="stat-fiches" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+                    </div>
+                    <div class="profile-card" style="text-align: center; border-left: 4px solid #fbbf24;">
+                      <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Tickets Ouverts</p>
+                      <h2 id="stat-tickets" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+                    </div>
+                    <div class="profile-card" style="text-align: center; border-left: 4px solid #ef4444;">
+                      <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Codes en Attente</p>
+                      <h2 id="stat-codes" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+                    </div>
+                  </div>
+                </div>
+      
+                <!-- VUE MEMBRES DEV -->
+                <div id="dev-view-membres" class="view">
+                  <h3 class="admin-title">Gestion des Membres</h3>
+                  <div id="dev-membres-list"><p style="color: gray;">Chargement...</p></div>
+                </div>
+      
+              </div>
+      
+              <!-- BARRE DE NAVIGATION DEV -->
+              <nav class="bottom-nav admin-nav" style="border-top-color: #8b5cf6;">
+                <button type="button" class="nav-btn active" data-dev-target="accueil"><span class="icon">🔑</span><span class="label">Codes</span></button>
+                <button type="button" class="nav-btn" data-dev-target="stats"><span class="icon">📊</span><span class="label">Stats</span></button>
+                <button type="button" class="nav-btn" data-dev-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
+                <button type="button" class="nav-btn" id="btn-quit-dev" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
+              </nav>
+            </div> <!-- FIN SCREEN-DEV -->
 
       <!-- MODAL CHAT TICKET -->
       <div id="ticket-chat-modal" class="support-modal-overlay">

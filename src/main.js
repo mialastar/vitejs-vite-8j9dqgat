@@ -1887,3 +1887,75 @@ document.getElementById('btn-copy-code')?.addEventListener('click', async () => 
     alert("Impossible de copier. Ton navigateur bloque peut-être le presse-papiers.");
   }
 });
+
+// ==========================================
+// --- NOUVELLES FONCTIONS DEV (STATS & MEMBRES) ---
+// ==========================================
+
+// Charger les statistiques
+async function loadDevStats() {
+  // Nombre total de membres
+  const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+  document.getElementById('stat-users').textContent = usersCount || 0;
+
+  // Nombre de fiches validées
+  const { count: fichesCount } = await supabase.from('fiches_oc').select('*', { count: 'exact', head: true }).eq('statut', 'Validée');
+  document.getElementById('stat-fiches').textContent = fichesCount || 0;
+
+  // Nombre de tickets ouverts
+  const { count: ticketsCount } = await supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('statut', 'Ouvert');
+  document.getElementById('stat-tickets').textContent = ticketsCount || 0;
+
+  // Nombre de codes en attente
+  const { count: codesCount } = await supabase.from('access_codes').select('*', { count: 'exact', head: true }).eq('status', 'En attente');
+  document.getElementById('stat-codes').textContent = codesCount || 0;
+}
+
+// Charger la liste des membres pour le Dev
+async function loadDevMembres() {
+  const container = document.getElementById('dev-membres-list');
+  if(!container) return;
+  container.innerHTML = '<p style="color: gray;">Chargement...</p>';
+  
+  const { data: profils } = await supabase.from('profiles').select('*');
+  if (!profils || profils.length === 0) { 
+    container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; 
+    return; 
+  }
+  
+  container.innerHTML = '';
+  profils.forEach(profil => {
+    container.innerHTML += `
+      <div class="profile-card" style="margin-bottom: 10px; border-left: 2px solid #8b5cf6;">
+        <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle APP :</strong> <span style="color: #8b5cf6;">${profil.role_app || 'JOUEUR'}</span></p>
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
+          <p style="margin: 0; font-size: 0.85rem;"><strong>Clan :</strong> ${profil.clan || 'Aucun'}</p>
+        </div>
+        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+          <button class="btn-action btn-modifier" onclick="changerRoleApp('${profil.id}')" style="color: #8b5cf6;">Modif APP</button>
+          <button class="btn-action btn-modifier" onclick="changerRoleRP('${profil.id}')">Modif RP</button>
+          <button class="btn-action btn-modifier" onclick="changerClan('${profil.id}')">Modif Clan</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// Mise à jour de la navigation interne du panel DEV
+document.querySelectorAll('[data-dev-target]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('[data-dev-target]').forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    document.querySelectorAll('#screen-dev .view').forEach(v => v.classList.remove('active'));
+    
+    const target = e.currentTarget.getAttribute('data-dev-target');
+    document.getElementById(`dev-view-${target}`).classList.add('active');
+
+    // On charge les données en fonction de l'onglet
+    if (target === 'stats') loadDevStats();
+    if (target === 'membres') loadDevMembres();
+    if (target === 'accueil') loadAdminCodes();
+  });
+});
