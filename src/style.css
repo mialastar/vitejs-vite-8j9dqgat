@@ -465,3 +465,28 @@ body {
 .fc .fc-daygrid-day-number { color: #cbd5e1; text-decoration: none; }
 .fc .fc-daygrid-day.fc-day-today { background-color: rgba(251, 191, 36, 0.05); }
 .fc-event { cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 4px; }
+
+/* --- FULLCALENDAR DARK THEME --- */
+.fc {
+  --fc-border-color: rgba(255, 255, 255, 0.1);
+  --fc-daygrid-event-dot: var(--accent);
+  --fc-event-bg-color: var(--accent);
+  --fc-event-border-color: var(--accent);
+  --fc-event-text-color: #000;
+  --fc-today-bg-color: rgba(251, 191, 36, 0.1);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: rgba(0, 0, 0, 0.3);
+  --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.fc-theme-standard .fc-scrollgrid { border-color: rgba(255, 255, 255, 0.1); }
+.fc .fc-toolbar-title { font-family: var(--font-title); color: var(--accent); text-transform: capitalize; font-size: 1.5rem;}
+.fc .fc-button-primary { background-color: rgba(251, 191, 36, 0.2); border-color: var(--accent); color: var(--accent); text-transform: capitalize; }
+.fc .fc-button-primary:hover { background-color: var(--accent); color: #000; }
+.fc .fc-button-primary:disabled { background-color: transparent; border-color: rgba(255,255,255,0.2); color: gray; }
+.fc .fc-col-header-cell-cushion { color: #fff; text-decoration: none; }
+.fc .fc-daygrid-day-number { color: #cbd5e1; text-decoration: none; }
+.fc .fc-daygrid-day.fc-day-today { background-color: rgba(251, 191, 36, 0.05); }
+.fc-event { cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem;}
+.fc-daygrid-day-frame { min-height: 80px; } /* Donne un peu de hauteur aux cases des jours */

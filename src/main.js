@@ -19,6 +19,7 @@ let currentRelationFicheId = null;
 let currentChatTicketId = null;
 let currentChatIsAdmin = false;
 let currentChatUserName = "";
+let myCalendar = null; // Variable globale pour stocker le calendrier
 let myCalendar = null; // Variable globale pour le calendrier
 
 // ==========================================
@@ -2204,6 +2205,7 @@ async function loadAdminEvents() {
   `).join('');
 }
 
+// Charger les événements pour les joueurs (Panel +) avec FullCalendar
 // Charger les événements pour les joueurs (Panel +) avec FullCalendar
 async function loadPlayerEvents() {
   const calendarEl = document.getElementById('calendar');
