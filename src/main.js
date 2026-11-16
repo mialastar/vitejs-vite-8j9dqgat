@@ -170,32 +170,23 @@ window.openPanelScreen = function(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(screenId).classList.add('active');
   
+  // Si on ouvre le Panel +, on charge le calendrier
   if (screenId === 'screen-panel-plus') loadPlayerEvents();
+  
+  // Si on ouvre le Panel Admin, on charge toutes ses données
+  if (screenId === 'screen-admin') {
+    loadAdminFiches();
+    loadAdminMembres();
+    loadAdminTickets();
+  }
+  
+  // Si on ouvre le Panel Dev, on charge ses données
+  if (screenId === 'screen-dev') {
+    loadAdminCodes();
+    loadDevStats();
+    loadDevMembres();
+  }
 };
-
-document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => {
-  document.getElementById('screen-panel-plus').classList.remove('active');
-  screenApp.classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
-  document.getElementById('view-plus').classList.add('active');
-});
-
-document.getElementById('btn-quit-panel-clan')?.addEventListener('click', () => {
-  document.getElementById('screen-panel-clan').classList.remove('active');
-  screenApp.classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
-  document.getElementById('view-plus').classList.add('active');
-});
-
-document.getElementById('btn-quit-panel-chef')?.addEventListener('click', () => {
-  document.getElementById('screen-panel-chef').classList.remove('active');
-  screenApp.classList.add('active');
-  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
-  document.getElementById('view-plus').classList.add('active');
-});
 
 // ==========================================
 // --- ONGLETS MONDE & FICHES ---
@@ -2211,36 +2202,13 @@ async function loadPlayerEvents() {
   const calendarEl = document.getElementById('calendar');
   if(!calendarEl) return;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
-  const monClan = profile ? profile.clan : 'Aucun';
-
-  const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
-
-  const eventsVisibles = (data || []).filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
-
-  const formattedEvents = eventsVisibles.map(ev => {
-    let color = '#fbbf24';
-    if(ev.type_evenement.includes('guerre')) color = '#ef4444';
-    if(ev.type_evenement.includes('nuit')) color = '#60a5fa';
-    if(ev.type_evenement.includes('rituel')) color = '#10b981';
-
-    return {
-      id: ev.id,
-      title: ev.titre,
-      start: ev.date_evenement,
-      backgroundColor: color,
-      borderColor: color,
-      extendedProps: {
-        description: ev.description,
-        clan: ev.clan_cible,
-        lieu: ev.details?.lieu || '',
-        type: ev.type_evenement
-      }
-    };
-  });
-
+  // 1. ON INITIALISE LE CALENDRIER EN PREMIER (pour être sûr qu'il s'affiche)
   if (!myCalendar) {
+    if (typeof FullCalendar === 'undefined') {
+      calendarEl.innerHTML = '<p style="color: red; text-align: center;">Erreur : FullCalendar n\'a pas chargé. Vérifie ta connexion.</p>';
+      return;
+    }
+
     myCalendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       locale: 'fr',
@@ -2255,20 +2223,53 @@ async function loadPlayerEvents() {
         week: 'Semaine',
         list: 'Liste'
       },
-      events: formattedEvents,
+      events: [], // Vide pour le moment
       eventClick: function(info) {
         const props = info.event.extendedProps;
         alert(`📅 ${info.event.title}\n\n📍 Lieu : ${props.lieu || 'Non spécifié'}\n🏷️ Cible : ${props.clan}\n\n📝 ${props.description}`);
       },
-      eventTimeFormat: { 
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false 
-      }
+      eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false }
     });
     myCalendar.render();
-  } else {
+  }
+
+  // 2. ENSUITE, ON CHERCHE LES ÉVÉNEMENTS DANS SUPABASE
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).maybeSingle();
+    const monClan = profile ? profile.clan : 'Aucun';
+
+    const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
+
+    const eventsVisibles = (data || []).filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
+
+    const formattedEvents = eventsVisibles.map(ev => {
+      let color = '#fbbf24';
+      if(ev.type_evenement.includes('guerre')) color = '#ef4444';
+      if(ev.type_evenement.includes('nuit')) color = '#60a5fa';
+      if(ev.type_evenement.includes('rituel')) color = '#10b981';
+
+      return {
+        id: ev.id,
+        title: ev.titre,
+        start: ev.date_evenement,
+        backgroundColor: color,
+        borderColor: color,
+        extendedProps: {
+          description: ev.description,
+          clan: ev.clan_cible,
+          lieu: ev.details?.lieu || '',
+          type: ev.type_evenement
+        }
+      };
+    });
+
     myCalendar.removeAllEvents();
     myCalendar.addEventSource(formattedEvents);
+
+  } catch (err) {
+    console.error("Erreur chargement des événements :", err);
   }
 }
