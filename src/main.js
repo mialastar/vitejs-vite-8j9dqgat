@@ -19,6 +19,7 @@ let currentRelationFicheId = null;
 let currentChatTicketId = null;
 let currentChatIsAdmin = false;
 let currentChatUserName = "";
+let myCalendar = null; // Variable globale pour le calendrier
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -156,7 +157,6 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
     const target = e.currentTarget.getAttribute('data-panel-target');
     parentScreen.querySelector(`#panel-${target}`)?.classList.add('active');
 
-    // Si on clique sur l'onglet Calendrier, on charge les événements
     if (target === 'calendrier') loadPlayerEvents();
   });
 });
@@ -169,11 +169,9 @@ window.openPanelScreen = function(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(screenId).classList.add('active');
   
-  // Si on ouvre le panel +, on charge direct le calendrier par défaut
   if (screenId === 'screen-panel-plus') loadPlayerEvents();
 };
 
-// Fermer le Panel +
 document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => {
   document.getElementById('screen-panel-plus').classList.remove('active');
   screenApp.classList.add('active');
@@ -182,7 +180,6 @@ document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => 
   document.getElementById('view-plus').classList.add('active');
 });
 
-// Fermer le Panel Clan
 document.getElementById('btn-quit-panel-clan')?.addEventListener('click', () => {
   document.getElementById('screen-panel-clan').classList.remove('active');
   screenApp.classList.add('active');
@@ -191,7 +188,6 @@ document.getElementById('btn-quit-panel-clan')?.addEventListener('click', () => 
   document.getElementById('view-plus').classList.add('active');
 });
 
-// Fermer le Panel Chef
 document.getElementById('btn-quit-panel-chef')?.addEventListener('click', () => {
   document.getElementById('screen-panel-chef').classList.remove('active');
   screenApp.classList.add('active');
@@ -1142,7 +1138,6 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
     const target = e.currentTarget.getAttribute('data-admin-target');
     document.getElementById(`admin-view-${target}`).classList.add('active');
 
-    // Si on clique sur l'onglet Calendrier, on charge les événements
     if (target === 'calendrier') loadAdminEvents();
   });
 });
@@ -2209,39 +2204,69 @@ async function loadAdminEvents() {
   `).join('');
 }
 
-// Charger les événements pour les joueurs (Panel +)
+// Charger les événements pour les joueurs (Panel +) avec FullCalendar
 async function loadPlayerEvents() {
-  const container = document.getElementById('player-events-list');
-  if(!container) return;
+  const calendarEl = document.getElementById('calendar');
+  if(!calendarEl) return;
 
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
   const monClan = profile ? profile.clan : 'Aucun';
 
-  // On récupère les événements à venir
-  const now = new Date().toISOString();
-  const { data } = await supabase.from('evenements').select('*').gte('date_evenement', now).order('date_evenement', { ascending: true });
+  const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
 
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>';
-    return;
+  const eventsVisibles = (data || []).filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
+
+  const formattedEvents = eventsVisibles.map(ev => {
+    let color = '#fbbf24';
+    if(ev.type_evenement.includes('guerre')) color = '#ef4444';
+    if(ev.type_evenement.includes('nuit')) color = '#60a5fa';
+    if(ev.type_evenement.includes('rituel')) color = '#10b981';
+
+    return {
+      id: ev.id,
+      title: ev.titre,
+      start: ev.date_evenement,
+      backgroundColor: color,
+      borderColor: color,
+      extendedProps: {
+        description: ev.description,
+        clan: ev.clan_cible,
+        lieu: ev.details?.lieu || '',
+        type: ev.type_evenement
+      }
+    };
+  });
+
+  if (!myCalendar) {
+    myCalendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'fr',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek'
+      },
+      buttonText: {
+        today: "Aujourd'hui",
+        month: 'Mois',
+        week: 'Semaine',
+        list: 'Liste'
+      },
+      events: formattedEvents,
+      eventClick: function(info) {
+        const props = info.event.extendedProps;
+        alert(`📅 ${info.event.title}\n\n📍 Lieu : ${props.lieu || 'Non spécifié'}\n🏷️ Cible : ${props.clan}\n\n📝 ${props.description}`);
+      },
+      eventTimeFormat: { 
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false 
+      }
+    });
+    myCalendar.render();
+  } else {
+    myCalendar.removeAllEvents();
+    myCalendar.addEventSource(formattedEvents);
   }
-
-  // On filtre : le joueur voit les events publics ou ceux de son clan
-  const eventsVisibles = data.filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
-
-  if (eventsVisibles.length === 0) {
-    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu pour ton clan.</p>';
-    return;
-  }
-
-  container.innerHTML = eventsVisibles.map(ev => `
-    <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
-      <p style="font-size: 0.75rem; color: var(--accent); font-weight: bold;">${new Date(ev.date_evenement).toLocaleString('fr-FR')}</p>
-      <h4 style="color: #fff; margin: 5px 0;">${ev.titre}</h4>
-      <p style="font-size: 0.85rem; color: #cbd5e1;">${ev.description}</p>
-      ${ev.details.lieu ? `<p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">📍 Lieu : ${ev.details.lieu}</p>` : ''}
-      <p style="font-size: 0.8rem; color: var(--text-dim);">🏷️ ${ev.clan_cible}</p>
-    </div>
-  `).join('');
 }
