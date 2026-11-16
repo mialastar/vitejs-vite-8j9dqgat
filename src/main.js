@@ -20,6 +20,7 @@ let currentRelationFicheId = null;
 let currentChatTicketId = null;
 let currentChatIsAdmin = false;
 let currentChatUserName = "";
+let isSubmittingEvent = false;
 let myCalendar = null; // UNE SEULE déclaration (bug #1 du calendrier)
 
 // ==========================================
@@ -167,14 +168,17 @@ navBtns.forEach(btn => {
 document.querySelectorAll('[data-panel-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
     const parentScreen = e.currentTarget.closest('.screen');
-    
+    if (!parentScreen) return;
+
     parentScreen.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    
+
+    // CORRIGÉ (bug 1) : retire active de TOUS les panel-content du screen
     parentScreen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
-    
+
     const target = e.currentTarget.getAttribute('data-panel-target');
-    parentScreen.querySelector(`#panel-${target}`)?.classList.add('active');
+    const targetEl = parentScreen.querySelector(`#panel-${target}`);
+    if (targetEl) targetEl.classList.add('active');
 
     if (target === 'calendrier') loadPlayerEvents();
   });
@@ -185,19 +189,55 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
 // ==========================================
 
 window.openPanelScreen = function(screenId) {
+  // Ferme tous les écrans
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-  
-  if (screenId === 'screen-panel-plus') loadPlayerEvents();
-  
+  const screen = document.getElementById(screenId);
+  if (!screen) return;
+  screen.classList.add('active');
+
+  // CORRIGÉ (bug 1) : réinitialise l'onglet actif de chaque panel
+  if (screenId === 'screen-panel-plus') {
+    screen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+    const first = screen.querySelector('#panel-calendrier');
+    if (first) first.classList.add('active');
+    screen.querySelectorAll('[data-panel-target]').forEach(b => b.classList.remove('active'));
+    screen.querySelector('[data-panel-target="calendrier"]')?.classList.add('active');
+    loadPlayerEvents();
+  }
+
+  if (screenId === 'screen-panel-clan') {
+    screen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+    screen.querySelector('#panel-annonces')?.classList.add('active');
+    screen.querySelectorAll('[data-panel-target]').forEach(b => b.classList.remove('active'));
+    screen.querySelector('[data-panel-target="annonces"]')?.classList.add('active');
+  }
+
+  if (screenId === 'screen-panel-chef') {
+    screen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+    screen.querySelector('#panel-gestion-membres')?.classList.add('active');
+    screen.querySelectorAll('[data-panel-target]').forEach(b => b.classList.remove('active'));
+    screen.querySelector('[data-panel-target="gestion-membres"]')?.classList.add('active');
+  }
+
   if (screenId === 'screen-admin') {
+    // Réinitialise aussi l'onglet admin sur "accueil"
+    screen.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    screen.querySelector('#admin-view-accueil')?.classList.add('active');
+    screen.querySelectorAll('[data-admin-target]').forEach(b => b.classList.remove('active'));
+    screen.querySelector('[data-admin-target="accueil"]')?.classList.add('active');
+
     loadAdminFiches();
     loadAdminMembres();
     loadAdminTickets();
-    loadAdminEvents(); // CORRIGÉ (bonus B5)
+    loadAdminEvents();
   }
-  
+
   if (screenId === 'screen-dev') {
+    screen.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    screen.querySelector('#dev-view-accueil')?.classList.add('active');
+    screen.querySelectorAll('[data-dev-target]').forEach(b => b.classList.remove('active'));
+    screen.querySelector('[data-dev-target="accueil"]')?.classList.add('active');
+
     loadAdminCodes();
     loadDevStats();
     loadDevMembres();
@@ -1968,43 +2008,108 @@ window.openEventForm = function(type) {
   document.getElementById('event-modal').classList.add('active');
 };
 
-document.getElementById('btn-submit-event')?.addEventListener('click', async () => {
-  if(!currentEventType) return;
-  
-  const titre = document.getElementById('ev-titre')?.value || "Sans titre";
-  const date = document.getElementById('ev-date')?.value;
-  const desc = document.getElementById('ev-desc')?.value || "";
-  const clan = document.getElementById('ev-clan')?.value || "Tous les clans";
-  const lieu = document.getElementById('ev-lieu')?.value || "";
+let isSubmittingEvent = false; // flag anti double-clic
 
-  if (!date || !titre) return alert("Remplis au moins le titre et la date.");
-
-  const details = { lieu: lieu };
-
-  const { error } = await supabase.from('evenements').insert({
-    type_evenement: currentEventType,
-    titre: titre,
-    date_evenement: new Date(date).toISOString(),
-    description: desc,
-    clan_cible: clan,
-    details: details,
-    statut: 'Validé'
-  });
-
-  if (error) { alert("Erreur : " + error.message); } 
-  else {
-    alert("✅ Événement ajouté au calendrier !");
-    document.getElementById('event-modal').classList.remove('active');
-    loadAdminEvents();
+// ==========================================
+// --- SOUMISSION D'UN ÉVÉNEMENT (ROBUSTE) ---
+// ==========================================
+function attachEventSubmitListener() {
+  const btn = document.getElementById('btn-submit-event');
+  if (!btn) {
+    // Le bouton n'est pas encore dans le DOM → on réessaie dans 100ms
+    setTimeout(attachEventSubmitListener, 100);
+    return;
   }
-});
+  if (btn.dataset.listenerAttached === '1') return; // évite le double
+  btn.dataset.listenerAttached = '1';
 
+  // Force type="button" pour empêcher la soumission native
+  btn.type = 'button';
+
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isSubmittingEvent) return;
+    if (!currentEventType) return alert("Type d'événement inconnu.");
+
+    const titre = document.getElementById('ev-titre')?.value?.trim() || "";
+    const date = document.getElementById('ev-date')?.value;
+    const desc = document.getElementById('ev-desc')?.value || "";
+    const clan = document.getElementById('ev-clan')?.value || "Tous les clans";
+    const lieu = document.getElementById('ev-lieu')?.value || "";
+
+    if (!titre) return alert("Remplis au moins le titre.");
+    if (!date) return alert("Remplis la date et l'heure.");
+
+    isSubmittingEvent = true;
+    btn.disabled = true;
+    const oldText = btn.textContent;
+    btn.textContent = "Création...";
+
+    try {
+      const { error } = await supabase.from('evenements').insert({
+        type_evenement: currentEventType,
+        titre: titre,
+        date_evenement: new Date(date).toISOString(),
+        description: desc,
+        clan_cible: clan,
+        details: { lieu },
+        statut: 'Validé'
+      });
+
+      if (error) {
+        alert("Erreur : " + error.message);
+        return;
+      }
+
+      // Ferme le modal
+      document.getElementById('event-modal').classList.remove('active');
+
+      // Force l'onglet Calendrier de l'admin AVANT de recharger
+      const adminScreen = document.getElementById('screen-admin');
+      if (adminScreen) {
+        adminScreen.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        adminScreen.querySelector('#admin-view-calendrier')?.classList.add('active');
+        adminScreen.querySelectorAll('[data-admin-target]').forEach(b => b.classList.remove('active'));
+        adminScreen.querySelector('[data-admin-target="calendrier"]')?.classList.add('active');
+      }
+
+      await loadAdminEvents();
+      alert("✅ Événement ajouté au calendrier !");
+
+    } finally {
+      isSubmittingEvent = false;
+      btn.disabled = false;
+      btn.textContent = oldText;
+    }
+  });
+}
+
+// Déclenche l'attachement dès que le DOM est prêt
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachEventSubmitListener);
+} else {
+  attachEventSubmitListener();
+}
 async function loadAdminEvents() {
   const container = document.getElementById('admin-events-list');
-  if(!container) return;
-  
-  const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
-  if (!data || data.length === 0) { container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>'; return; }
+  if (!container) return;
+
+  const { data, error } = await supabase
+    .from('evenements')
+    .select('*')
+    .order('date_evenement', { ascending: true });
+
+  if (error) {
+    container.innerHTML = '<p style="color: red;">Erreur de chargement.</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>';
+    return;
+  }
 
   container.innerHTML = data.map(ev => `
     <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
