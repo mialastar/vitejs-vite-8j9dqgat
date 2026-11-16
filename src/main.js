@@ -59,11 +59,7 @@ if(btnDiscordLogin) {
 }
 
 function showApp() {
-  screenIntro.classList.remove('active');
-  screenCredits.classList.remove('active');
-  screenAuth.classList.remove('active');
-  screenAdmin.classList.remove('active');
-  screenDev.classList.remove('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   screenApp.classList.add('active');
   
   // On force le retour sur l'accueil
@@ -78,11 +74,7 @@ function showApp() {
 }
 
 function showIntro() {
-  screenApp.classList.remove('active');
-  screenAdmin.classList.remove('active');
-  screenDev.classList.remove('active');
-  screenCredits.classList.remove('active');
-  screenAuth.classList.remove('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   screenIntro.classList.add('active');
 }
 
@@ -150,31 +142,62 @@ navBtns.forEach(btn => {
 });
 
 // ==========================================
-// --- ONGLETS INTERNES AUX PANELS (PLUS, CLAN, CHEF) ---
+// --- LOGIQUE DES ONGLETS INTERNES AUX PANELS SÉPARÉS ---
 // ==========================================
-document.querySelectorAll('.panel-tab-btn').forEach(btn => {
+document.querySelectorAll('[data-panel-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
-    const parentView = e.currentTarget.closest('.view');
+    // On trouve l'écran parent (screen-panel-plus, screen-panel-clan, etc.)
+    const parentScreen = e.currentTarget.closest('.screen');
     
-    parentView.querySelectorAll('.panel-tab-btn').forEach(b => b.classList.remove('active'));
-    parentView.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
-    
+    // On désactive tous les boutons de la barre de nav de CE panel
+    parentScreen.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    const target = e.currentTarget.getAttribute('data-panel');
-    parentView.querySelector(`#panel-${target}`)?.classList.add('active');
+    
+    // On cache tous les contenus de CE panel
+    parentScreen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+    
+    // On affiche le bon contenu
+    const target = e.currentTarget.getAttribute('data-panel-target');
+    parentScreen.querySelector(`#panel-${target}`)?.classList.add('active');
   });
 });
 
-// Fonction globale pour naviguer entre les panneaux (ex: cliquer sur "Panel +" depuis la grille)
-window.showView = function(viewName) {
-  document.querySelectorAll('.app-content .view').forEach(v => v.classList.remove('active'));
-  const targetView = document.getElementById(`view-${viewName}`);
-  if(targetView) targetView.classList.add('active');
-  
-  // On garde l'onglet "Plus" allumé dans la barre du bas
+// ==========================================
+// --- OUVERTURE ET FERMETURE DES PANELS SÉPARÉS ---
+// ==========================================
+
+// Ouvrir un panel (depuis la grille "Plus")
+window.openPanelScreen = function(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+};
+
+// Fermer le Panel +
+document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-plus').classList.remove('active');
+  screenApp.classList.add('active');
   document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
-};
+  document.getElementById('view-plus').classList.add('active');
+});
+
+// Fermer le Panel Clan
+document.getElementById('btn-quit-panel-clan')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-clan').classList.remove('active');
+  screenApp.classList.add('active');
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
+});
+
+// Fermer le Panel Chef
+document.getElementById('btn-quit-panel-chef')?.addEventListener('click', () => {
+  document.getElementById('screen-panel-chef').classList.remove('active');
+  screenApp.classList.add('active');
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
+});
 
 // ==========================================
 // --- ONGLETS MONDE & FICHES ---
@@ -884,48 +907,6 @@ window.updatePlusMenu = function(roleApp, roleRp) {
 document.getElementById('btn-logout')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
 
 // ==========================================
-// --- BASCULE VERS LES PANELS ADMIN & DEV (DEPUIS LE MENU PLUS) ---
-// ==========================================
-window.openAdminPanel = function() {
-  screenApp.classList.remove('active');
-  screenAdmin.classList.add('active');
-  loadAdminFiches(); loadAdminMembres(); loadAdminTickets();
-};
-
-window.openDevPanel = function() {
-  screenApp.classList.remove('active');
-  screenDev.classList.add('active');
-  loadAdminCodes();
-};
-
-document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
-  screenAdmin.classList.remove('active');
-  screenApp.classList.add('active');
-  showView('plus'); // Retour au menu Plus
-});
-
-document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
-  screenDev.classList.remove('active');
-  screenApp.classList.add('active');
-  showView('plus'); // Retour au menu Plus
-});
-
-// Garder les anciens boutons du profil qui font la même chose (pour éviter de casser si tu les utilises)
-document.getElementById('btn-admin-panel')?.addEventListener('click', window.openAdminPanel);
-document.getElementById('btn-dev-panel')?.addEventListener('click', window.openDevPanel);
-
-document.querySelectorAll('[data-dev-target]').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('[data-dev-target]').forEach(b => b.classList.remove('active'));
-    e.currentTarget.classList.add('active');
-    document.querySelectorAll('#screen-dev .view').forEach(v => v.classList.remove('active'));
-    
-    const target = e.currentTarget.getAttribute('data-dev-target');
-    document.getElementById(`dev-view-${target}`).classList.add('active');
-  });
-});
-
-// ==========================================
 // --- PANEL DE GESTION RP (CHEF) ---
 // ==========================================
 document.getElementById('btn-close-rp-panel')?.addEventListener('click', () => {
@@ -1113,6 +1094,39 @@ document.getElementById('btn-open-credits')?.addEventListener('click', () => {
     btnContinue.textContent = "Retour à l'application";
     btnContinue.onclick = () => { screenCredits.classList.remove('active'); screenApp.classList.add('active'); btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; btnContinue.onclick = null; window.location.reload(); };
   }
+});
+
+// ==========================================
+// --- BASCULE VERS LES PANELS ADMIN & DEV (DEPUIS LE MENU PLUS) ---
+// ==========================================
+document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
+  screenApp.classList.remove('active');
+  screenAdmin.classList.add('active');
+  loadAdminFiches();
+  loadAdminMembres();
+  loadAdminTickets();
+});
+
+document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
+  screenAdmin.classList.remove('active');
+  screenApp.classList.add('active');
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
+});
+
+document.getElementById('btn-dev-panel')?.addEventListener('click', () => {
+  screenApp.classList.remove('active');
+  screenDev.classList.add('active');
+  loadAdminCodes();
+});
+
+document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
+  screenDev.classList.remove('active');
+  screenApp.classList.add('active');
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+  document.getElementById('view-plus').classList.add('active');
 });
 
 // ==========================================
@@ -1780,14 +1794,12 @@ document.getElementById('btn-access-code')?.addEventListener('click', () => {
 
 document.getElementById('btn-submit-access')?.addEventListener('click', async () => {
   const pseudo = document.getElementById('access-pseudo').value.trim();
-  const code = document.getElementById('access-code').value.trim().toUpperCase(); // Force le code en majuscules
+  const code = document.getElementById('access-code').value.trim().toUpperCase();
 
   if (!pseudo || !code) {
     return alert("Remplis ton pseudo et ton code.");
   }
 
-  // On cherche le code en ignorant la casse pour le pseudo (.ilike)
-  // Et on utilise .maybeSingle() pour éviter les plantages
   const { data: codeData, error } = await supabase
     .from('access_codes')
     .select('*')
@@ -1795,9 +1807,7 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     .ilike('discord_pseudo', pseudo) 
     .maybeSingle();
 
-  // SI ON NE TROUVE RIEN :
   if (error || !codeData) {
-    // On va chercher pour voir si le code existe tout court (pour aider au debug)
     const { data: checkCode } = await supabase
       .from('access_codes')
       .select('discord_pseudo, status')
@@ -1811,7 +1821,6 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     }
   }
 
-  // SI ON TROUVE LE CODE :
   if (codeData.status === 'En attente') {
     alert("⏳ Ta demande est enregistrée ! Mais le Staff doit d'abord la valider dans le Panel Dev. Réessaie après validation.");
     document.getElementById('access-code-modal').classList.remove('active');
@@ -1855,9 +1864,7 @@ window.genererCodeAcces = async function() {
   const code = "LGDC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
   const emailFictif = safePseudo + "@lgdc-rp.vercel.app"; 
 
-  // ON APPELLE L'EDGE FUNCTION ICI
   try {
-    // ⚠️ VÉRIFIE QUE L'URL CORRESPOND AU NOM DE TA FONCTION SUR SUPABASE
     const response = await fetch("https://lrkiivqbnkkduxfcrbjn.supabase.co/functions/v1/smart-action", {
       method: "POST",
       headers: {
@@ -1869,7 +1876,6 @@ window.genererCodeAcces = async function() {
 
     const data = await response.json();
 
-    // Si l'utilisateur existe déjà, ce n'est pas grave, on continue
     if (!response.ok && !data.error?.includes("already been registered") && !data.error?.includes("already exists")) {
       return alert("Erreur création compte : " + (data.error || "Erreur inconnue"));
     }
@@ -1878,7 +1884,6 @@ window.genererCodeAcces = async function() {
     return alert("Erreur réseau : " + err.message);
   }
 
-  // On enregistre le code dans la base de données
   const { error } = await supabase.from('access_codes').insert({ 
     code: code, 
     discord_pseudo: pseudo, 
@@ -1888,7 +1893,6 @@ window.genererCodeAcces = async function() {
   if (error) {
     alert("Erreur base de données : " + error.message);
   } else {
-    // On affiche la nouvelle modale avec le code
     document.getElementById('gen-pseudo-display').textContent = pseudo;
     document.getElementById('gen-code-display').textContent = code;
     document.getElementById('code-generated-modal').classList.add('active');
@@ -1947,14 +1951,10 @@ document.getElementById('btn-copy-code')?.addEventListener('click', async () => 
   const btn = document.getElementById('btn-copy-code');
 
   try {
-    // On copie dans le presse-papiers
     await navigator.clipboard.writeText(codeText);
-    
-    // On change le texte du bouton pour confirmer
     btn.textContent = "✅ Copié !";
     btn.style.background = "#10b981"; 
     
-    // On remet le texte original après 2 secondes
     setTimeout(() => {
       btn.textContent = "📋 Copier le code";
       btn.style.background = "#10b981"; 
@@ -1971,19 +1971,15 @@ document.getElementById('btn-copy-code')?.addEventListener('click', async () => 
 
 // Charger les statistiques
 async function loadDevStats() {
-  // Nombre total de membres
   const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
   document.getElementById('stat-users').textContent = usersCount || 0;
 
-  // Nombre de fiches validées
   const { count: fichesCount } = await supabase.from('fiches_oc').select('*', { count: 'exact', head: true }).eq('statut', 'Validée');
   document.getElementById('stat-fiches').textContent = fichesCount || 0;
 
-  // Nombre de tickets ouverts
   const { count: ticketsCount } = await supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('statut', 'Ouvert');
   document.getElementById('stat-tickets').textContent = ticketsCount || 0;
 
-  // Nombre de codes en attente
   const { count: codesCount } = await supabase.from('access_codes').select('*', { count: 'exact', head: true }).eq('status', 'En attente');
   document.getElementById('stat-codes').textContent = codesCount || 0;
 }
