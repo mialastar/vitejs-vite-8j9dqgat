@@ -146,19 +146,18 @@ navBtns.forEach(btn => {
 // ==========================================
 document.querySelectorAll('[data-panel-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
-    // On trouve l'écran parent (screen-panel-plus, screen-panel-clan, etc.)
     const parentScreen = e.currentTarget.closest('.screen');
     
-    // On désactive tous les boutons de la barre de nav de CE panel
     parentScreen.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     
-    // On cache tous les contenus de CE panel
     parentScreen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
     
-    // On affiche le bon contenu
     const target = e.currentTarget.getAttribute('data-panel-target');
     parentScreen.querySelector(`#panel-${target}`)?.classList.add('active');
+
+    // Si on clique sur l'onglet Calendrier, on charge les événements
+    if (target === 'calendrier') loadPlayerEvents();
   });
 });
 
@@ -166,10 +165,12 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
 // --- OUVERTURE ET FERMETURE DES PANELS SÉPARÉS ---
 // ==========================================
 
-// Ouvrir un panel (depuis la grille "Plus")
 window.openPanelScreen = function(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(screenId).classList.add('active');
+  
+  // Si on ouvre le panel +, on charge direct le calendrier par défaut
+  if (screenId === 'screen-panel-plus') loadPlayerEvents();
 };
 
 // Fermer le Panel +
@@ -1140,6 +1141,9 @@ document.querySelectorAll('[data-admin-target]').forEach(btn => {
     
     const target = e.currentTarget.getAttribute('data-admin-target');
     document.getElementById(`admin-view-${target}`).classList.add('active');
+
+    // Si on clique sur l'onglet Calendrier, on charge les événements
+    if (target === 'calendrier') loadAdminEvents();
   });
 });
 
@@ -2032,3 +2036,212 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
     if (target === 'accueil') loadAdminCodes();
   });
 });
+
+// ==========================================
+// --- SYSTÈME DE CALENDRIER (ÉVÉNEMENTS) ---
+// ==========================================
+
+// Configuration des champs pour chaque type d'événement
+const eventConfigs = {
+  'assemblee_clan': {
+    title: "📢 Assemblée de Clan",
+    fields: [
+      { id: 'titre', label: 'Motif de l\'assemblée', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+      { id: 'lieu', label: 'Lieu', type: 'text', placeholder: 'Ex: Camp principal' },
+      { id: 'desc', label: 'Description', type: 'textarea', required: true }
+    ]
+  },
+  'grande_assemblee': {
+    title: "🌙 Grande Assemblée",
+    fields: [
+      { id: 'titre', label: 'Motif', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'desc', label: 'Description', type: 'textarea', required: true }
+    ]
+  },
+  'patrouille': {
+    title: "👣 Patrouille",
+    fields: [
+      { id: 'titre', label: 'Type de patrouille', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+      { id: 'lieu', label: 'Zone à patrouiller', type: 'text', required: true },
+      { id: 'desc', label: 'Détails', type: 'textarea' }
+    ]
+  },
+  'ceremonie': {
+    title: "🎖️ Cérémonie",
+    fields: [
+      { id: 'titre', label: 'Type de cérémonie', type: 'text', placeholder: 'Ex: Promotion d\'apprenti', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+      { id: 'desc', label: 'Détails', type: 'textarea', required: true }
+    ]
+  },
+  'nuit_lune': {
+    title: "🔮 Nuit de la Lune",
+    fields: [
+      { id: 'titre', label: 'Nom de l\'événement', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'desc', label: 'Description', type: 'textarea', required: true }
+    ]
+  },
+  'rituel': {
+    title: "🌿 Rituel du Guérisseur",
+    fields: [
+      { id: 'titre', label: 'Type de rituel', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'clan', label: 'Clan concerné', type: 'select', options: ['Clan de la Forêt', 'Clan de la Pluie', 'Clan du Zénith', 'Clan de la Brume'], required: true },
+      { id: 'desc', label: 'Description', type: 'textarea' }
+    ]
+  },
+  'tournoi': {
+    title: "⚔️ Tournoi Amical",
+    fields: [
+      { id: 'titre', label: 'Nom du tournoi', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'lieu', label: 'Lieu', type: 'text', required: true },
+      { id: 'desc', label: 'Règles / Description', type: 'textarea', required: true }
+    ]
+  },
+  'maintenance': {
+    title: "🛠️ Maintenance",
+    fields: [
+      { id: 'titre', label: 'Sujet', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'desc', label: 'Détails de la maintenance', type: 'textarea', required: true }
+    ]
+  },
+  'reunion_staff': {
+    title: "📋 Réunion Staff",
+    fields: [
+      { id: 'titre', label: 'Sujet de la réunion', type: 'text', required: true },
+      { id: 'date', label: 'Date et Heure', type: 'datetime-local', required: true },
+      { id: 'desc', label: 'Points à aborder', type: 'textarea', required: true }
+    ]
+  }
+};
+
+let currentEventType = null;
+
+// Ouvre le formulaire avec les bons champs
+window.openEventForm = function(type) {
+  currentEventType = type;
+  const config = eventConfigs[type];
+  if(!config) return;
+
+  document.getElementById('event-modal-title').textContent = config.title;
+  const container = document.getElementById('event-form-fields');
+  container.innerHTML = '';
+
+  config.fields.forEach(field => {
+    let inputHtml = '';
+    if (field.type === 'text' || field.type === 'datetime-local') {
+      inputHtml = `<input type="${field.type}" id="ev-${field.id}" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''} style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">`;
+    } else if (field.type === 'textarea') {
+      inputHtml = `<textarea id="ev-${field.id}" rows="3" ${field.required ? 'required' : ''} style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>`;
+    } else if (field.type === 'select') {
+      const options = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+      inputHtml = `<select id="ev-${field.id}" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);">${options}</select>`;
+    }
+
+    container.innerHTML += `<div class="form-group"><label>${field.label}</label>${inputHtml}</div>`;
+  });
+
+  document.getElementById('event-modal').classList.add('active');
+};
+
+// Enregistrer l'événement dans Supabase
+document.getElementById('btn-submit-event')?.addEventListener('click', async () => {
+  if(!currentEventType) return;
+  
+  // Récupération des données
+  const titre = document.getElementById('ev-titre')?.value || "Sans titre";
+  const date = document.getElementById('ev-date')?.value;
+  const desc = document.getElementById('ev-desc')?.value || "";
+  const clan = document.getElementById('ev-clan')?.value || "Tous les clans";
+  const lieu = document.getElementById('ev-lieu')?.value || "";
+
+  if (!date || !titre) return alert("Remplis au moins le titre et la date.");
+
+  // On stocke les infos spécifiques (lieu, etc.) en JSON dans 'details'
+  const details = { lieu: lieu };
+
+  const { error } = await supabase.from('evenements').insert({
+    type_evenement: currentEventType,
+    titre: titre,
+    date_evenement: new Date(date).toISOString(),
+    description: desc,
+    clan_cible: clan,
+    details: details,
+    statut: 'Validé'
+  });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+  } else {
+    alert("✅ Événement ajouté au calendrier !");
+    document.getElementById('event-modal').classList.remove('active');
+    loadAdminEvents();
+  }
+});
+
+// Charger les événements pour l'Admin
+async function loadAdminEvents() {
+  const container = document.getElementById('admin-events-list');
+  if(!container) return;
+  
+  const { data } = await supabase.from('evenements').select('*').order('date_evenement', { ascending: true });
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>';
+    return;
+  }
+
+  container.innerHTML = data.map(ev => `
+    <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
+      <p style="font-size: 0.75rem; color: gray;">${new Date(ev.date_evenement).toLocaleString('fr-FR')}</p>
+      <h4 style="color: #fff; margin: 5px 0;">${ev.titre} <span style="font-size: 0.7rem; color: var(--accent);">(${ev.type_evenement})</span></h4>
+      <p style="font-size: 0.85rem; color: #cbd5e1;">${ev.description}</p>
+      <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">Cible : <strong>${ev.clan_cible}</strong></p>
+    </div>
+  `).join('');
+}
+
+// Charger les événements pour les joueurs (Panel +)
+async function loadPlayerEvents() {
+  const container = document.getElementById('player-events-list');
+  if(!container) return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('clan').eq('id', user.id).single();
+  const monClan = profile ? profile.clan : 'Aucun';
+
+  // On récupère les événements à venir
+  const now = new Date().toISOString();
+  const { data } = await supabase.from('evenements').select('*').gte('date_evenement', now).order('date_evenement', { ascending: true });
+
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu.</p>';
+    return;
+  }
+
+  // On filtre : le joueur voit les events publics ou ceux de son clan
+  const eventsVisibles = data.filter(ev => ev.clan_cible === 'Tous les clans' || ev.clan_cible === monClan);
+
+  if (eventsVisibles.length === 0) {
+    container.innerHTML = '<p style="color: gray; text-align: center;">Aucun événement prévu pour ton clan.</p>';
+    return;
+  }
+
+  container.innerHTML = eventsVisibles.map(ev => `
+    <div class="profile-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
+      <p style="font-size: 0.75rem; color: var(--accent); font-weight: bold;">${new Date(ev.date_evenement).toLocaleString('fr-FR')}</p>
+      <h4 style="color: #fff; margin: 5px 0;">${ev.titre}</h4>
+      <p style="font-size: 0.85rem; color: #cbd5e1;">${ev.description}</p>
+      ${ev.details.lieu ? `<p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 5px;">📍 Lieu : ${ev.details.lieu}</p>` : ''}
+      <p style="font-size: 0.8rem; color: var(--text-dim);">🏷️ ${ev.clan_cible}</p>
+    </div>
+  `).join('');
+}

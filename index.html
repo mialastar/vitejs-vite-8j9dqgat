@@ -596,7 +596,10 @@
           <div class="admin-header"><h2 style="color: var(--accent);">Panel +</h2></div>
           
           <div id="view-panel-plus" class="view active">
-            <div id="panel-calendrier" class="panel-content active"><p style="color: gray; text-align: center;">Le calendrier apparaîtra ici.</p></div>
+            <div id="panel-calendrier" class="panel-content active">
+              <h3 style="color: var(--accent); text-align: center; margin-bottom: 15px;">Calendrier de ton clan</h3>
+              <div id="player-events-list"><p style="color: gray; text-align: center;">Chargement des événements...</p></div>
+            </div>
             <div id="panel-arbre" class="panel-content"><p style="color: gray; text-align: center;">L'arbre généalogique apparaîtra ici.</p></div>
             <div id="panel-prophetie" class="panel-content"><p style="color: gray; text-align: center;">Les prophéties apparaîtront ici.</p></div>
             <div id="panel-missions" class="panel-content"><p style="color: gray; text-align: center;">Les missions apparaîtront ici.</p></div>
@@ -702,6 +705,27 @@
             </div>
           </div>
 
+          <!-- VUE CALENDRIER ADMIN -->
+          <div id="admin-view-calendrier" class="view">
+            <h3 class="admin-title">Gestion du Calendrier</h3>
+            <p style="color: gray; margin-bottom: 15px;">Clique sur une carte pour créer un événement.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('assemblee_clan')"><span style="font-size: 1.5rem;">📢</span><br><span style="font-size: 0.8rem;">Assemblée de Clan</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('grande_assemblee')"><span style="font-size: 1.5rem;">🌙</span><br><span style="font-size: 0.8rem;">Grande Assemblée</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('patrouille')"><span style="font-size: 1.5rem;">👣</span><br><span style="font-size: 0.8rem;">Patrouille</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('ceremonie')"><span style="font-size: 1.5rem;">🎖️</span><br><span style="font-size: 0.8rem;">Cérémonie</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('nuit_lune')"><span style="font-size: 1.5rem;">🔮</span><br><span style="font-size: 0.8rem;">Nuit de la Lune</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('rituel')"><span style="font-size: 1.5rem;">🌿</span><br><span style="font-size: 0.8rem;">Rituel</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('tournoi')"><span style="font-size: 1.5rem;">⚔️</span><br><span style="font-size: 0.8rem;">Tournoi</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('maintenance')"><span style="font-size: 1.5rem;">🛠️</span><br><span style="font-size: 0.8rem;">Maintenance</span></button>
+              <button class="profile-card btn-event-card" style="text-align: center; padding: 15px;" onclick="openEventForm('reunion_staff')"><span style="font-size: 1.5rem;">📋</span><br><span style="font-size: 0.8rem;">Réunion Staff</span></button>
+            </div>
+
+            <h4 style="color: var(--accent); margin-top: 30px; margin-bottom: 15px;">Événements à venir</h4>
+            <div id="admin-events-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
           <!-- VUE TICKETS ADMIN -->
           <div id="admin-view-tickets" class="view"><h3 class="admin-title">Tickets & Support</h3><div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div></div>
         </div>
@@ -712,6 +736,10 @@
           <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
           <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
           <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
+          
+          <!-- NOUVEAU BOUTON CALENDRIER ADMIN -->
+          <button type="button" class="nav-btn" data-admin-target="calendrier"><span class="icon">📅</span><span class="label">Calendrier</span></button>
+          
           <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
           <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
         </nav>
@@ -862,6 +890,20 @@
           </div>
 
           <button type="button" id="btn-submit-access" class="btn-primary" style="width: 100%; margin-top: 10px;">Valider mon accès</button>
+        </div>
+      </div>
+
+      <!-- MODAL CRÉATION ÉVÉNEMENT -->
+      <div id="event-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('event-modal').classList.remove('active')">✕</button>
+          <h2 id="event-modal-title" style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Créer un événement</h2>
+          
+          <div id="event-form-fields">
+            <!-- Les champs seront générés par le JS -->
+          </div>
+
+          <button type="button" id="btn-submit-event" class="btn-primary" style="width: 100%; margin-top: 20px;">Créer l'événement</button>
         </div>
       </div>
 
