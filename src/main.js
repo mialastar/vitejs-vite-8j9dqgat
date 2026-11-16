@@ -28,7 +28,7 @@ const screenCredits = document.getElementById('screen-credits');
 const screenAuth = document.getElementById('screen-auth');
 const screenApp = document.getElementById('screen-app');
 const screenAdmin = document.getElementById('screen-admin');
-const screenDev = document.getElementById('screen-dev'); // Nouvel écran Dev
+const screenDev = document.getElementById('screen-dev'); 
 
 const btnStart = document.getElementById('btn-start');
 const btnContinueCredits = document.getElementById('btn-continue-credits');
@@ -66,6 +66,12 @@ function showApp() {
   screenDev.classList.remove('active');
   screenApp.classList.add('active');
   
+  // On force le retour sur l'accueil
+  document.querySelectorAll('.app-content .view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-accueil').classList.add('active');
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="accueil"]')?.classList.add('active');
+
   loadActualites();
   loadChroniques();
   loadTempsRP();
@@ -85,7 +91,6 @@ async function checkUser() {
   if (data && data.session) {
     showApp();
     
-    // On lie l'ID Discord à OneSignal
     if (window.OneSignal) {
       window.OneSignal.push(function() {
         OneSignal.login(data.session.user.id);
@@ -107,7 +112,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 // ==========================================
-// --- NAVIGATION JOUEUR ---
+// --- NAVIGATION JOUEUR (BARRE DU BAS) ---
 // ==========================================
 const navBtns = document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn');
 const views = document.querySelectorAll('.app-content:not(.admin-layout .app-content) .view');
@@ -134,6 +139,9 @@ navBtns.forEach(btn => {
       document.getElementById('view-chroniques').classList.add('active');
       loadChroniques();
     }
+    if(target === 'plus') {
+      document.getElementById('view-plus').classList.add('active');
+    }
     if(target === 'profil') {
       document.getElementById('view-profil').classList.add('active');
       loadProfil(); 
@@ -141,7 +149,36 @@ navBtns.forEach(btn => {
   });
 });
 
-// Onglets Monde
+// ==========================================
+// --- ONGLETS INTERNES AUX PANELS (PLUS, CLAN, CHEF) ---
+// ==========================================
+document.querySelectorAll('.panel-tab-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const parentView = e.currentTarget.closest('.view');
+    
+    parentView.querySelectorAll('.panel-tab-btn').forEach(b => b.classList.remove('active'));
+    parentView.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+    
+    e.currentTarget.classList.add('active');
+    const target = e.currentTarget.getAttribute('data-panel');
+    parentView.querySelector(`#panel-${target}`)?.classList.add('active');
+  });
+});
+
+// Fonction globale pour naviguer entre les panneaux (ex: cliquer sur "Panel +" depuis la grille)
+window.showView = function(viewName) {
+  document.querySelectorAll('.app-content .view').forEach(v => v.classList.remove('active'));
+  const targetView = document.getElementById(`view-${viewName}`);
+  if(targetView) targetView.classList.add('active');
+  
+  // On garde l'onglet "Plus" allumé dans la barre du bas
+  document.querySelectorAll('.bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.bottom-nav:not(.admin-nav) .nav-btn[data-target="plus"]')?.classList.add('active');
+};
+
+// ==========================================
+// --- ONGLETS MONDE & FICHES ---
+// ==========================================
 document.querySelectorAll('.monde-tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('.monde-tab-btn').forEach(b => b.classList.remove('active'));
@@ -160,7 +197,6 @@ document.querySelectorAll('.lore-tab-btn').forEach(btn => {
   });
 });
 
-// Onglets Fiches
 document.querySelectorAll('.sub-tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -820,23 +856,63 @@ async function loadProfil() {
       });
     } else { ocContainer.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Aucune fiche.</p>'; }
   }
+
+  // Mise à jour du menu "Plus" selon le rôle
+  window.updatePlusMenu(roleApp, roleRp);
 }
+
+// Cette fonction gère l'affichage des boutons dans l'onglet "Plus"
+window.updatePlusMenu = function(roleApp, roleRp) {
+  const btnChef = document.getElementById('btn-plus-chef');
+  const btnAdmin = document.getElementById('btn-plus-admin');
+  const btnDev = document.getElementById('btn-plus-dev');
+
+  if (roleRp.toLowerCase().includes('chef') || roleRp.toLowerCase().includes('lieutenant')) {
+    if(btnChef) btnChef.style.display = 'flex';
+  } else { if(btnChef) btnChef.style.display = 'none'; }
+
+  if (roleApp.toUpperCase() === 'ADMIN' || roleApp.toUpperCase() === 'MJ') {
+    if(btnAdmin) btnAdmin.style.display = 'flex';
+  } else { if(btnAdmin) btnAdmin.style.display = 'none'; }
+
+  if (roleApp.toUpperCase() === 'DEV') {
+    if(btnDev) btnDev.style.display = 'flex';
+    if(btnAdmin) btnAdmin.style.display = 'flex';
+  } else { if(btnDev) btnDev.style.display = 'none'; }
+};
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
 
 // ==========================================
-// --- BASCULE VERS LE PANEL DEV ---
+// --- BASCULE VERS LES PANELS ADMIN & DEV (DEPUIS LE MENU PLUS) ---
 // ==========================================
-document.getElementById('btn-dev-panel')?.addEventListener('click', () => {
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-dev').classList.add('active');
-  loadAdminCodes(); // On charge les codes dès l'ouverture
+window.openAdminPanel = function() {
+  screenApp.classList.remove('active');
+  screenAdmin.classList.add('active');
+  loadAdminFiches(); loadAdminMembres(); loadAdminTickets();
+};
+
+window.openDevPanel = function() {
+  screenApp.classList.remove('active');
+  screenDev.classList.add('active');
+  loadAdminCodes();
+};
+
+document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
+  screenAdmin.classList.remove('active');
+  screenApp.classList.add('active');
+  showView('plus'); // Retour au menu Plus
 });
 
 document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
-  document.getElementById('screen-dev').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
+  screenDev.classList.remove('active');
+  screenApp.classList.add('active');
+  showView('plus'); // Retour au menu Plus
 });
+
+// Garder les anciens boutons du profil qui font la même chose (pour éviter de casser si tu les utilises)
+document.getElementById('btn-admin-panel')?.addEventListener('click', window.openAdminPanel);
+document.getElementById('btn-dev-panel')?.addEventListener('click', window.openDevPanel);
 
 document.querySelectorAll('[data-dev-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
@@ -1040,25 +1116,8 @@ document.getElementById('btn-open-credits')?.addEventListener('click', () => {
 });
 
 // ==========================================
-// --- BASCULE ADMIN & GESTION ---
+// --- ADMIN : FICHES, MEMBRES, TICKETS ---
 // ==========================================
-document.getElementById('btn-admin-panel')?.addEventListener('click', () => {
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-admin').classList.add('active');
-  loadAdminFiches();
-  loadAdminMembres();
-  loadAdminTickets();
-});
-
-document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
-  document.getElementById('screen-admin').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
-  
-  loadActualites();
-  loadChroniques();
-  loadTempsRP();
-});
-
 document.querySelectorAll('[data-admin-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('[data-admin-target]').forEach(b => b.classList.remove('active'));
@@ -1779,6 +1838,7 @@ document.getElementById('btn-submit-access')?.addEventListener('click', async ()
     }
   }
 });
+
 // ==========================================
 // --- PANEL DEV (GESTION DES CODES D'ACCÈS) ---
 // ==========================================
