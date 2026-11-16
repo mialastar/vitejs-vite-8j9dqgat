@@ -709,15 +709,28 @@ async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  // On récupère le pseudo Discord (full_name ou username)
+  const discordPseudo = user.user_metadata.full_name || user.user_metadata.user_name || "Joueur";
+
   const userEl = document.getElementById('profile-username');
-  if(userEl) userEl.textContent = user.user_metadata.full_name || "Joueur";
+  if(userEl) userEl.textContent = discordPseudo;
+  
   const avatarEl = document.getElementById('profile-avatar');
   if(avatarEl) avatarEl.src = user.user_metadata.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
 
   let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  
   if (!profile) { 
-    const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id }).select().single(); 
+    // Création du profil avec le pseudo
+    const { data: newProfile } = await supabase.from('profiles').insert({ 
+      id: user.id, 
+      discord_pseudo: discordPseudo 
+    }).select().single(); 
     profile = newProfile; 
+  } else if (profile.discord_pseudo !== discordPseudo) {
+    // Mise à jour du pseudo si différent
+    await supabase.from('profiles').update({ discord_pseudo: discordPseudo }).eq('id', user.id);
+    profile.discord_pseudo = discordPseudo;
   }
 
   const roleApp = profile?.role_app || 'JOUEUR';
@@ -743,7 +756,6 @@ async function loadProfil() {
     }
   }
 
-  // Gestion des boutons Admin et Dev
   const btnAdmin = document.getElementById('btn-admin-panel');
   const btnDevPanel = document.getElementById('btn-dev-panel');
   
@@ -758,7 +770,7 @@ async function loadProfil() {
   if (btnDevPanel) {
     if (roleApp.toUpperCase().trim() === 'DEV') {
       btnDevPanel.style.display = 'flex';
-      if (btnAdmin) btnAdmin.style.display = 'flex'; // Le DEV peut aussi voir l'admin s'il veut
+      if (btnAdmin) btnAdmin.style.display = 'flex';
     } else { 
       btnDevPanel.style.display = 'none'; 
     }
@@ -1123,14 +1135,19 @@ window.refuserFicheAdmin = async function(id) { await supabase.from('fiches_oc')
 async function loadAdminMembres() {
   const container = document.getElementById('admin-membres-list');
   if(!container) return;
-  const { data: profils } = await supabase.from('profiles').select('*');
-  if (!profils || profils.length === 0) return;
-  container.innerHTML = '';
+  container.innerHTML = '<p style="color: gray;">Chargement...</p>';
   
+  const { data: profils } = await supabase.from('profiles').select('*');
+  if (!profils || profils.length === 0) { 
+    container.innerHTML = '<p style="color: gray;">Aucun membre.</p>'; 
+    return; 
+  }
+  
+  container.innerHTML = '';
   profils.forEach(profil => {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px;">
-        <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
+        <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}... | Pseudo: <strong style="color: #fff;">${profil.discord_pseudo || 'Non renseigné'}</strong></p>
         <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle APP :</strong> ${profil.role_app || 'JOUEUR'}</p>
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
@@ -1927,7 +1944,7 @@ async function loadDevMembres() {
   profils.forEach(profil => {
     container.innerHTML += `
       <div class="profile-card" style="margin-bottom: 10px; border-left: 2px solid #8b5cf6;">
-        <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}</p>
+        <p style="font-size: 0.8rem; color: gray; margin-bottom: 5px;">ID: ${profil.id.substring(0, 8)}... | Pseudo: <strong style="color: #fff;">${profil.discord_pseudo || 'Non renseigné'}</strong></p>
         <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle APP :</strong> <span style="color: #8b5cf6;">${profil.role_app || 'JOUEUR'}</span></p>
           <p style="margin: 0; font-size: 0.85rem;"><strong>Rôle RP :</strong> ${profil.role_rp || 'Aucun'}</p>
