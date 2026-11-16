@@ -7,8 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     
+    <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -76,13 +78,14 @@
             Se connecter avec Discord
           </button>
 
+          <!-- CONNEXION PAR CODE -->
           <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
             <button type="button" id="btn-access-code" onclick="document.getElementById('access-code-modal').classList.add('active')" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
               🔑 J'ai un code d'accès spécial
             </button>
           </div>
         </div>
-      </div>
+      </div> <!-- FIN SCREEN-AUTH (IMPORTANT !) -->
 
       <!-- ÉCRAN 3 : APPLICATION JOUEUR -->
       <div id="screen-app" class="screen app-layout">
@@ -123,23 +126,35 @@
               
               <div id="lore-histoire" class="lore-content active">
                 <h3>La Création des Terres et le Sanctuaire de l'Île Lunaire</h3>
-                <p>Bien avant que les étoiles ne murmurent leurs prophéties aux guérisseurs... (Texte complet du Lore ici, inchangé).</p>
-                <!-- J'ai raccourci le texte ici pour la lisibilité, tu remettras ton texte complet à la place -->
+                <p>Bien avant que les étoiles ne murmurent leurs prophéties aux guérisseurs et que les frontières ne soient gravées dans l’écorce des arbres ou la pierre des falaises, cette vallée ne connaissait que le sang et l'effroi. Nul Clan n’y avait encore vu le jour, nul code n’y protégeait les faibles, et aucun félin n’osait s’aventurer à découvert sans craindre d’être déchiqueté. Sur ces terres sauvages régnait une terreur implacable : une immense horde de chiens errants, affamés et sanguinaires, qui chassaient en meute hurlante et ne laissaient derrière eux que des carcasses et des cendres. Leurs aboiements rauques faisaient trembler les feuillages jusque dans les recoins les plus reculés des montagnes, et les rares solitaires qui peuplaient la vallée survivaient comme des ombres traquées, tapis au fond des crevasses, le cœur rongé par une peur incessante.</p>
+                <p>C’est au cœur de cet âge sombre que le destin réunit quatre chats d’exception, dont les noms allaient résonner à travers les générations. Rien ne semblait pourtant les rapprocher. Il y avait Ronce, un mâle massif au pelage sombre comme la terre humide des sous-bois, capable de se fondre dans le moindre fourré sans faire craquer une seule brindille ; Torrent, une féline agile au pelage gris argenté, aussi vive et imprévisible que les remous d’une rivière en crue ; Astre, un guerrier imposant à la fourrure dorée et au regard perçant, qui savait lire la course des astres et anticiper les embuscades bien avant que l'ennemi ne surgisse ; et enfin Voile, une chatte élancée au pelage pâle comme la fumée, dont la voix calme semblait porter l’écho d’esprits invisibles.</p>
+                <p>Pendant des lunes interminables, ces quatre héros unirent leurs griffes, leur ruse et leur courage pour tenir tête à la meute. Là où un solitaire isolé aurait été mis en pièces en quelques battements de cœur, leur alliance fit des miracles. Tandis que Ronce attirait les bêtes massives dans les fourrés épais pour les aveugler et les désorienter, Torrent surgissait des eaux vives pour frapper leurs flancs avec la violence d’un éclair avant de replonger dans le courant. Depuis les crêtes rocheuses, Astre guidait leurs assauts avec une lucidité implacable, et Voile déjouait les pièges de la meute grâce à une intuition surnaturelle. Leur lutte s'étira sur plusieurs saisons, faite de retraites nocturnes, de blessures profondes et de veilles épuisantes, jusqu'à culminer lors d'une bataille titanesque au bord du grand lac. Sous un ciel déchiré par l'orage, les quatre légendes menèrent une ultime charge désespérée, repoussant le chef de la meute et ses bêtes hurlantes hors des gorges et par-delà les montagnes, d'où ils ne revinrent jamais. Lorsque l'aube se leva le lendemain matin, le silence était enfin revenu sur la vallée, révélant une terre libre, baignée de lumière et gorgée de gibier.</p>
+                <p>Mais la paix est parfois plus difficile à porter que la guerre. Une fois la horde chassée et les plaies refermées, le lien forgé dans le sang et la survie commença lentement à s’effriter. Les solitaires de la vallée affluaient désormais vers les quatre libérateurs, cherchant protection et guidance, mais les différences profondes qui avaient jadis fait la force des quatre héros devinrent le poison de leur alliance. Les tensions s’accumulèrent au fil des jours, jusqu’au soir où, au bord du grand lac où la rivière se scindait en deux bras autour d’une île paisible, la discorde éclata au grand jour.</p>
+                <p>Ronce fit un pas vers la lisière des bois qui s'étendaient au nord du lac, la queue basse et les épaules tendues.<br><br>
+                — On est trop nombreux au même endroit, grogna-t-il en jetant un regard agacé aux solitaires qui se disputaient déjà un mulot quelques longueurs plus loin. Mes pattes sont faites pour les sous-bois et l'ombre des arbres, pas pour rester à découvert. Demain à l'aube, je pars vers la forêt avec ceux qui veulent me suivre.</p>
+                <p>Torrent laissa échapper un feulement bref, les oreilles plaquées contre son crâne. Elle tourna la tête vers les grandes cascades rugissantes qui dévalaient les falaises au sud-ouest.<br><br>
+                — Ne fais pas comme si tu étais le seul à avoir besoin d'espace, Ronce, répliqua-t-elle sèchement. Tes fourrés m'étouffent. Moi, il me faut le courant des rivières et les berges ouvertes, là où on peut courir et chasser sans se cogner à un tronc à chaque bond. Si tu pars dans les bois, je descends vers les cascades.</p>
+                <p>Posté sur un rocher plat qui surplombait la berge, Astre poussa un long soupir avant de les observer tour à tour.<br><br>
+                — Vous n'avez donc rien retenu de ces dernières lunes ? lança-t-il d'un ton froid. Les chiens viennent à peine de fuir, et vous vous comportez déjà comme de vulgaires errants prêts à se battre pour un morceau de territoire. Ni les bois ni les rivières ne suffiront à vous protéger si vous perdez votre sang-froid. Pour ma part, je monte vers les crêtes à l'est : là-haut, au moins, on voit venir le danger de loin.</p>
+                <p>Un silence lourd retomba sur la rive. Tous les regards se tournèrent alors vers Voile, assise en retrait près des nappes de brouillard qui s'élevaient lentement de la vallée encaissée. Elle fixa l'eau sombre du lac pendant un long moment avant de parler d'une voix posée.<br><br>
+                — Astre a raison sur un point : on ne peut plus vivre tous ensemble, dit-elle simplement. On a su se battre côte à côte parce qu'on n'avait pas le choix, mais on ne chasse pas de la même façon et on ne vit pas de la même manière. Si on force les choses, on finira par s'entre-tuer. Chacun doit suivre sa propre voie.</p>
+                <p>Nul ne trouva rien à redire à cette vérité implacable. Pourtant, avant de se tourner le dos pour toujours, les quatre héros posèrent les yeux sur l'île boisée qui reposait au centre même du grand lac, reliée aux berges par d'anciens ponts de bois et baignée par la lumière argentée de l'astre nocturne. Ils comprirent d'un commun accord que cette terre neutre n'appartiendrait à aucun d'entre eux. Ils la baptisèrent l'Île Lunaire et décrétèrent qu'à chaque pleine lune, leurs peuples respectifs traverseraient les ponts pour s'y réunir lors des Assemblées, déposant toute haine et toute rivalité le temps d'une nuit sacrée afin que le souvenir de leur alliance passée ne s'éteigne jamais.</p>
+                <p>À l’aube suivante, le pacte scellé, les quatre chats légendaires prirent chacun une direction différente, suivis par les félins qui avaient choisi de croire en leur vision du monde. Ronce s’enfonça au nord dans les profondeurs verdoyantes des grands bois, fondant le Clan de la Forêt, un peuple discret, furtif et intimement lié aux rythmes de la nature. Torrent descendit vers le sud-ouest, là où les eaux se précipitent en cascades vertigineuses et serpentent à travers les terres, donnant naissance au Clan de la Pluie, composé de guerriers agiles, imprévisibles et rapides comme l’éclair. Astre entreprit l’ascension des hautes montagnes rocheuses au sud-est, établissant le Clan du Zénith, un peuple de chats sages, observateurs et proches du ciel, veillant non loin des sentiers escarpés menant vers les hauteurs sacrées de la Source Lunaire. Quant à Voile, elle s’évanouit dans les terres basses et enveloppées de mystère situées entre les bois et les contreforts montagneux, fondant le Clan de la Brume, un peuple silencieux, énigmatique et profondément connecté aux esprits. Ainsi naquirent les quatre Clans qui règnent aujourd'hui sur la vallée, unis dans le souvenir de leur victoire et liés à jamais par les nuits d'Assemblée sur l'Île Lunaire.</p>
               </div>
 
               <div id="lore-clans" class="lore-content">
-                <div class="clan-lore-card"><h4>Clan de la Forêt</h4><p>Discrets, furtifs et connectés à la nature. Fondé par Ronce.</p></div>
-                <div class="clan-lore-card"><h4>Clan de la Pluie</h4><p>Agiles, imprévisibles et rapides. Fondé par Torrent.</p></div>
-                <div class="clan-lore-card"><h4>Clan du Zénith</h4><p>Sages, observateurs et proches du ciel. Fondé par Astre.</p></div>
-                <div class="clan-lore-card"><h4>Clan de la Brume</h4><p>Mystérieux et proches des esprits. Fondé par Voile.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Forêt</h4><p>Discrets, furtifs et connectés à la nature. Fondé par Ronce, ils préfèrent l'ombre des arbres et n'aiment pas les conflits ouverts.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Pluie</h4><p>Agiles, imprévisibles et rapides. Fondé par Torrent, maîtres des embuscades, ils utilisent l'eau et la boue pour surprendre leurs ennemis.</p></div>
+                <div class="clan-lore-card"><h4>Clan du Zénith</h4><p>Sages, observateurs et proches du ciel. Fondé par Astre, ils se croient investis d'une mission spirituelle et veillent sur l'équilibre.</p></div>
+                <div class="clan-lore-card"><h4>Clan de la Brume</h4><p>Mystérieux et proches des esprits. Fondé par Voile, vivant dans les marais, ils connaissent les poisons et les plantes rares.</p></div>
               </div>
               <div id="lore-source" class="lore-content">
                 <p><strong>Lieu Neutre et Sacré</strong></p>
-                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline...</p>
+                <p>Située dans une grotte souterraine, la Source Lunaire est un bassin d'eau cristalline où les gouttes brillent comme des étoiles. Le Clan du Zénith veille non loin de ces sentiers escarpés menant vers les hauteurs sacrées.</p>
               </div>
             </div>
             <div id="monde-carte" class="monde-content">
-              <div class="map-hint" id="map-hint">👆 Glisse pour explorer...</div>
+              <div class="map-hint" id="map-hint">👆 Glisse pour explorer, pince avec 2 doigts ou utilise la molette pour zoomer.</div>
               <div id="map-viewport" class="map-viewport">
                 <div id="map-content" class="map-content">
                   <img id="map-image" src="https://cdn.phototourl.com/anon/2026-11-14-680e42d5-24a5-4c42-b39e-84df2892a84e.webp" alt="Carte des Terres" />
@@ -162,7 +177,7 @@
             <div id="chroniques-container"><p style="color: gray; text-align: center;">Chargement...</p></div>
           </div>
 
-          <!-- VUE PLUS (LA GRILLE DES PANELS) -->
+          <!-- VUE PLUS (GRILLE D'APPLICATIONS) -->
           <div id="view-plus" class="view">
             <h3 style="font-family: var(--font-title); color: var(--accent); font-size: 1.8rem; margin-bottom: 20px; text-align: center;">Menu des Panels</h3>
             
@@ -208,7 +223,7 @@
               <button type="button" class="panel-tab-btn" data-panel="recompenses">🎁 Récompenses</button>
             </div>
 
-            <div id="panel-calendrier" class="panel-content active"><p style="color: gray; text-align: center;">Le calendrier apparaîtra ici.</p></div>
+            <div id="panel-calendrier" class="panel-content active"><p style="color: gray; text-align: center;">Le calendrier de ton clan apparaîtra ici.</p></div>
             <div id="panel-arbre" class="panel-content"><p style="color: gray; text-align: center;">L'arbre généalogique apparaîtra ici.</p></div>
             <div id="panel-prophetie" class="panel-content"><p style="color: gray; text-align: center;">Les prophéties apparaîtront ici.</p></div>
             <div id="panel-missions" class="panel-content"><p style="color: gray; text-align: center;">Les missions apparaîtront ici.</p></div>
@@ -225,8 +240,8 @@
               <button type="button" class="panel-tab-btn" data-panel="membres-clan">👥 Membres</button>
             </div>
 
-            <div id="panel-annonces" class="panel-content active"><p style="color: gray; text-align: center;">Les annonces du clan apparaîtront ici.</p></div>
-            <div id="panel-membres-clan" class="panel-content"><p style="color: gray; text-align: center;">La liste des membres du clan apparaîtra ici.</p></div>
+            <div id="panel-annonces" class="panel-content active"><p style="color: gray; text-align: center;">Les annonces de ton clan apparaîtront ici.</p></div>
+            <div id="panel-membres-clan" class="panel-content"><p style="color: gray; text-align: center;">La liste des membres de ton clan apparaîtra ici.</p></div>
           </div>
 
           <!-- VUE PANEL CHEF -->
@@ -469,9 +484,148 @@
           <!-- BOUTON SUPPORT FLOTTANT -->
           <button type="button" id="btn-floating-support" class="floating-support-btn">?</button>
 
-          <!-- (TOUTES LES MODALES SONT IDENTIQUES À TON CODE, JE LES AI JUSTE RACCOURCIES ICI POUR LA LISIBILITÉ) -->
-          <!-- ... Garde tes modales (support-modal, settings-modal, relation-modal, rp-panel-modal, player-tickets-modal, rules-modal, code-generated-modal, access-code-modal, toast-success) à la suite ... -->
+          <!-- (TES MODALES SONT ICI, IDENTIQUES À TON CODE PRÉCÉDENT) -->
+          <!-- MENU SUPPORT MODAL -->
+          <div id="support-modal" class="support-modal-overlay">
+            <div class="support-modal">
+              <button type="button" class="btn-close-support" id="btn-close-support">✕</button>
+              <div id="support-menu-view">
+                <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Centre d'aide</h2>
+                <div class="support-grid">
+                  <button type="button" class="support-option" onclick="openSupportForm('faction')"><span class="icon">🛡️</span><span>Créer une Faction</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('famille')"><span class="icon">🌳</span><span>Créer une famille</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('suggestion')"><span class="icon">💡</span><span>Faire une suggestion</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('staff')"><span class="icon">👑</span><span>Rejoindre le staff</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('bug')"><span class="icon">🐛</span><span>Signaler un bug</span></button>
+                  <button type="button" class="support-option" onclick="openSupportForm('joueur')"><span class="icon">⚠️</span><span>Signaler un joueur</span></button>
+                </div>
+              </div>
+              <div id="support-form-view" style="display: none;">
+                <button type="button" class="btn-back-support" id="btn-back-support">← Retour</button>
+                <h3 id="support-form-title" style="font-family: var(--font-title); color: #fff; margin-bottom: 15px;">Titre</h3>
+                <div id="dynamic-form-fields"></div>
+                <button type="button" id="btn-submit-ticket" class="btn-primary" style="width: 100%; margin-top: 20px;">Envoyer le ticket</button>
+              </div>
+            </div>
+          </div>
 
+          <!-- MENU PARAMÈTRES MODAL -->
+          <div id="settings-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 400px;">
+              <button type="button" class="btn-close-support" id="btn-close-settings">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Paramètres</h2>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="alert('Le changement de thème arrive bientôt !')" style="justify-content: space-between;"><span>🎨 Changer de thème</span> <span style="color: gray; font-size: 0.7rem;">(Bientôt)</span></button>
+                <button type="button" class="btn-secondary" id="btn-open-credits" style="justify-content: flex-start; gap: 10px;">⭐ Relire les crédits</button>
+                <button type="button" class="btn-secondary" onclick="window.open('https://discord.gg/TON_LIEN_DISCORD', '_blank')" style="justify-content: flex-start; gap: 10px;">💬 Rejoindre le Discord</button>
+                <button type="button" class="btn-secondary" onclick="alert('Bientôt disponible !')" style="justify-content: flex-start; gap: 10px;">🔔 Gérer mes notifications</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('btn-logout').click()" style="justify-content: flex-start; gap: 10px; color: #ef4444; border-color: rgba(239,68,68,0.3);">🚪 Se déconnecter</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODAL DEMANDE DE RELATION -->
+          <div id="relation-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 450px;">
+              <button type="button" class="btn-close-support" id="btn-close-relation">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Demander une relation</h2>
+              <div class="form-group"><label>Ton personnage (qui fait la demande)</label><select id="rel-source"><option value="">Chargement...</option></select></div>
+              <div class="form-group"><label>Personnage ciblé</label><select id="rel-cible"><option value="">Chargement...</option></select></div>
+              <div class="form-group"><label>Type de relation</label><select id="rel-type"><option>Famille</option><option>Compagnon</option><option>Ami</option><option>Rival</option><option>Ennemi</option><option>Mentor</option><option>Apprenti</option></select></div>
+              <div class="form-group"><label>Message pour le staff</label><textarea id="rel-message" rows="3" placeholder="Explique brièvement..."></textarea></div>
+              <button type="button" id="btn-submit-relation" class="btn-primary" style="width: 100%; margin-top: 10px;">Envoyer la demande</button>
+            </div>
+          </div>
+
+          <!-- MODAL PANEL DE GESTION RP (CHEF) -->
+          <div id="rp-panel-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" id="btn-close-rp-panel">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Gestion du Clan</h2>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                  <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="convoquerAssemblee()">📢 Convoquer Assemblée</button>
+                  <button type="button" class="btn-secondary" style="flex: 1; font-size: 0.85rem;" onclick="declarerGuerre()">⚔️ Déclarer Guerre</button>
+              </div>
+              <h3 style="font-family: var(--font-title); color: #fff; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Membres du Clan</h3>
+              <div id="rp-members-list"><p style="color: gray; font-size: 0.9rem; text-align: center;">Chargement...</p></div>
+            </div>
+          </div>
+
+          <!-- MODAL MES TICKETS (JOUEUR) -->
+          <div id="player-tickets-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('player-tickets-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">Mes Tickets</h2>
+              <div id="player-tickets-list"><p style="color: gray; text-align: center;">Chargement...</p></div>
+            </div>
+          </div>
+
+          <!-- MODAL RÈGLES (CODE DU GUERRIER) -->
+          <div id="rules-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('rules-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 20px; text-align: center;">⚔️ Le Code du Guerrier ⚔️</h2>
+              
+              <div style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🛡️ 1. Loyauté et Défense</h3>
+                <p>Ton premier devoir est de protéger ton clan, ton territoire et tes camarades. Tu ne trahis jamais ton clan. Un traître est jugé par le Clan de la Lune (ou les Ronces, selon son acte). Tu respectes ton Chef et ton guérisseur, et tu suis leurs décisions.</p>
+                
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🐾 2. Honneur et Respect</h3>
+                <p>Tu ne tues jamais sans une raison valable. La vie est précieuse. Tu respectes les anciens, les guérisseurs et les chatons. Tu ne les attaques jamais (sauf en cas de légitime défense extrême). Tu ne voles pas le gibier d'un autre clan.</p>
+                
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">⚖️ 3. La Guerre et la Paix</h3>
+                <p>Tu ne déclenches pas de guerre sans l'accord de ton Chef. Pendant une bataille, tu te bats avec honneur. Pas de coups bas, pas d'attaques dans le dos (sauf si le RP l'exige et que l'autre joueur est d'accord). Tu peux capturer un ennemi, mais tu ne le tortures pas. Après la guerre, tu respectes les accords de paix.</p>
+
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🌙 4. Les Esprits</h3>
+                <p>Tu respectes les esprits du Clan de la Lune. Ils guident tes pas et veillent sur ton clan. Tu crains le Clan des Ronces et tu sais que tes actes sombres pourraient te mener vers eux. Tu ne blasphèmes pas contre les esprits lors des rassemblements.</p>
+
+                <h3 style="color: #fff; font-family: var(--font-title); margin-top: 15px;">🐾 5. La Vie de Clan</h3>
+                <p>Chaque guerrier participe à la vie du clan : chasse, patrouilles, entraînement des apprentis. Tu ne laisses jamais un camarade blessé seul. Tu accueilles les nouveaux membres et les aides à s'intégrer.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODAL CODE GÉNÉRÉ (DEV) -->
+          <div id="code-generated-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 400px; text-align: center;">
+              <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
+              <p style="color: #cbd5e1; margin-bottom: 15px;">Donne ce code à <strong id="gen-pseudo-display" style="color: #fff;"></strong> :</p>
+              
+              <div id="gen-code-display" style="background: rgba(0,0,0,0.5); border: 2px dashed var(--accent); padding: 15px; border-radius: 8px; font-size: 1.8rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
+                LGDC-XXXX
+              </div>
+              
+              <button type="button" id="btn-copy-code" class="btn-primary" style="width: 100%; margin-bottom: 10px; background: #10b981; border-color: #10b981;">📋 Copier le code</button>
+              
+              <button type="button" class="btn-secondary" style="width: 100%;" onclick="document.getElementById('code-generated-modal').classList.remove('active')">Fermer</button>
+            </div>
+          </div>
+
+          <!-- MODAL CODE D'ACCÈS (JOUEUR) -->
+          <div id="access-code-modal" class="support-modal-overlay">
+            <div class="support-modal" style="max-width: 400px;">
+              <button type="button" class="btn-close-support" onclick="document.getElementById('access-code-modal').classList.remove('active')">✕</button>
+              <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Accès par Code</h2>
+              <p style="color: #cbd5e1; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">Si tu ne peux pas utiliser Discord, entre ton pseudo et ton code fourni par le Staff.</p>
+              
+              <div class="form-group">
+                <label>Pseudo Discord</label>
+                <input type="text" id="access-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              </div>
+              
+              <div class="form-group">
+                <label>Code Spécial</label>
+                <input type="text" id="access-code" placeholder="Ex: LGDC-A1B2" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              </div>
+
+              <button type="button" id="btn-submit-access" class="btn-primary" style="width: 100%; margin-top: 10px;">Valider mon accès</button>
+            </div>
+          </div>
+
+          <div id="toast-success" class="toast hidden">
+            <div class="toast-icon">✓</div>
+            <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
+          </div>
         </div> <!-- FIN APP-CONTENT JOUEUR -->
 
         <!-- BARRE DE NAVIGATION JOUEUR -->
@@ -488,9 +642,224 @@
         </nav>
       </div> <!-- FIN SCREEN-APP JOUEUR -->
 
-      <!-- ÉCRAN 4 : APPLICATION ADMIN (et tout le reste de ton code identique) -->
-      <!-- ... Garde ton screen-admin, screen-dev et tes modales ici ... -->
+      <!-- ÉCRAN 4 : APPLICATION ADMIN -->
+      <div id="screen-admin" class="screen app-layout admin-layout">
+        <div class="app-content">
+          <div class="admin-header">
+            <h2>Panneau d'Administration</h2>
+            <span>Moonlight Studio</span>
+          </div>
 
+          <!-- VUE ACCUEIL ADMIN -->
+          <div id="admin-view-accueil" class="view active">
+            <h3 class="admin-title">Gestion du Temps RP</h3>
+            <div class="profile-card" style="margin-bottom: 20px;">
+              <label style="color: var(--text-dim);">Saison actuelle :</label>
+              <select id="admin-saison-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Printemps</option><option>Été</option><option>Automne</option><option>Hiver</option></select>
+              <label style="color: var(--text-dim);">Nom de la Lune :</label>
+              <input type="text" id="admin-lune-input" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Météo actuelle :</label>
+              <select id="admin-meteo-select" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>☀️ Ensoleillé</option><option>🌤️ Nuageux</option><option>🌧️ Pluvieux</option><option>⛈️ Orageux</option><option>🌫️ Brumeux</option><option>❄️ Neige</option><option>🌬️ Venteux</option></select>
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #10b981;" onclick="updateTempsRP()">Mettre à jour le temps</button>
+            </div>
+
+            <h3 class="admin-title">Gestion de l'Accueil (Embed)</h3>
+            <div class="profile-card">
+              <label style="color: var(--text-dim);">Couleur :</label><input type="color" id="admin-actu-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              <label style="color: var(--text-dim);">Titre :</label><input type="text" id="admin-actu-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Auteur :</label><input type="text" id="admin-actu-auteur" value="Moonlight Studio" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Description :</label><textarea id="admin-actu-input" rows="3" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+              <label style="color: var(--text-dim);">Sous-description (petit texte) :</label><input type="text" id="admin-actu-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierActu()">Publier l'Embed</button>
+            </div>
+          </div>
+
+          <!-- VUE FICHES ADMIN -->
+          <div id="admin-view-fiches" class="view"><h3 class="admin-title">Fiches en attente</h3><div id="admin-fiches-list"><p style="color: gray;">Chargement...</p></div></div>
+
+          <!-- VUE MEMBRES ADMIN -->
+          <div id="admin-view-membres" class="view"><h3 class="admin-title">Gestion des Membres</h3><div id="admin-membres-list"><p style="color: gray;">Chargement...</p></div></div>
+
+          <!-- VUE CHRONIQUES ADMIN -->
+          <div id="admin-view-chroniques" class="view">
+            <h3 class="admin-title">Gestion des Chroniques (Embed)</h3>
+            <div class="profile-card">
+              <label style="color: var(--text-dim);">Couleur :</label><input type="color" id="admin-chro-couleur" value="#fbbf24" style="width: 100%; height: 40px; margin: 10px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" />
+              <label style="color: var(--text-dim);">Titre :</label><input type="text" id="admin-chro-titre" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Auteur :</label><input type="text" id="admin-chro-auteur" value="Le Maître du Jeu" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <label style="color: var(--text-dim);">Description :</label><textarea id="admin-chro-contenu" rows="5" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea>
+              <label style="color: var(--text-dim);">Sous-description :</label><input type="text" id="admin-chro-sous" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px;" onclick="publierChronique()">Publier l'Embed</button>
+            </div>
+          </div>
+
+          <!-- VUE TICKETS ADMIN -->
+          <div id="admin-view-tickets" class="view"><h3 class="admin-title">Tickets & Support</h3><div id="admin-tickets-list"><p style="color: gray;">Chargement...</p></div></div>
+        </div>
+
+        <!-- BARRE DE NAVIGATION ADMIN -->
+        <nav class="bottom-nav admin-nav">
+          <button type="button" class="nav-btn active" data-admin-target="accueil"><span class="icon">🏠</span><span class="label">Accueil</span></button>
+          <button type="button" class="nav-btn" data-admin-target="fiches"><span class="icon">🐾</span><span class="label">Fiches</span></button>
+          <button type="button" class="nav-btn" data-admin-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
+          <button type="button" class="nav-btn" data-admin-target="chroniques"><span class="icon">📜</span><span class="label">Chroniques</span></button>
+          <button type="button" class="nav-btn" data-admin-target="tickets"><span class="icon">🎫</span><span class="label">Tickets</span></button>
+          <button type="button" class="nav-btn" id="btn-quit-admin" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
+        </nav>
+      </div> <!-- FIN SCREEN-ADMIN -->
+
+      <!-- ÉCRAN 5 : APPLICATION DEV -->
+      <div id="screen-dev" class="screen app-layout admin-layout" style="background-image: linear-gradient(rgba(10, 5, 20, 0.9), rgba(10, 5, 20, 0.95)), url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop');">
+        <div class="app-content">
+          <div class="admin-header" style="border-bottom: 2px solid #8b5cf6;">
+            <h2 style="color: #8b5cf6;">Panel Développeur</h2>
+            <span>Moonlight Studio</span>
+          </div>
+
+          <!-- VUE ACCUEIL DEV (Codes) -->
+          <div id="dev-view-accueil" class="view active">
+            <h3 class="admin-title">Gestion des Codes d'Accès</h3>
+            <div class="profile-card" style="margin-bottom: 20px; border-color: rgba(139, 92, 246, 0.3);">
+              <h4 style="color: #8b5cf6; margin-bottom: 15px;">Générer un code d'accès</h4>
+              <label style="color: var(--text-dim);">Pseudo Discord du joueur :</label>
+              <input type="text" id="dev-gen-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+              <button class="btn-primary" style="padding: 10px; width: 100%; margin-top: 10px; background: #8b5cf6; border-color: #8b5cf6;" onclick="genererCodeAcces()">Générer le code</button>
+            </div>
+            <h4 style="color: #8b5cf6; margin-bottom: 15px;">Demandes de connexion</h4>
+            <div id="admin-dev-codes-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
+          <!-- VUE STATISTIQUES DEV -->
+          <div id="dev-view-stats" class="view">
+            <h3 class="admin-title">Tableau de bord</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+              <div class="profile-card" style="text-align: center; border-left: 4px solid #8b5cf6;">
+                <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Membres Inscrits</p>
+                <h2 id="stat-users" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+              </div>
+              <div class="profile-card" style="text-align: center; border-left: 4px solid #10b981;">
+                <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Fiches Validées</p>
+                <h2 id="stat-fiches" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+              </div>
+              <div class="profile-card" style="text-align: center; border-left: 4px solid #fbbf24;">
+                <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Tickets Ouverts</p>
+                <h2 id="stat-tickets" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+              </div>
+              <div class="profile-card" style="text-align: center; border-left: 4px solid #ef4444;">
+                <p style="font-size: 0.8rem; color: gray; text-transform: uppercase;">Codes en Attente</p>
+                <h2 id="stat-codes" style="color: #fff; font-size: 2.5rem; margin: 10px 0;">0</h2>
+              </div>
+            </div>
+          </div>
+
+          <!-- VUE MEMBRES DEV -->
+          <div id="dev-view-membres" class="view">
+            <h3 class="admin-title">Gestion des Membres</h3>
+            <div id="dev-membres-list"><p style="color: gray;">Chargement...</p></div>
+          </div>
+
+        </div>
+
+        <!-- BARRE DE NAVIGATION DEV -->
+        <nav class="bottom-nav admin-nav" style="border-top-color: #8b5cf6;">
+          <button type="button" class="nav-btn active" data-dev-target="accueil"><span class="icon">🔑</span><span class="label">Codes</span></button>
+          <button type="button" class="nav-btn" data-dev-target="stats"><span class="icon">📊</span><span class="label">Stats</span></button>
+          <button type="button" class="nav-btn" data-dev-target="membres"><span class="icon">👥</span><span class="label">Membres</span></button>
+          <button type="button" class="nav-btn" id="btn-quit-dev" style="color: #ef4444;"><span class="icon">🚪</span><span class="label">Quitter</span></button>
+        </nav>
+      </div> <!-- FIN SCREEN-DEV -->
+
+      <!-- MODAL CHAT TICKET -->
+      <div id="ticket-chat-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 500px; padding: 0; display: flex; flex-direction: column; height: 75vh; overflow: hidden;">
+          <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: #151520;"><h3 id="chat-title" style="color: var(--accent); font-family: var(--font-title); margin: 0;">Discussion</h3><button class="btn-close-support" onclick="document.getElementById('ticket-chat-modal').classList.remove('active')">✕</button></div>
+          <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;"></div>
+          <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #151520;"><input type="text" id="chat-input" placeholder="Écrire un message..." style="flex: 1; padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /><button id="chat-send-btn" class="btn-primary" style="padding: 10px 20px; border-radius: 20px;">Envoyer</button></div>
+        </div>
+      </div>
+
+      <!-- MODAL GESTION RÉPUTATION -->
+      <div id="reputation-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('reputation-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Gérer la Réputation</h2>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.2rem;"><span>Points :</span><span id="rep-slider-value" style="color: var(--accent); font-weight: bold;">0</span></div>
+          <input type="range" id="reputation-slider" min="0" max="500" value="0" style="width: 100%; height: 8px; margin-bottom: 20px; accent-color: var(--accent);" />
+          <div class="form-group"><label>Raison de la modification :</label><input type="text" id="reputation-reason" placeholder="Ex: A gagné un combat, Punition..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="appliquerReputation()">Enregistrer</button>
+        </div>
+      </div>
+
+      <!-- MODAL ASSEMBLÉE (CHEF) -->
+      <div id="assemblee-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('assemblee-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Convoquer une Assemblée</h2>
+          <div class="form-group"><label>Couleur de l'embed :</label><input type="color" id="assemblee-couleur" value="#60a5fa" style="width: 100%; height: 40px; margin: 5px 0; border-radius: 8px; border: none; background: transparent; cursor: pointer;" /></div>
+          <div class="form-group"><label>Motif de l'Assemblée :</label><input type="text" id="assemblee-motif" placeholder="Ex: Réunion d'urgence, Annonce..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Convoqué par :</label><input type="text" id="assemblee-auteur" placeholder="Ex: Le Chef du Clan de la Forêt" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Date et Heure :</label><input type="datetime-local" id="assemblee-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Description :</label><textarea id="assemblee-desc" rows="3" placeholder="Détails de l'assemblée..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
+          <div class="form-group"><label>Sous-description :</label><input type="text" id="assemblee-sous" placeholder="Petit texte (ex: Présence obligatoire)" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <button type="button" class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="envoyerAssemblee()">Envoyer l'Assemblée</button>
+        </div>
+      </div>
+
+      <!-- MODAL GUERRE (CHEF) -->
+      <div id="guerre-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 450px; max-height: 85vh; overflow-y: auto;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('guerre-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: #ef4444; margin-bottom: 15px; text-align: center;">Déclarer la Guerre</h2>
+          <div class="form-group"><label>Clan ciblé :</label><select id="guerre-cible" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><option>Clan de la Forêt</option><option>Clan de la Pluie</option><option>Clan du Zénith</option><option>Clan de la Brume</option></select></div>
+          <div class="form-group"><label>Motif de la Guerre :</label><input type="text" id="guerre-motif" placeholder="Ex: Vol de proie, Insulte..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" /></div>
+          <div class="form-group"><label>Description / Message pour le Staff :</label><textarea id="guerre-desc" rows="4" placeholder="Expliquez la situation..." style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></textarea></div>
+          <p style="font-size: 0.75rem; color: gray; margin-bottom: 15px;">*Note : Cette déclaration sera envoyée au Staff sous forme de ticket. C'est le Staff qui publiera l'annonce sur l'accueil.</p>
+          <button type="button" class="btn-primary" style="width: 100%; background: #ef4444;" onclick="envoyerGuerre()">Envoyer au Staff</button>
+        </div>
+      </div>
+
+      <!-- MODAL CODE GÉNÉRÉ (DEV) -->
+      <div id="code-generated-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 400px; text-align: center;">
+          <h2 style="color: #10b981; margin-bottom: 10px;">✅ Code généré !</h2>
+          <p style="color: #cbd5e1; margin-bottom: 15px;">Donne ce code à <strong id="gen-pseudo-display" style="color: #fff;"></strong> :</p>
+          
+          <div id="gen-code-display" style="background: rgba(0,0,0,0.5); border: 2px dashed var(--accent); padding: 15px; border-radius: 8px; font-size: 1.8rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
+            LGDC-XXXX
+          </div>
+          
+          <button type="button" id="btn-copy-code" class="btn-primary" style="width: 100%; margin-bottom: 10px; background: #10b981; border-color: #10b981;">📋 Copier le code</button>
+          
+          <button type="button" class="btn-secondary" style="width: 100%;" onclick="document.getElementById('code-generated-modal').classList.remove('active')">Fermer</button>
+        </div>
+      </div>
+
+      <!-- MODAL CODE D'ACCÈS (JOUEUR) -->
+      <div id="access-code-modal" class="support-modal-overlay">
+        <div class="support-modal" style="max-width: 400px;">
+          <button type="button" class="btn-close-support" onclick="document.getElementById('access-code-modal').classList.remove('active')">✕</button>
+          <h2 style="font-family: var(--font-title); color: var(--accent); margin-bottom: 15px; text-align: center;">Accès par Code</h2>
+          <p style="color: #cbd5e1; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">Si tu ne peux pas utiliser Discord, entre ton pseudo et ton code fourni par le Staff.</p>
+          
+          <div class="form-group">
+            <label>Pseudo Discord</label>
+            <input type="text" id="access-pseudo" placeholder="Ex: Kln.nts" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+          
+          <div class="form-group">
+            <label>Code Spécial</label>
+            <input type="text" id="access-code" placeholder="Ex: LGDC-A1B2" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1);" />
+          </div>
+
+          <button type="button" id="btn-submit-access" class="btn-primary" style="width: 100%; margin-top: 10px;">Valider mon accès</button>
+        </div>
+      </div>
+
+      <div id="toast-success" class="toast hidden">
+        <div class="toast-icon">✓</div>
+        <div class="toast-text"><h4>Succès !</h4><p>Action réalisée avec succès.</p></div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>
