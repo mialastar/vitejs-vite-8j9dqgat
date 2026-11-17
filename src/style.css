@@ -452,11 +452,58 @@ body {
 }
 
 /* ==========================================
-   --- ARBRE GÉNÉALOGIQUE (VIS.JS) --- 
+   --- ARBRE GÉNÉALOGIQUE (TABLEAU BLANC) --- 
    ========================================== */
 
+/* Le rond du personnage sur le tableau */
+.arbre-node {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #1a1a24;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid #8b5cf6;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  user-select: none;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  transform: translate(-50%, -50%); /* Centre le rond sur le curseur de la souris */
+  z-index: 10;
+}
+
+/* Quand on attrape le personnage */
+.arbre-node:active {
+  cursor: grabbing;
+  box-shadow: 0 0 15px #8b5cf6;
+  z-index: 20;
+}
+
+/* L'étiquette avec le nom du personnage */
+.arbre-node span {
+  position: absolute;
+  bottom: -30px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid #8b5cf6;
+  pointer-events: none; /* Empêche l'étiquette de bloquer le clic */
+}
+
+/* Curseur spécial quand on est en mode "Tracer un lien" */
+.mode-lien .arbre-node {
+  cursor: crosshair;
+}
+
 /* Style des menus déroulants de l'éditeur Dev */
-#arbre-perso-1, #arbre-perso-2, #arbre-type-lien {
+#arbre-select-perso, #arbre-type-lien {
   background-color: rgba(10, 5, 20, 0.8) !important;
   color: #fff !important;
   border: 1px solid #8b5cf6 !important;
@@ -465,37 +512,6 @@ body {
   font-family: var(--font-body);
 }
 
-#arbre-perso-1:focus, #arbre-perso-2:focus, #arbre-type-lien:focus {
+#arbre-select-perso:focus, #arbre-type-lien:focus {
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
-}
-
-/* Style des boutons de navigation (zoom, recentrer) */
-.vis-navigation .vis-button {
-  background-color: rgba(139, 92, 246, 0.2) !important;
-  border: 1px solid #8b5cf6 !important;
-  border-radius: 8px !important;
-  opacity: 0.8;
-  transition: 0.3s;
-}
-
-.vis-navigation .vis-button:hover {
-  background-color: rgba(139, 92, 246, 0.6) !important;
-  opacity: 1;
-}
-
-/* On filtre l'icône blanche par défaut pour la rendre plus visible sur fond sombre */
-.vis-navigation .vis-button::before {
-  filter: invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5));
-}
-
-/* Style de la bulle d'information (Tooltip) quand on survole un personnage */
-.vis-tooltip {
-  background-color: rgba(15, 20, 15, 0.95) !important;
-  border: 1px solid #8b5cf6 !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  padding: 8px 12px !important;
-  font-family: var(--font-body) !important;
-  font-size: 0.85rem !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }

@@ -22,8 +22,13 @@ let currentChatIsAdmin = false;
 let currentChatUserName = "";
 let isSubmittingEvent = false;
 let myCalendar = null;
-let devNetwork = null;
-let playerNetwork = null;
+
+// Variables pour le Tableau Blanc (Arbre)
+let nodesArbreData = {};
+let liensArbreData = [];
+let isModeLien = false;
+let firstNodeSelectionne = null;
+let panzoomArbre = null;
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -1959,161 +1964,229 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
 });
 
 // ==========================================
-// --- ARBRE GÉNÉALOGIQUE (VIS.JS) ---
+// --- ARBRE GÉNÉALOGIQUE (TABLEAU BLANC) ---
 // ==========================================
 async function loadArbreDev() {
-  const container = document.getElementById('arbre-network');
-  if (!container) return;
+  const board = document.getElementById('arbre-board');
+  if (!board) return;
 
+  // 1. Initialiser Panzoom (si pas déjà fait)
+  if (!panzoomArbre && typeof Panzoom !== 'undefined') {
+    panzoomArbre = Panzoom(board, { maxScale: 3, minScale: 0.5, startScale: 1, cursor: 'grab' });
+    document.getElementById('arbre-viewport')?.addEventListener('wheel', panzoomArbre.zoomWithWheel);
+  }
+
+  // 2. Charger les fiches validées pour le menu déroulant
   const { data: fiches } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('statut', 'Validée');
-  const select1 = document.getElementById('arbre-perso-1');
-  const select2 = document.getElementById('arbre-perso-2');
-  
-  if (select1 && select2) {
-    let options = '<option value="">Choisir un personnage...</option>';
+  const select = document.getElementById('arbre-select-perso');
+  if (select) {
+    select.innerHTML = '<option value="">-- Choisir un perso existant à placer --</option>';
     (fiches || []).forEach(f => {
-      options += `<option value="${f.id}">${f.nom}</option>`;
+      select.innerHTML += `<option value="${f.id}">${f.nom}</option>`;
     });
-    select1.innerHTML = options;
-    select2.innerHTML = options;
   }
 
+  // 3. Charger les positions et les liens
+  const { data: positions } = await supabase.from('positions_arbres').select('*');
   const { data: liens } = await supabase.from('relations_arbres').select('*');
+
+  nodesArbreData = {};
+  (positions || []).forEach(pos => {
+    const fiche = (fiches || []).find(f => String(f.id) === String(pos.fiche_id));
+    if (fiche) {
+      nodesArbreData[fiche.id] = { ...fiche, x: pos.x, y: pos.y };
+    }
+  });
+
+  liensArbreData = liens || [];
+  renderArbreBoard();
+}
+
+function renderArbreBoard() {
+  const board = document.getElementById('arbre-board');
+  const svg = document.getElementById('arbre-svg');
   
-  const nodes = (fiches || []).map(f => {
-    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
-    if (f.image_url && f.image_url.trim() !== '') img = f.image_url.split(',')[0].trim();
-    
-    return {
-      id: f.id,
-      label: f.nom,
-      shape: 'circularImage',
-      image: img,
-      brokenImage: "https://cdn.discordapp.com/embed/avatars/0.png",
-      size: 35,
-      font: { color: '#fff', face: 'Montserrat', size: 14 }
-    };
-  });
+  board.querySelectorAll('.arbre-node').forEach(n => n.remove());
+  svg.innerHTML = '';
 
-  const edges = (liens || []).map(l => {
+  // Dessiner les lignes
+  liensArbreData.forEach(lien => {
+    const n1 = nodesArbreData[lien.personnage_1_id];
+    const n2 = nodesArbreData[lien.personnage_2_id];
+    if (!n1 || !n2) return;
+
     let color = '#8b5cf6';
-    let dashes = false;
-    let label = 'Relation';
+    if (lien.type_relation === 'parent') color = '#fbbf24';
+    if (lien.type_relation === 'fratrie') color = '#60a5fa';
+    if (lien.type_relation === 'couple') color = '#ef4444';
 
-    if (l.type_relation === 'parent') { color = '#fbbf24'; label = 'Parent'; }
-    if (l.type_relation === 'fratrie') { color = '#60a5fa'; dashes = true; label = 'Fratrie'; }
-    if (l.type_relation === 'couple') { color = '#ef4444'; label = 'Couple'; }
-
-    return {
-      from: l.personnage_1_id,
-      to: l.personnage_2_id,
-      color: { color: color },
-      dashes: dashes,
-      arrows: 'to',
-      label: label,
-      font: { color: color, size: 11, align: 'middle' }
-    };
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', n1.x);
+    line.setAttribute('y1', n1.y);
+    line.setAttribute('x2', n2.x);
+    line.setAttribute('y2', n2.y);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', '4');
+    if (lien.type_relation === 'fratrie') line.setAttribute('stroke-dasharray', '8,8');
+    svg.appendChild(line);
   });
 
-  const data = { nodes: nodes, edges: edges };
-  const options = {
-    physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
-    interaction: { hover: true, tooltipDelay: 200, navigationButtons: true, keyboard: true }
-  };
+  // Dessiner les personnages
+  Object.values(nodesArbreData).forEach(node => {
+    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
+    if (node.image_url && node.image_url.trim() !== '') img = node.image_url.split(',')[0].trim();
 
-  if (typeof vis === 'undefined') {
-    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Vis.js non chargé.</p>';
-    return;
+    const div = document.createElement('div');
+    div.className = 'arbre-node';
+    div.id = `node-${node.id}`;
+    div.style.backgroundImage = `url('${img}')`;
+    div.style.left = `${node.x}px`;
+    div.style.top = `${node.y}px`;
+    div.innerHTML = `<span>${node.nom}</span>`;
+    
+    makeDraggable(div, node.id, board);
+    
+    div.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!isModeLien) return;
+      gererClicLien(node.id);
+    });
+
+    board.appendChild(div);
+  });
+}
+
+window.ajouterNoeudArbre = async function() {
+  const select = document.getElementById('arbre-select-perso');
+  const ficheId = select.value;
+  if (!ficheId) return alert("Choisis un personnage dans la liste.");
+  if (nodesArbreData[ficheId]) return alert("Ce personnage est déjà sur le tableau !");
+
+  const { data: fiche } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('id', ficheId).single();
+  
+  const x = 300 + Math.random() * 200;
+  const y = 300 + Math.random() * 200;
+
+  // On force l'ID en nombre
+  await supabase.from('positions_arbres').upsert({ fiche_id: Number(ficheId), x, y });
+  
+  nodesArbreData[ficheId] = { ...fiche, x, y };
+  renderArbreBoard();
+  select.value = '';
+};
+
+function makeDraggable(elmnt, ficheId, board) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+  elmnt.onpointerdown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    if (isModeLien) return;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    elmnt.setPointerCapture(e.pointerId);
+    document.onpointerup = closeDragElement;
+    document.onpointermove = elementDrag;
   }
 
-  if (devNetwork) {
-    devNetwork.setData(data);
-  } else {
-    devNetwork = new vis.Network(container, data, options);
+  function elementDrag(e) {
+    e.preventDefault();
+    
+    const scale = panzoomArbre ? panzoomArbre.getScale() : 1;
+    pos1 = (pos3 - e.clientX) / scale;
+    pos2 = (pos4 - e.clientY) / scale;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+
+    let newX = elmnt.offsetLeft - pos1;
+    let newY = elmnt.offsetTop - pos2;
+
+    elmnt.style.left = newX + "px";
+    elmnt.style.top = newY + "px";
+
+    nodesArbreData[ficheId].x = newX;
+    nodesArbreData[ficheId].y = newY;
+
+    const svg = document.getElementById('arbre-svg');
+    svg.innerHTML = '';
+    liensArbreData.forEach(lien => {
+      const n1 = nodesArbreData[lien.personnage_1_id];
+      const n2 = nodesArbreData[lien.personnage_2_id];
+      if (!n1 || !n2) return;
+      let color = lien.type_relation === 'parent' ? '#fbbf24' : lien.type_relation === 'fratrie' ? '#60a5fa' : '#ef4444';
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', n1.x); line.setAttribute('y1', n1.y);
+      line.setAttribute('x2', n2.x); line.setAttribute('y2', n2.y);
+      line.setAttribute('stroke', color); line.setAttribute('stroke-width', '4');
+      if (lien.type_relation === 'fratrie') line.setAttribute('stroke-dasharray', '8,8');
+      svg.appendChild(line);
+    });
+  }
+
+  function closeDragElement() {
+    document.onpointerup = null;
+    document.onpointermove = null;
+    
+    const newX = elmnt.offsetLeft;
+    const newY = elmnt.offsetTop;
+    supabase.from('positions_arbres').update({ x: newX, y: newY }).eq('fiche_id', Number(ficheId)).then();
   }
 }
 
-async function loadArbreJoueur() {
-  const container = document.getElementById('player-arbre-network');
-  if (!container) return;
-
-  const { data: fiches } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('statut', 'Validée');
-  const { data: liens } = await supabase.from('relations_arbres').select('*');
+window.activerModeLien = function() {
+  isModeLien = !isModeLien;
+  const btn = document.getElementById('btn-mode-lien');
+  const viewport = document.getElementById('arbre-viewport');
   
-  const nodes = (fiches || []).map(f => {
-    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
-    if (f.image_url && f.image_url.trim() !== '') img = f.image_url.split(',')[0].trim();
-    
-    return {
-      id: f.id,
-      label: f.nom,
-      shape: 'circularImage',
-      image: img,
-      brokenImage: "https://cdn.discordapp.com/embed/avatars/0.png",
-      size: 35,
-      font: { color: '#fff', face: 'Montserrat', size: 14 }
-    };
-  });
+  if (isModeLien) {
+    btn.style.background = '#60a5fa';
+    btn.style.color = '#000';
+    viewport.classList.add('mode-lien');
+    firstNodeSelectionne = null;
+    alert("Mode Lien activé : Clique sur le premier personnage, puis sur le second.");
+  } else {
+    btn.style.background = 'transparent';
+    btn.style.color = '#60a5fa';
+    viewport.classList.remove('mode-lien');
+    document.querySelectorAll('.arbre-node').forEach(n => n.style.borderColor = '#8b5cf6');
+    firstNodeSelectionne = null;
+  }
+};
 
-  const edges = (liens || []).map(l => {
-    let color = '#8b5cf6';
-    let dashes = false;
-    let label = 'Relation';
-
-    if (l.type_relation === 'parent') { color = '#fbbf24'; label = 'Parent'; }
-    if (l.type_relation === 'fratrie') { color = '#60a5fa'; dashes = true; label = 'Fratrie'; }
-    if (l.type_relation === 'couple') { color = '#ef4444'; label = 'Couple'; }
-
-    return {
-      from: l.personnage_1_id,
-      to: l.personnage_2_id,
-      color: { color: color },
-      dashes: dashes,
-      arrows: 'to',
-      label: label,
-      font: { color: color, size: 11, align: 'middle' }
-    };
-  });
-
-  const data = { nodes: nodes, edges: edges };
-  const options = {
-    physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
-    interaction: { hover: true, tooltipDelay: 200, navigationButtons: true, keyboard: true }
-  };
-
-  if (typeof vis === 'undefined') {
-    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Vis.js non chargé.</p>';
+async function gererClicLien(ficheId) {
+  if (!firstNodeSelectionne) {
+    firstNodeSelectionne = ficheId;
+    document.getElementById(`node-${ficheId}`).style.borderColor = '#10b981';
     return;
   }
 
-  if (playerNetwork) {
-    playerNetwork.setData(data);
-  } else {
-    playerNetwork = new vis.Network(container, data, options);
+  if (firstNodeSelectionne === ficheId) {
+    document.getElementById(`node-${ficheId}`).style.borderColor = '#8b5cf6';
+    firstNodeSelectionne = null;
+    return;
   }
-}
 
-window.creerLienArbre = async function() {
-  const p1 = document.getElementById('arbre-perso-1').value;
-  const p2 = document.getElementById('arbre-perso-2').value;
   const type = document.getElementById('arbre-type-lien').value;
-
-  if (!p1 || !p2) return alert("Choisis deux personnages.");
-  if (p1 === p2) return alert("Un personnage ne peut pas être lié à lui-même.");
+  const p2 = ficheId;
 
   const { error } = await supabase.from('relations_arbres').insert({
-    personnage_1_id: p1,
-    personnage_2_id: p2,
+    personnage_1_id: Number(firstNodeSelectionne),
+    personnage_2_id: Number(p2),
     type_relation: type
   });
 
   if (error) {
     alert("Erreur : " + error.message);
   } else {
-    alert("✅ Lien ajouté à l'arbre !");
-    loadArbreDev(); 
+    document.getElementById(`node-${firstNodeSelectionne}`).style.borderColor = '#8b5cf6';
+    firstNodeSelectionne = null;
+    
+    const { data: liens } = await supabase.from('relations_arbres').select('*');
+    liensArbreData = liens || [];
+    renderArbreBoard();
   }
-};
+}
 
 // ==========================================
 // --- CALENDRIER : CONFIG ÉVÉNEMENTS ---
