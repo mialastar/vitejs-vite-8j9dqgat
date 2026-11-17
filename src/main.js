@@ -1969,6 +1969,8 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
 let currentArbreId = null;
 let currentPersoPrincipalId = null;
 let allFichesValidees = [];
+let outilActuel = 'deplacer'; // 'deplacer', 'lien', 'supprimer'
+let premierPersoLien = null;
 
 async function loadArbreDev() {
   const container = document.getElementById('arbre-liste-persos');
@@ -1976,16 +1978,13 @@ async function loadArbreDev() {
 
   container.innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
 
-  // 1. Charger les fiches validées
   const { data: fiches } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('statut', 'Validée').order('nom');
   allFichesValidees = fiches || [];
 
-  // 2. Charger tous les arbres existants
   const { data: arbres } = await supabase.from('arbres').select('*');
   const arbresMap = {};
   (arbres || []).forEach(a => arbresMap[a.personnage_principal_id] = a);
 
-  // 3. Construire la liste
   container.innerHTML = '';
   if (allFichesValidees.length === 0) {
     container.innerHTML = '<p style="color: gray; text-align: center;">Aucun personnage validé.</p>';
@@ -2016,7 +2015,6 @@ async function loadArbreDev() {
     container.appendChild(row);
   });
 
-  // Fermer les menus si on clique ailleurs
   document.addEventListener('click', (e) => {
     if (!e.target.closest('button[onclick^="toggleMenuArbre"]')) {
       document.querySelectorAll('[id^="menu-arbre-"]').forEach(m => m.style.display = 'none');
@@ -2040,7 +2038,6 @@ window.ouvrirEditeurArbre = async function(ficheId) {
   const fiche = allFichesValidees.find(f => String(f.id) === String(ficheId));
   if (!fiche) return;
 
-  // Chercher si un arbre existe déjà pour ce perso
   const { data: arbreExistant } = await supabase.from('arbres').select('*').eq('personnage_principal_id', Number(ficheId)).maybeSingle();
 
   if (!arbreExistant) {
@@ -2054,14 +2051,27 @@ window.ouvrirEditeurArbre = async function(ficheId) {
 
     if (error) return alert("Erreur : " + error.message);
     currentArbreId = nouvelArbre.id;
+    
+    // AJOUT AUTOMATIQUE DU PERSO PRINCIPAL AU CENTRE
+    const x = 1500;
+    const y = 1500;
+    await supabase.from('positions_arbres').insert({ arbre_id: currentArbreId, fiche_id: Number(ficheId), x, y });
   } else {
     currentArbreId = arbreExistant.id;
   }
 
-  // Basculer l'interface
   document.getElementById('arbre-liste-persos').style.display = 'none';
-  document.getElementById('arbre-editeur').style.display = 'block';
+  document.getElementById('arbre-editeur').style.display = 'flex'; // Utilise flex pour le layout
   document.getElementById('arbre-titre-editeur').textContent = "Éditeur : " + fiche.nom;
+  document.getElementById('arbre-nom-perso').textContent = "Perso principal : " + fiche.nom;
+
+  // Centrer la vue au démarrage
+  setTimeout(() => {
+    if (panzoomArbre) {
+      panzoomArbre.zoom(1);
+      panzoomArbre.pan(-1000, -1000); // Décale pour voir le centre
+    }
+  }, 100);
 
   chargerArbreSelectionne();
 };
@@ -2071,11 +2081,11 @@ window.fermerEditeurArbre = function() {
   currentPersoPrincipalId = null;
   document.getElementById('arbre-editeur').style.display = 'none';
   document.getElementById('arbre-liste-persos').style.display = 'flex';
-  loadArbreDev(); // Recharge la liste pour mettre à jour les icônes
+  loadArbreDev();
 };
 
 window.supprimerArbreComplet = async function(arbreId) {
-  if (!confirm("⚠️ Supprimer cet arbre et TOUTES ses données (persos, liens) ?")) return;
+  if (!confirm("⚠️ Supprimer cet arbre et TOUTES ses données ?")) return;
   const { error } = await supabase.from('arbres').delete().eq('id', arbreId);
   if (error) alert(error.message);
   else loadArbreDev();
@@ -2085,13 +2095,27 @@ async function chargerArbreSelectionne() {
   if (!currentArbreId) return;
 
   const board = document.getElementById('arbre-board');
+  const viewport = document.getElementById('arbre-viewport');
 
   if (!panzoomArbre && typeof Panzoom !== 'undefined') {
-    panzoomArbre = Panzoom(board, { maxScale: 3, minScale: 0.5, startScale: 1, cursor: 'grab' });
-    document.getElementById('arbre-viewport')?.addEventListener('wheel', panzoomArbre.zoomWithWheel);
+    panzoomArbre = Panzoom(board, { maxScale: 3, minScale: 0.2, startScale: 1, cursor: 'grab', canvas: true });
+    
+    // Zoom avec la molette
+    viewport.addEventListener('wheel', (e) => {
+      if (outilActuel === 'deplacer') panzoomArbre.zoomWithWheel(e);
+      else e.preventDefault(); // Empêche le scroll si on dessine
+    });
+    
+    // Pan avec le clic droit ou le clic gauche si outil "deplacer"
+    viewport.addEventListener('pointerdown', (e) => {
+      if (outilActuel === 'deplacer' && e.target === viewport || e.target === board) {
+        panzoomArbre.handleDown(e);
+      }
+    });
+    viewport.addEventListener('pointermove', (e) => panzoomArbre.handleMove(e));
+    viewport.addEventListener('pointerup', (e) => panzoomArbre.handleUp(e));
   }
 
-  // Charger uniquement les éléments de l'arbre courant
   const { data: positions } = await supabase.from('positions_arbres').select('*').eq('arbre_id', currentArbreId);
   const { data: liens } = await supabase.from('relations_arbres').select('*').eq('arbre_id', currentArbreId);
 
@@ -2104,44 +2128,94 @@ async function chargerArbreSelectionne() {
   liensArbreData = liens || [];
   renderArbreBoard();
 
-  // Remplir le select de la toolbar
   const selectPerso = document.getElementById('arbre-select-perso');
   if (selectPerso) {
-    selectPerso.innerHTML = '<option value="">-- Ajouter un perso à cet arbre --</option>';
+    selectPerso.innerHTML = '<option value="">-- Ajouter un perso --</option>';
     allFichesValidees.forEach(f => {
       if (!nodesArbreData[f.id]) selectPerso.innerHTML += `<option value="${f.id}">${f.nom}</option>`;
     });
   }
 }
 
-// Le reste de tes fonctions (ajouterNoeudArbre, makeDraggable) reste identique à mon message précédent.
-// Tu dois juste t'assurer que dans `ajouterNoeudArbre` et `makeDraggable`, les requêtes Supabase utilisent bien `currentArbreId`.
-
-window.ajouterNoeudArbre = async function() {
-  if (!currentArbreId) return;
-  const select = document.getElementById('arbre-select-perso');
-  const ficheId = select.value;
-  if (!ficheId) return;
-
-  const fiche = allFichesValidees.find(f => String(f.id) === String(ficheId));
-  if (!fiche) return;
+window.setTool = function(tool) {
+  outilActuel = tool;
+  premierPersoLien = null;
   
-  const x = 300 + Math.random() * 200;
-  const y = 300 + Math.random() * 200;
-
-  const { error } = await supabase.from('positions_arbres').insert({ 
-    arbre_id: currentArbreId,
-    fiche_id: Number(ficheId), x, y 
-  });
+  // Style des boutons
+  document.getElementById('tool-deplacer').style.background = tool === 'deplacer' ? '#8b5cf6' : 'transparent';
+  document.getElementById('tool-deplacer').style.color = tool === 'deplacer' ? 'white' : '#ccc';
   
-  if (error) return alert(error.message);
-
-  nodesArbreData[ficheId] = { ...fiche, x, y };
-  renderArbreBoard();
+  document.getElementById('tool-lien').style.background = tool === 'lien' ? '#60a5fa' : 'transparent';
+  document.getElementById('tool-lien').style.color = tool === 'lien' ? '#000' : '#ccc';
   
-  // Mettre à jour le select (retirer le perso ajouté)
-  chargerArbreSelectionne();
+  document.getElementById('tool-supprimer').style.background = tool === 'supprimer' ? '#ef4444' : 'transparent';
+  document.getElementById('tool-supprimer').style.color = tool === 'supprimer' ? 'white' : '#ef4444';
+
+  // Changer le curseur
+  document.getElementById('arbre-viewport').style.cursor = tool === 'deplacer' ? 'grab' : 'crosshair';
+  
+  // Reset visuel des persos
+  document.querySelectorAll('.arbre-node').forEach(n => n.style.borderColor = '#8b5cf6');
 };
+
+async function renderArbreBoard() {
+  const board = document.getElementById('arbre-board');
+  const svg = document.getElementById('arbre-svg');
+  
+  board.querySelectorAll('.arbre-node').forEach(n => n.remove());
+  svg.innerHTML = '';
+
+  // Dessiner les lignes
+  liensArbreData.forEach(lien => {
+    const n1 = nodesArbreData[lien.personnage_1_id];
+    const n2 = nodesArbreData[lien.personnage_2_id];
+    if (!n1 || !n2) return;
+
+    let color = lien.type_relation === 'parent' ? '#fbbf24' : lien.type_relation === 'fratrie' ? '#60a5fa' : '#ef4444';
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', n1.x + 40); // +40 pour centrer sur le perso
+    line.setAttribute('y1', n1.y + 40);
+    line.setAttribute('x2', n2.x + 40);
+    line.setAttribute('y2', n2.y + 40);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', '4');
+    if (lien.type_relation === 'fratrie') line.setAttribute('stroke-dasharray', '8,8');
+    svg.appendChild(line);
+  });
+
+  // Dessiner les persos
+  Object.values(nodesArbreData).forEach(node => {
+    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
+    if (node.image_url && node.image_url.trim() !== '') img = node.image_url.split(',')[0].trim();
+
+    const div = document.createElement('div');
+    div.className = 'arbre-node';
+    div.id = `node-${node.id}`;
+    div.style.position = 'absolute';
+    div.style.width = '80px';
+    div.style.height = '80px';
+    div.style.borderRadius = '50%';
+    div.style.backgroundImage = `url('${img}')`;
+    div.style.backgroundSize = 'cover';
+    div.style.backgroundPosition = 'center';
+    div.style.border = '3px solid #8b5cf6';
+    div.style.left = `${node.x}px`;
+    div.style.top = `${node.y}px`;
+    div.style.cursor = outilActuel === 'deplacer' ? 'grab' : 'crosshair';
+    div.style.boxShadow = '0 4px 6px rgba(0,0,0,0.5)';
+    div.innerHTML = `<span style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,0.8); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">${node.nom}</span>`;
+    
+    makeDraggable(div, node.id, board);
+    
+    div.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (outilActuel === 'lien') gererClicLien(node.id);
+      if (outilActuel === 'supprimer') supprimerPersoArbre(node.id);
+    });
+
+    board.appendChild(div);
+  });
+}
 
 function makeDraggable(elmnt, ficheId, board) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -2149,7 +2223,7 @@ function makeDraggable(elmnt, ficheId, board) {
   elmnt.onpointerdown = dragMouseDown;
 
   function dragMouseDown(e) {
-    if (isModeLien) return;
+    if (outilActuel !== 'deplacer') return; // Ne glisse que si on a l'outil déplacer
     e.preventDefault();
     pos3 = e.clientX;
     pos4 = e.clientY;
@@ -2184,8 +2258,8 @@ function makeDraggable(elmnt, ficheId, board) {
       if (!n1 || !n2) return;
       let color = lien.type_relation === 'parent' ? '#fbbf24' : lien.type_relation === 'fratrie' ? '#60a5fa' : '#ef4444';
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', n1.x); line.setAttribute('y1', n1.y);
-      line.setAttribute('x2', n2.x); line.setAttribute('y2', n2.y);
+      line.setAttribute('x1', n1.x + 40); line.setAttribute('y1', n1.y + 40);
+      line.setAttribute('x2', n2.x + 40); line.setAttribute('y2', n2.y + 40);
       line.setAttribute('stroke', color); line.setAttribute('stroke-width', '4');
       if (lien.type_relation === 'fratrie') line.setAttribute('stroke-dasharray', '8,8');
       svg.appendChild(line);
@@ -2203,15 +2277,87 @@ function makeDraggable(elmnt, ficheId, board) {
   }
 }
 
+window.ajouterNoeudArbre = async function() {
+  if (!currentArbreId) return;
+  const select = document.getElementById('arbre-select-perso');
+  const ficheId = select.value;
+  if (!ficheId) return;
+
+  const fiche = allFichesValidees.find(f => String(f.id) === String(ficheId));
+  if (!fiche) return;
+  
+  // Placer un peu au hasard autour du centre
+  const x = 1200 + Math.random() * 600;
+  const y = 1200 + Math.random() * 600;
+
+  const { error } = await supabase.from('positions_arbres').insert({ 
+    arbre_id: currentArbreId,
+    fiche_id: Number(ficheId), x, y 
+  });
+  
+  if (error) return alert(error.message);
+
+  nodesArbreData[ficheId] = { ...fiche, x, y };
+  renderArbreBoard();
+  chargerArbreSelectionne(); // Maj select
+};
+
+async function gererClicLien(ficheId) {
+  const nodeEl = document.getElementById(`node-${ficheId}`);
+
+  if (!premierPersoLien) {
+    premierPersoLien = ficheId;
+    nodeEl.style.borderColor = '#10b981'; // Vert pour le 1er sélectionné
+    return;
+  }
+
+  if (premierPersoLien === ficheId) {
+    nodeEl.style.borderColor = '#8b5cf6';
+    premierPersoLien = null;
+    return;
+  }
+
+  // Demander le type de lien
+  const type = prompt("Type de lien ? (parent, fratrie, couple)", "parent");
+  if (!type || !['parent', 'fratrie', 'couple'].includes(type.toLowerCase())) {
+    document.getElementById(`node-${premierPersoLien}`).style.borderColor = '#8b5cf6';
+    premierPersoLien = null;
+    return;
+  }
+
+  const { error } = await supabase.from('relations_arbres').insert({
+    arbre_id: currentArbreId,
+    personnage_1_id: Number(premierPersoLien),
+    personnage_2_id: Number(ficheId),
+    type_relation: type.toLowerCase()
+  });
+
+  if (error) alert("Erreur : " + error.message);
+  else {
+    premierPersoLien = null;
+    chargerArbreSelectionne();
+  }
+}
+
+window.supprimerPersoArbre = async function(ficheId) {
+  if (ficheId === currentPersoPrincipalId) return alert("Impossible de supprimer le personnage principal.");
+  if (!confirm("Supprimer ce personnage de l'arbre (et ses liens) ?")) return;
+
+  await supabase.from('positions_arbres').delete().eq('fiche_id', Number(ficheId)).eq('arbre_id', currentArbreId);
+  await supabase.from('relations_arbres').delete().or(`personnage_1_id.eq.${ficheId},personnage_2_id.eq.${ficheId}`).eq('arbre_id', currentArbreId);
+  
+  chargerArbreSelectionne();
+}
+
 window.publierArbre = async function() {
   if (!currentArbreId) return;
-  if (!confirm("Publier cet arbre ? Il sera visible par tous les joueurs.")) return;
+  if (!confirm("Publier cet arbre ?")) return;
 
   const { error } = await supabase.from('arbres').update({ statut: 'publie' }).eq('id', currentArbreId);
   if (error) alert("Erreur : " + error.message);
   else {
-    alert("Arbre publié avec succès !");
-    fermerEditeurArbre(); // Retour à la liste
+    alert("Arbre publié !");
+    fermerEditeurArbre();
   }
 };
 
