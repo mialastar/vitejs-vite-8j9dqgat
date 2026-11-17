@@ -441,3 +441,12 @@ body {
   background: rgba(239, 68, 68, 0.4);
   transform: scale(1.05);
 }
+
+/* Force la séparation des onglets du Panel + */
+.panel-content {
+  display: none !important; 
+}
+
+.panel-content.active {
+  display: block !important;
+}
