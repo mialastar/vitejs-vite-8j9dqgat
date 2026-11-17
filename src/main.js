@@ -22,6 +22,8 @@ let currentChatIsAdmin = false;
 let currentChatUserName = "";
 let isSubmittingEvent = false;
 let myCalendar = null;
+let devNetwork = null;
+let playerNetwork = null;
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -176,6 +178,7 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
     if (targetEl) targetEl.classList.add('active');
 
     if (target === 'calendrier') loadPlayerEvents();
+    if (target === 'arbre') loadArbreJoueur();
   });
 });
 
@@ -1492,9 +1495,8 @@ async function loadPlayerTickets() {
 // ==========================================
 // --- CHAT TICKETS (TEMPS RÉEL) ---
 // ==========================================
-let realtimeSubscription = null; // Pour stocker l'écouteur
+let realtimeSubscription = null;
 
-// Fonction pour faire défiler tout en bas
 function scrollToBottom() {
   const container = document.getElementById('chat-messages');
   if (container) {
@@ -1510,7 +1512,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const messagesContainer = document.getElementById('chat-messages');
   messagesContainer.innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
   
-  // 1. Charger les infos du ticket
   const { data: t, error } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
   if (error) return;
 
@@ -1519,12 +1520,10 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const { data: { user } } = await supabase.auth.getUser();
   currentChatUserName = user.user_metadata.full_name || "Joueur";
 
-  // 2. Charger l'historique des messages
   const { data: messages } = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true });
 
   messagesContainer.innerHTML = '';
   
-  // Afficher la description initiale du ticket
   messagesContainer.innerHTML += `
     <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.05); border-color: gray; margin-bottom: 20px;">
       <span class="chat-sender">Demande initiale</span>
@@ -1532,7 +1531,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     </div>
   `;
 
-  // Afficher les messages
   if (messages && messages.length > 0) {
     messages.forEach(msg => {
       const isMe = msg.sender_id === user.id;
@@ -1549,7 +1547,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
 
   scrollToBottom();
 
-  // 3. ACTIVER LE TEMPS RÉEL (CORRIGÉ)
   if (realtimeSubscription) {
     supabase.removeChannel(realtimeSubscription);
   }
@@ -1560,7 +1557,7 @@ window.openTicketChat = async function(ticketId, isAdmin) {
       event: 'INSERT', 
       schema: 'public', 
       table: 'ticket_messages',
-      filter: `ticket_id=eq.${ticketId}` // On n'écoute que ce ticket
+      filter: `ticket_id=eq.${ticketId}` 
     }, (payload) => {
       const newMsg = payload.new;
       const isMe = newMsg.sender_id === user.id;
@@ -1579,7 +1576,6 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     .subscribe();
 };
 
-// Fermer le chat et couper le temps réel
 document.getElementById('ticket-chat-modal')?.addEventListener('click', (e) => {
   if (e.target.id === 'ticket-chat-modal' || e.target.closest('.btn-close-support')) {
     if (realtimeSubscription) {
@@ -1589,7 +1585,6 @@ document.getElementById('ticket-chat-modal')?.addEventListener('click', (e) => {
   }
 });
 
-// Envoyer un message
 document.getElementById('chat-send-btn')?.addEventListener('click', async () => {
   const input = document.getElementById('chat-input').value.trim();
   if (!input || !currentChatTicketId) return;
@@ -1607,9 +1602,8 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
   
   if (error) { 
     alert("Erreur lors de l'envoi : " + error.message); 
-    document.getElementById('chat-input').value = input; // Restaure le texte si erreur
+    document.getElementById('chat-input').value = input; 
   } else {
-    // Mettre à jour le statut du ticket
     await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
@@ -1960,8 +1954,166 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
     if (target === 'stats') loadDevStats();
     if (target === 'membres') loadDevMembres();
     if (target === 'accueil') loadAdminCodes();
+    if (target === 'arbre') loadArbreDev();
   });
 });
+
+// ==========================================
+// --- ARBRE GÉNÉALOGIQUE (VIS.JS) ---
+// ==========================================
+async function loadArbreDev() {
+  const container = document.getElementById('arbre-network');
+  if (!container) return;
+
+  const { data: fiches } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('statut', 'Validée');
+  const select1 = document.getElementById('arbre-perso-1');
+  const select2 = document.getElementById('arbre-perso-2');
+  
+  if (select1 && select2) {
+    let options = '<option value="">Choisir un personnage...</option>';
+    (fiches || []).forEach(f => {
+      options += `<option value="${f.id}">${f.nom}</option>`;
+    });
+    select1.innerHTML = options;
+    select2.innerHTML = options;
+  }
+
+  const { data: liens } = await supabase.from('relations_arbres').select('*');
+  
+  const nodes = (fiches || []).map(f => {
+    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
+    if (f.image_url && f.image_url.trim() !== '') img = f.image_url.split(',')[0].trim();
+    
+    return {
+      id: f.id,
+      label: f.nom,
+      shape: 'circularImage',
+      image: img,
+      brokenImage: "https://cdn.discordapp.com/embed/avatars/0.png",
+      size: 35,
+      font: { color: '#fff', face: 'Montserrat', size: 14 }
+    };
+  });
+
+  const edges = (liens || []).map(l => {
+    let color = '#8b5cf6';
+    let dashes = false;
+    let label = 'Relation';
+
+    if (l.type_relation === 'parent') { color = '#fbbf24'; label = 'Parent'; }
+    if (l.type_relation === 'fratrie') { color = '#60a5fa'; dashes = true; label = 'Fratrie'; }
+    if (l.type_relation === 'couple') { color = '#ef4444'; label = 'Couple'; }
+
+    return {
+      from: l.personnage_1_id,
+      to: l.personnage_2_id,
+      color: { color: color },
+      dashes: dashes,
+      arrows: 'to',
+      label: label,
+      font: { color: color, size: 11, align: 'middle' }
+    };
+  });
+
+  const data = { nodes: nodes, edges: edges };
+  const options = {
+    physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
+    interaction: { hover: true, tooltipDelay: 200, navigationButtons: true, keyboard: true }
+  };
+
+  if (typeof vis === 'undefined') {
+    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Vis.js non chargé.</p>';
+    return;
+  }
+
+  if (devNetwork) {
+    devNetwork.setData(data);
+  } else {
+    devNetwork = new vis.Network(container, data, options);
+  }
+}
+
+async function loadArbreJoueur() {
+  const container = document.getElementById('player-arbre-network');
+  if (!container) return;
+
+  const { data: fiches } = await supabase.from('fiches_oc').select('id, nom, image_url').eq('statut', 'Validée');
+  const { data: liens } = await supabase.from('relations_arbres').select('*');
+  
+  const nodes = (fiches || []).map(f => {
+    let img = "https://cdn.discordapp.com/embed/avatars/0.png";
+    if (f.image_url && f.image_url.trim() !== '') img = f.image_url.split(',')[0].trim();
+    
+    return {
+      id: f.id,
+      label: f.nom,
+      shape: 'circularImage',
+      image: img,
+      brokenImage: "https://cdn.discordapp.com/embed/avatars/0.png",
+      size: 35,
+      font: { color: '#fff', face: 'Montserrat', size: 14 }
+    };
+  });
+
+  const edges = (liens || []).map(l => {
+    let color = '#8b5cf6';
+    let dashes = false;
+    let label = 'Relation';
+
+    if (l.type_relation === 'parent') { color = '#fbbf24'; label = 'Parent'; }
+    if (l.type_relation === 'fratrie') { color = '#60a5fa'; dashes = true; label = 'Fratrie'; }
+    if (l.type_relation === 'couple') { color = '#ef4444'; label = 'Couple'; }
+
+    return {
+      from: l.personnage_1_id,
+      to: l.personnage_2_id,
+      color: { color: color },
+      dashes: dashes,
+      arrows: 'to',
+      label: label,
+      font: { color: color, size: 11, align: 'middle' }
+    };
+  });
+
+  const data = { nodes: nodes, edges: edges };
+  const options = {
+    physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
+    interaction: { hover: true, tooltipDelay: 200, navigationButtons: true, keyboard: true }
+  };
+
+  if (typeof vis === 'undefined') {
+    container.innerHTML = '<p style="color: red; text-align: center;">Erreur : Vis.js non chargé.</p>';
+    return;
+  }
+
+  if (playerNetwork) {
+    playerNetwork.setData(data);
+  } else {
+    playerNetwork = new vis.Network(container, data, options);
+  }
+}
+
+window.creerLienArbre = async function() {
+  const p1 = document.getElementById('arbre-perso-1').value;
+  const p2 = document.getElementById('arbre-perso-2').value;
+  const type = document.getElementById('arbre-type-lien').value;
+
+  if (!p1 || !p2) return alert("Choisis deux personnages.");
+  if (p1 === p2) return alert("Un personnage ne peut pas être lié à lui-même.");
+
+  const { error } = await supabase.from('relations_arbres').insert({
+    personnage_1_id: p1,
+    personnage_2_id: p2,
+    type_relation: type
+  });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+  } else {
+    alert("✅ Lien ajouté à l'arbre !");
+    loadArbreDev(); 
+  }
+};
 
 // ==========================================
 // --- CALENDRIER : CONFIG ÉVÉNEMENTS ---
@@ -2048,9 +2200,6 @@ window.openEventForm = function(type) {
   document.getElementById('event-modal').classList.add('active');
 };
 
-// ==========================================
-// --- SOUMISSION D'UN ÉVÉNEMENT (ROBUSTE) ---
-// ==========================================
 function attachEventSubmitListener() {
   const btn = document.getElementById('btn-submit-event');
   if (!btn) {
@@ -2159,9 +2308,6 @@ async function loadAdminEvents() {
   `).join('');
 }
 
-// ==========================================
-// --- SUPPRESSION D'UN ÉVÉNEMENT ---
-// ==========================================
 window.supprimerEvenement = async function(eventId) {
   if (!eventId) { alert("Erreur : ID événement manquant."); return; }
   if (!confirm("⚠️ Supprimer cet événement ? Cette action est définitive.")) return;
@@ -2223,9 +2369,6 @@ window.supprimerEvenement = async function(eventId) {
   }
 };
 
-// ==========================================
-// --- CALENDRIER JOUEUR ---
-// ==========================================
 async function loadPlayerEvents() {
   const calendarEl = document.getElementById('calendar');
   if(!calendarEl) return;
