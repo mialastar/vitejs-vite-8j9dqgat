@@ -23,12 +23,15 @@ let currentChatUserName = "";
 let isSubmittingEvent = false;
 let myCalendar = null;
 
-// Variables pour le Tableau Blanc (Arbre)
+// Variables pour l'Arbre Généalogique
 let nodesArbreData = {};
 let liensArbreData = [];
-let isModeLien = false;
-let firstNodeSelectionne = null;
 let panzoomArbre = null;
+let currentArbreId = null;
+let currentPersoPrincipalId = null;
+let allFichesValidees = [];
+let outilActuel = 'deplacer'; // 'deplacer', 'lien', 'supprimer'
+let premierPersoLien = null;
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -183,7 +186,6 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
     if (targetEl) targetEl.classList.add('active');
 
     if (target === 'calendrier') loadPlayerEvents();
-    if (target === 'arbre') loadArbreJoueur();
   });
 });
 
@@ -1966,12 +1968,6 @@ document.querySelectorAll('[data-dev-target]').forEach(btn => {
 // ==========================================
 // --- ARBRE GÉNÉALOGIQUE (MULTI-ARBRES) ---
 // ==========================================
-let currentArbreId = null;
-let currentPersoPrincipalId = null;
-let allFichesValidees = [];
-let outilActuel = 'deplacer'; // 'deplacer', 'lien', 'supprimer'
-let premierPersoLien = null;
-
 async function loadArbreDev() {
   const container = document.getElementById('arbre-liste-persos');
   if (!container) return;
@@ -2360,60 +2356,6 @@ window.publierArbre = async function() {
     fermerEditeurArbre();
   }
 };
-
-window.activerModeLien = function() {
-  isModeLien = !isModeLien;
-  const btn = document.getElementById('btn-mode-lien');
-  const viewport = document.getElementById('arbre-viewport');
-  
-  if (isModeLien) {
-    btn.style.background = '#60a5fa';
-    btn.style.color = '#000';
-    viewport.classList.add('mode-lien');
-    firstNodeSelectionne = null;
-    alert("Mode Lien activé : Clique sur le premier personnage, puis sur le second.");
-  } else {
-    btn.style.background = 'transparent';
-    btn.style.color = '#60a5fa';
-    viewport.classList.remove('mode-lien');
-    document.querySelectorAll('.arbre-node').forEach(n => n.style.borderColor = '#8b5cf6');
-    firstNodeSelectionne = null;
-  }
-};
-
-async function gererClicLien(ficheId) {
-  if (!firstNodeSelectionne) {
-    firstNodeSelectionne = ficheId;
-    document.getElementById(`node-${ficheId}`).style.borderColor = '#10b981';
-    return;
-  }
-
-  if (firstNodeSelectionne === ficheId) {
-    document.getElementById(`node-${ficheId}`).style.borderColor = '#8b5cf6';
-    firstNodeSelectionne = null;
-    return;
-  }
-
-  const type = document.getElementById('arbre-type-lien').value;
-  const p2 = ficheId;
-
-  const { error } = await supabase.from('relations_arbres').insert({
-    personnage_1_id: Number(firstNodeSelectionne),
-    personnage_2_id: Number(p2),
-    type_relation: type
-  });
-
-  if (error) {
-    alert("Erreur : " + error.message);
-  } else {
-    document.getElementById(`node-${firstNodeSelectionne}`).style.borderColor = '#8b5cf6';
-    firstNodeSelectionne = null;
-    
-    const { data: liens } = await supabase.from('relations_arbres').select('*');
-    liensArbreData = liens || [];
-    renderArbreBoard();
-  }
-}
 
 // ==========================================
 // --- CALENDRIER : CONFIG ÉVÉNEMENTS ---
