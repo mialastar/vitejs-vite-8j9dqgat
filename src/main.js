@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 // ==========================================
-// --- VARIABLES GLOBALES (CORRIGÉ : doublon supprimé) ---
+// --- VARIABLES GLOBALES ---
 // ==========================================
 let editingFicheId = null; 
 let currentEditingImage = ""; 
@@ -21,7 +21,7 @@ let currentChatTicketId = null;
 let currentChatIsAdmin = false;
 let currentChatUserName = "";
 let isSubmittingEvent = false;
-let myCalendar = null; // UNE SEULE déclaration (bug #1 du calendrier)
+let myCalendar = null;
 
 // ==========================================
 // --- GESTION DES ÉCRANS & AUTH ---
@@ -62,7 +62,7 @@ if(btnDiscordLogin) {
 }
 
 // ==========================================
-// --- CHARGEMENT DES RÔLES (CORRIGÉ : indépendant de loadProfil) ---
+// --- CHARGEMENT DES RÔLES ---
 // ==========================================
 async function loadUserRoles() {
   const { data: { user } } = await supabase.auth.getUser();
@@ -79,13 +79,11 @@ async function showApp() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   screenApp.classList.add('active');
   
-  // CORRIGÉ : scope strict à #screen-app
   document.querySelectorAll('#screen-app .app-content .view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-accueil').classList.add('active');
   document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('#screen-app .bottom-nav:not(.admin-nav) .nav-btn[data-target="accueil"]')?.classList.add('active');
 
-  // CORRIGÉ (bug #3) : on met à jour le menu Plus dès le démarrage
   const { roleApp, roleRp } = await loadUserRoles();
   window.updatePlusMenu(roleApp, roleRp);
 
@@ -104,7 +102,6 @@ async function checkUser() {
   if (data && data.session) {
     await showApp();
     
-    // CORRIGÉ : OneSignal v16 → OneSignal.login directement
     if (window.OneSignal && typeof window.OneSignal.login === 'function') {
       try { window.OneSignal.login(data.session.user.id); } catch(e) { console.warn(e); }
     }
@@ -124,9 +121,8 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 // ==========================================
-// --- NAVIGATION JOUEUR (BARRE DU BAS) ---
+// --- NAVIGATION JOUEUR ---
 // ==========================================
-// CORRIGÉ (bug #2) : scope strict à #screen-app
 const navBtns = document.querySelectorAll('#screen-app .bottom-nav:not(.admin-nav) .nav-btn');
 const views = document.querySelectorAll('#screen-app .view');
 
@@ -163,7 +159,7 @@ navBtns.forEach(btn => {
 });
 
 // ==========================================
-// --- LOGIQUE DES ONGLETS INTERNES AUX PANELS SÉPARÉS ---
+// --- LOGIQUE DES ONGLETS INTERNES ---
 // ==========================================
 document.querySelectorAll('[data-panel-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
@@ -173,7 +169,6 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
     parentScreen.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
 
-    // CORRIGÉ (bug 1) : retire active de TOUS les panel-content du screen
     parentScreen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
 
     const target = e.currentTarget.getAttribute('data-panel-target');
@@ -185,17 +180,14 @@ document.querySelectorAll('[data-panel-target]').forEach(btn => {
 });
 
 // ==========================================
-// --- OUVERTURE ET FERMETURE DES PANELS SÉPARÉS ---
+// --- OUVERTURE ET FERMETURE DES PANELS ---
 // ==========================================
-
 window.openPanelScreen = function(screenId) {
-  // Ferme tous les écrans
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById(screenId);
   if (!screen) return;
   screen.classList.add('active');
 
-  // CORRIGÉ (bug 1) : réinitialise l'onglet actif de chaque panel
   if (screenId === 'screen-panel-plus') {
     screen.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
     const first = screen.querySelector('#panel-calendrier');
@@ -220,7 +212,6 @@ window.openPanelScreen = function(screenId) {
   }
 
   if (screenId === 'screen-admin') {
-    // Réinitialise aussi l'onglet admin sur "accueil"
     screen.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     screen.querySelector('#admin-view-accueil')?.classList.add('active');
     screen.querySelectorAll('[data-admin-target]').forEach(b => b.classList.remove('active'));
@@ -337,7 +328,6 @@ if(btnNext) btnNext.addEventListener('click', async () => {
     if (!origines || origines.trim() === "") { alert("⚠️ N'oublie pas d'écrire les origines de ton personnage !"); return; }
   }
 
-  // CORRIGÉ (bonus B14) : vérif points restants avant soumission
   if (currentStep === totalSteps) {
     const sliders2 = document.querySelectorAll('.stat-slider');
     let total = 0; sliders2.forEach(s => total += parseInt(s.value));
@@ -806,7 +796,7 @@ document.getElementById('btn-submit-relation')?.addEventListener('click', async 
 });
 
 // ==========================================
-// --- PROFIL (JOUEUR & GESTION RÔLES) ---
+// --- PROFIL ---
 // ==========================================
 async function loadProfil() {
   const { data: { user } } = await supabase.auth.getUser();
@@ -882,7 +872,6 @@ async function loadProfil() {
       fiches.forEach(fiche => {
         let firstImg = "https://cdn.discordapp.com/embed/avatars/0.png";
         if (fiche.image_url && fiche.image_url.trim() !== '') firstImg = fiche.image_url.split(',')[0].trim();
-        // CORRIGÉ (bonus B2) : évite l'échappement fragile du sélecteur
         const safeName = (fiche.nom || 'OC').split(' ')[0].replace(/[<>&"']/g, '');
         ocContainer.innerHTML += `
           <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" 
@@ -897,7 +886,6 @@ async function loadProfil() {
   window.updatePlusMenu(roleApp, roleRp);
 }
 
-// CORRIGÉ (bug #3) : fonction de révélation des boutons, appelable partout
 window.updatePlusMenu = function(roleApp, roleRp) {
   const btnChef = document.getElementById('btn-plus-chef');
   const btnAdmin = document.getElementById('btn-plus-admin');
@@ -1119,17 +1107,14 @@ document.getElementById('btn-open-credits')?.addEventListener('click', () => {
       screenApp.classList.add('active'); 
       btnContinue.textContent = "Entrer dans les Terres du Crépuscule"; 
       btnContinue.onclick = null; 
-      // CORRIGÉ (bonus B9) : plus de reload brutal
       showApp();
     };
   }
 });
 
 // ==========================================
-// --- BASCULE VERS LES PANELS ADMIN & DEV ---
+// --- BASCULE VERS LES PANELS ---
 // ==========================================
-// CORRIGÉ (bonus B1) : les IDs existent maintenant (btn-plus-admin / btn-plus-dev)
-// et openPanelScreen() se charge déjà du chargement. On garde juste les listeners "Quitter".
 document.getElementById('btn-quit-admin')?.addEventListener('click', () => {
   screenAdmin.classList.remove('active');
   screenApp.classList.add('active');
@@ -1148,7 +1133,6 @@ document.getElementById('btn-quit-dev')?.addEventListener('click', () => {
   document.getElementById('view-plus').classList.add('active');
 });
 
-// Boutons "Quitter" des panels +, clan, chef (manquaient à l'appel !)
 document.getElementById('btn-quit-panel-plus')?.addEventListener('click', () => {
   document.getElementById('screen-panel-plus').classList.remove('active');
   screenApp.classList.add('active');
@@ -1292,7 +1276,7 @@ async function loadAdminTickets() {
 }
 
 // ==========================================
-// --- TEMPS RP (SAISONS, LUNES & MÉTÉO) ---
+// --- TEMPS RP ---
 // ==========================================
 async function loadTempsRP() {
   const { data } = await supabase.from('config').select('*');
@@ -2008,22 +1992,17 @@ window.openEventForm = function(type) {
   document.getElementById('event-modal').classList.add('active');
 };
 
-let isSubmittingEvent = false; // flag anti double-clic
-
 // ==========================================
 // --- SOUMISSION D'UN ÉVÉNEMENT (ROBUSTE) ---
 // ==========================================
 function attachEventSubmitListener() {
   const btn = document.getElementById('btn-submit-event');
   if (!btn) {
-    // Le bouton n'est pas encore dans le DOM → on réessaie dans 100ms
     setTimeout(attachEventSubmitListener, 100);
     return;
   }
-  if (btn.dataset.listenerAttached === '1') return; // évite le double
+  if (btn.dataset.listenerAttached === '1') return;
   btn.dataset.listenerAttached = '1';
-
-  // Force type="button" pour empêcher la soumission native
   btn.type = 'button';
 
   btn.addEventListener('click', async (e) => {
@@ -2063,10 +2042,8 @@ function attachEventSubmitListener() {
         return;
       }
 
-      // Ferme le modal
       document.getElementById('event-modal').classList.remove('active');
 
-      // Force l'onglet Calendrier de l'admin AVANT de recharger
       const adminScreen = document.getElementById('screen-admin');
       if (adminScreen) {
         adminScreen.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2086,12 +2063,12 @@ function attachEventSubmitListener() {
   });
 }
 
-// Déclenche l'attachement dès que le DOM est prêt
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', attachEventSubmitListener);
 } else {
   attachEventSubmitListener();
 }
+
 async function loadAdminEvents() {
   const container = document.getElementById('admin-events-list');
   if (!container) return;
@@ -2140,10 +2117,8 @@ window.supprimerEvenement = async function(eventId) {
     return;
   }
 
-  // Rafraîchit la liste admin
   await loadAdminEvents();
 
-  // Rafraîchit le calendrier FullCalendar côté joueur s'il est ouvert
   if (typeof myCalendar !== 'undefined' && myCalendar) {
     try {
       myCalendar.removeAllEvents();
@@ -2177,7 +2152,6 @@ window.supprimerEvenement = async function(eventId) {
     } catch (e) { console.warn("Refresh calendrier joueur échoué", e); }
   }
 
-  // Petit toast de confirmation
   const toast = document.getElementById('toast-success');
   if (toast) {
     const h4 = toast.querySelector('h4');
@@ -2194,14 +2168,13 @@ window.supprimerEvenement = async function(eventId) {
 };
 
 // ==========================================
-// --- CALENDRIER JOUEUR (CORRIGÉ) ---
+// --- CALENDRIER JOUEUR ---
 // ==========================================
 async function loadPlayerEvents() {
   const calendarEl = document.getElementById('calendar');
   if(!calendarEl) return;
 
   if (!myCalendar) {
-    // CORRIGÉ (bug #1) : garde-fou plus robuste
     if (typeof window.FullCalendar === 'undefined' && typeof FullCalendar === 'undefined') {
       calendarEl.innerHTML = '<p style="color: red; text-align: center;">Erreur : FullCalendar n\'a pas chargé. Vérifie ta connexion.</p>';
       return;
