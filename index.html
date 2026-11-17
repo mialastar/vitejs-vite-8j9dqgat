@@ -799,42 +799,42 @@
             <div id="dev-membres-list"><p style="color: gray;">Chargement...</p></div>
           </div>
 
-                    <!-- NOUVEL ONGLET : ÉDITEUR D'ARBRE (TABLEAU BLANC) -->
-                    <div id="dev-view-arbre" class="view" style="display: flex; flex-direction: column; height: 75vh;">
-                      <!-- HEADER DE L'ÉDITEUR -->
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                          <h3 style="color: #8b5cf6; margin: 0;" id="arbre-titre-editeur">Éditeur d'arbre</h3>
-                          <p style="color: gray; margin: 0; font-size: 0.85rem;" id="arbre-nom-perso">Perso principal : -</p>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                          <button type="button" class="btn-primary" onclick="publierArbre()" style="background: #fbbf24; border-color: #fbbf24; color: #000; padding: 8px 15px;">📢 Publier</button>
-                          <button type="button" class="btn-secondary" onclick="fermerEditeurArbre()" style="padding: 8px 15px;">✖ Quitter</button>
-                        </div>
-                      </div>
-                    
-                      <!-- LA PAGE BLANCHE (CANVAS) -->
-                      <div id="arbre-viewport" style="flex: 1; background: #1e1e24; border: 2px solid #333; border-radius: 10px; overflow: hidden; position: relative; cursor: default;">
-                        <!-- Le quadrillage pour faire "page blanche" -->
-                        <div id="arbre-board" style="width: 3000px; height: 3000px; position: relative; transform-origin: 0 0; background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px; background-position: 0 0;">
-                          <svg id="arbre-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
-                        </div>
-                      </div>
-                    
-                      <!-- LA BARRE D'OUTILS DU BAS -->
-                      <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px; padding: 10px; background: #1a1a24; border-radius: 10px; border: 1px solid #333;">
-                        <button type="button" id="tool-deplacer" onclick="setTool('deplacer')" style="background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Déplacer">✋ Déplacer</button>
-                        <button type="button" id="tool-lien" onclick="setTool('lien')" style="background: transparent; color: #ccc; border: 1px solid #555; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Créer un lien">🔗 Créer un lien</button>
-                        <button type="button" id="tool-supprimer" onclick="setTool('supprimer')" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Supprimer">🗑️ Supprimer</button>
-                        
-                        <div style="width: 1px; background: #444; margin: 0 10px;"></div>
-                        
-                        <select id="arbre-select-perso" style="padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #555;">
-                          <option value="">-- Ajouter un perso --</option>
-                        </select>
-                        <button type="button" onclick="ajouterNoeudArbre()" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">➕ Ajouter</button>
-                      </div>
-                    </div>
+          <!-- L'ÉDITEUR D'ARBRE (TABLEAU BLANC) -->
+          <div id="dev-view-arbre" class="view" style="display: flex; flex-direction: column; height: 75vh;">
+            <!-- HEADER DE L'ÉDITEUR -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <h3 style="color: #8b5cf6; margin: 0;" id="arbre-titre-editeur">Éditeur d'arbre</h3>
+                <p style="color: gray; margin: 0; font-size: 0.85rem;" id="arbre-nom-perso">Perso principal : -</p>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-primary" onclick="publierArbre()" style="background: #fbbf24; border-color: #fbbf24; color: #000; padding: 8px 15px;">📢 Publier</button>
+                <button type="button" class="btn-secondary" onclick="fermerEditeurArbre()" style="padding: 8px 15px;">✖ Quitter</button>
+              </div>
+            </div>
+          
+            <!-- LA PAGE BLANCHE (CANVAS) -->
+            <div id="arbre-viewport" style="flex: 1; background: #1e1e24; border: 2px solid #333; border-radius: 10px; overflow: hidden; position: relative; cursor: default;">
+              <!-- Le quadrillage pour faire "page blanche" -->
+              <div id="arbre-board" style="width: 3000px; height: 3000px; position: relative; transform-origin: 0 0; background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px; background-position: 0 0;">
+                <svg id="arbre-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+              </div>
+            </div>
+          
+            <!-- LA BARRE D'OUTILS DU BAS -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px; padding: 10px; background: #1a1a24; border-radius: 10px; border: 1px solid #333;">
+              <button type="button" id="tool-deplacer" onclick="setTool('deplacer')" style="background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Déplacer">✋ Déplacer</button>
+              <button type="button" id="tool-lien" onclick="setTool('lien')" style="background: transparent; color: #ccc; border: 1px solid #555; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Créer un lien">🔗 Créer un lien</button>
+              <button type="button" id="tool-supprimer" onclick="setTool('supprimer')" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;" title="Supprimer">🗑️ Supprimer</button>
+              
+              <div style="width: 1px; background: #444; margin: 0 10px;"></div>
+              
+              <select id="arbre-select-perso" style="padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #555;">
+                <option value="">-- Ajouter un perso --</option>
+              </select>
+              <button type="button" onclick="ajouterNoeudArbre()" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">➕ Ajouter</button>
+            </div>
+          </div>
 
         <nav class="bottom-nav admin-nav" style="border-top-color: #8b5cf6;">
           <button type="button" class="nav-btn active" data-dev-target="accueil"><span class="icon">🔑</span><span class="label">Codes</span></button>
