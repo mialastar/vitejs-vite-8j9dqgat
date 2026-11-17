@@ -1490,15 +1490,27 @@ async function loadPlayerTickets() {
 }
 
 // ==========================================
-// --- CHAT TICKETS ---
+// --- CHAT TICKETS (TEMPS RÉEL) ---
 // ==========================================
+let realtimeSubscription = null; // Pour stocker l'écouteur
+
+// Fonction pour faire défiler tout en bas
+function scrollToBottom() {
+  const container = document.getElementById('chat-messages');
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
 window.openTicketChat = async function(ticketId, isAdmin) {
   currentChatTicketId = ticketId;
   currentChatIsAdmin = isAdmin;
   
   document.getElementById('ticket-chat-modal').classList.add('active');
-  document.getElementById('chat-messages').innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
+  const messagesContainer = document.getElementById('chat-messages');
+  messagesContainer.innerHTML = '<p style="color: gray; text-align: center;">Chargement...</p>';
   
+  // 1. Charger les infos du ticket
   const { data: t, error } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
   if (error) return;
 
@@ -1507,11 +1519,12 @@ window.openTicketChat = async function(ticketId, isAdmin) {
   const { data: { user } } = await supabase.auth.getUser();
   currentChatUserName = user.user_metadata.full_name || "Joueur";
 
+  // 2. Charger l'historique des messages
   const { data: messages } = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true });
 
-  const messagesContainer = document.getElementById('chat-messages');
   messagesContainer.innerHTML = '';
-
+  
+  // Afficher la description initiale du ticket
   messagesContainer.innerHTML += `
     <div class="chat-bubble player" style="align-self: flex-start; background: rgba(255,255,255,0.05); border-color: gray; margin-bottom: 20px;">
       <span class="chat-sender">Demande initiale</span>
@@ -1519,6 +1532,7 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     </div>
   `;
 
+  // Afficher les messages
   if (messages && messages.length > 0) {
     messages.forEach(msg => {
       const isMe = msg.sender_id === user.id;
@@ -1533,11 +1547,51 @@ window.openTicketChat = async function(ticketId, isAdmin) {
     });
   }
 
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  scrollToBottom();
+
+  // 3. ACTIVER LE TEMPS RÉEL (CORRIGÉ)
+  if (realtimeSubscription) {
+    supabase.removeChannel(realtimeSubscription);
+  }
+
+  realtimeSubscription = supabase
+    .channel('public:ticket_messages')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: 'ticket_messages',
+      filter: `ticket_id=eq.${ticketId}` // On n'écoute que ce ticket
+    }, (payload) => {
+      const newMsg = payload.new;
+      const isMe = newMsg.sender_id === user.id;
+      const bubbleClass = isMe ? 'staff' : 'player';
+      const align = isMe ? 'flex-end' : 'flex-start';
+      
+      const msgHtml = `
+        <div class="chat-bubble ${bubbleClass}" style="align-self: ${align}; animation: fadeIn 0.3s ease;">
+          <span class="chat-sender">${newMsg.sender_name}</span>
+          ${newMsg.message}
+        </div>
+      `;
+      messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
+      scrollToBottom();
+    })
+    .subscribe();
 };
 
+// Fermer le chat et couper le temps réel
+document.getElementById('ticket-chat-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'ticket-chat-modal' || e.target.closest('.btn-close-support')) {
+    if (realtimeSubscription) {
+      supabase.removeChannel(realtimeSubscription);
+      realtimeSubscription = null;
+    }
+  }
+});
+
+// Envoyer un message
 document.getElementById('chat-send-btn')?.addEventListener('click', async () => {
-  const input = document.getElementById('chat-input').value;
+  const input = document.getElementById('chat-input').value.trim();
   if (!input || !currentChatTicketId) return;
 
   document.getElementById('chat-input').value = ''; 
@@ -1551,10 +1605,12 @@ document.getElementById('chat-send-btn')?.addEventListener('click', async () => 
     message: input
   });
   
-  if (error) { alert("Erreur lors de l'envoi : " + error.message); } 
-  else {
+  if (error) { 
+    alert("Erreur lors de l'envoi : " + error.message); 
+    document.getElementById('chat-input').value = input; // Restaure le texte si erreur
+  } else {
+    // Mettre à jour le statut du ticket
     await supabase.from('tickets').update({ statut: 'Répondu' }).eq('id', currentChatTicketId);
-    openTicketChat(currentChatTicketId, currentChatIsAdmin);
     if (currentChatIsAdmin) loadAdminTickets(); else loadPlayerTickets();
   }
 });
