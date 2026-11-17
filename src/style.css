@@ -450,3 +450,52 @@ body {
 .panel-content.active {
   display: block !important;
 }
+
+/* ==========================================
+   --- ARBRE GÉNÉALOGIQUE (VIS.JS) --- 
+   ========================================== */
+
+/* Style des menus déroulants de l'éditeur Dev */
+#arbre-perso-1, #arbre-perso-2, #arbre-type-lien {
+  background-color: rgba(10, 5, 20, 0.8) !important;
+  color: #fff !important;
+  border: 1px solid #8b5cf6 !important;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+#arbre-perso-1:focus, #arbre-perso-2:focus, #arbre-type-lien:focus {
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+/* Style des boutons de navigation (zoom, recentrer) */
+.vis-navigation .vis-button {
+  background-color: rgba(139, 92, 246, 0.2) !important;
+  border: 1px solid #8b5cf6 !important;
+  border-radius: 8px !important;
+  opacity: 0.8;
+  transition: 0.3s;
+}
+
+.vis-navigation .vis-button:hover {
+  background-color: rgba(139, 92, 246, 0.6) !important;
+  opacity: 1;
+}
+
+/* On filtre l'icône blanche par défaut pour la rendre plus visible sur fond sombre */
+.vis-navigation .vis-button::before {
+  filter: invert(1) drop-shadow(0 0 2px rgba(0,0,0,0.5));
+}
+
+/* Style de la bulle d'information (Tooltip) quand on survole un personnage */
+.vis-tooltip {
+  background-color: rgba(15, 20, 15, 0.95) !important;
+  border: 1px solid #8b5cf6 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.85rem !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+}
